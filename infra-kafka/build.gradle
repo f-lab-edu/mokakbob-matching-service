@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
+
+dependencies {
+    implementation 'org.springframework.kafka:spring-kafka'
+}
