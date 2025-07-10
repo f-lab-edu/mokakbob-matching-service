@@ -1,17 +1,5 @@
 rootProject.name = 'mokakbob'
-include 'api'
 
-include 'domain-member'
-include 'domain-matching'
-include 'domain-promise'
-include 'domain-review'
-include 'domain-chat'
-include 'domain-deposit'
-include 'domain-payment'
-
-include 'infra-kafka'
-include 'infra-redis'
-
-include 'common'
-include 'support-batch'
-
+include 'mokakbob-core'
+include 'mokakbob-app'
+include 'mokakbob-common'

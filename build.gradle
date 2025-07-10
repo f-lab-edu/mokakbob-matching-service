@@ -51,8 +51,8 @@ subprojects {
 		useJUnitPlatform()
 	}
 
-	// 도메인 모듈 + Common 모듈 bootJar 비활성화
-	if (project.name.startsWith("domain-") || project.name == "common") {
+	// core(도메인) 모듈 + Common 모듈 bootJar 비활성화
+	if (project.name in ["mokakbob-core", "mokakbob-common"]) {
 		bootJar { enabled = false }
 		jar { enabled = true }
 	}
