@@ -4,8 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MokakbobApplication {
+public class MokakbobBatchApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(MokakbobApplication.class, args);
+        SpringApplication.run(MokakbobBatchApplication.class, args);
     }
 }

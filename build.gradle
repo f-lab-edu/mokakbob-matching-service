@@ -51,8 +51,8 @@ subprojects {
 		useJUnitPlatform()
 	}
 
-	// core(도메인) 모듈 + Common 모듈 bootJar 비활성화
-	if (project.name in ["mokakbob-core", "mokakbob-common"]) {
+	// core(도메인) 모듈 + kafka 모듈 + redis 모듈 bootJar 비활성화
+	if (project.name in ["mokakbob-core", "mokakbob-kafka", "mokakbob-redis"]) {
 		bootJar { enabled = false }
 		jar { enabled = true }
 	}

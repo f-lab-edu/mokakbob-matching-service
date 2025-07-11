@@ -9,9 +9,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     implementation project(':mokakbob-core')
-    implementation project(':mokakbob-common')
+    implementation project(':mokakbob-kafka')
+    implementation project(':mokakbob-redis')
 }
 
 springBoot {
-    mainClass = 'com.mokakbob.MokakbobApplication'
+    mainClass = 'com.mokakbob.MokakbobBatchApplication'
 }
