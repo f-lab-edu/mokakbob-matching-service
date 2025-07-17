@@ -1,4 +1,4 @@
-package com.mokakbob.common.exception.exceptionHandler.dto;
+package com.mokakbob.excpeption.dto;
 
 public record ErrorResponse(
         String customCode,

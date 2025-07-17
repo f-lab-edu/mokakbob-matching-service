@@ -1,8 +1,9 @@
-package com.mokakbob.common.exception.exceptionHandler;
+package com.mokakbob.excpeption;
 
-import com.mokakbob.common.exception.exceptionHandler.dto.ErrorResponse;
-import com.mokakbob.common.exception.exceptions.DomainErrorCode;
-import com.mokakbob.common.exception.exceptions.DomainException;
+
+import com.mokakbob.common.exception.DomainErrorCode;
+import com.mokakbob.common.exception.DomainException;
+import com.mokakbob.excpeption.dto.ErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

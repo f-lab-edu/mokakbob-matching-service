@@ -1,4 +1,4 @@
-package com.mokakbob.common.exception.exceptions;
+package com.mokakbob.common.exception;
 
 public class DomainException extends RuntimeException {
 

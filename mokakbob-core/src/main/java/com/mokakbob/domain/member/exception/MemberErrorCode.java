@@ -1,6 +1,6 @@
 package com.mokakbob.domain.member.exception;
 
-import com.mokakbob.common.exception.exceptions.DomainErrorCode;
+import com.mokakbob.common.exception.DomainErrorCode;
 
 public enum MemberErrorCode implements DomainErrorCode {
     ;
