@@ -1,15 +1,11 @@
-package com.mokakbob.domain.matching.domain;
+package com.mokakbob.domain.promise.domain;
 
 import com.mokakbob.common.domain.BaseEntity;
-import com.mokakbob.domain.matching.domain.vo.MatchingRequestStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,28 +17,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class MatchingRequest extends BaseEntity {
+public class PromiseRestaurant extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long memberId;
+    private Long promiseId;
 
     @Column(nullable = false)
-    private String menuCategory;
+    private String name;
 
     @Column(nullable = false)
-    private Integer groupSize;
-
-    @Column(precision = 10, scale = 7)
-    private BigDecimal latitude;
-
-    @Column(precision = 10, scale = 7)
-    private BigDecimal longitude;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MatchingRequestStatus status;
+    private String address;
 }
