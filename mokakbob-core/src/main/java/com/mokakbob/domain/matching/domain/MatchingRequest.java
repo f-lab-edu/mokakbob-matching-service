@@ -1,7 +1,8 @@
-package com.mokakbob.domain.member.domain;
+package com.mokakbob.domain.matching.domain;
 
 import com.mokakbob.common.domain.BaseEntity;
-import com.mokakbob.domain.member.domain.vo.MemberPreference;
+import com.mokakbob.domain.matching.domain.vo.MatchingRequestStatus;
+import com.mokakbob.domain.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -9,6 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,36 +23,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Member extends BaseEntity {
+public class MatchingRequest extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    // 소셜 로그인 사용자는 null
-    private String password;
-
-    @Column(nullable = false, unique = true)
-    private String nickname;
-
-    // 프로필 이미지: 선택사항
-    private String profileImage;
+    @ManyToOne
+    private Member member;
 
     @Column(nullable = false)
-    private String phoneNumber;
+    private String menuCategory;
+
+    @Column(nullable = false)
+    private Integer groupSize;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal latitude;
+
+    @Column(precision = 10, scale = 7)
+    private BigDecimal longitude;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MemberPreference preference;
-
-    // 사용자 신뢰 점수: 기본값 50
-    @Column(nullable = false)
-    private Integer score;
-
-    // 가상 포인트: 기본값 2000
-    @Column(nullable = false)
-    private Integer depositPoint;
+    private MatchingRequestStatus status;
 }
