@@ -1,10 +1,8 @@
 package com.mokakbob.common.exception.exceptions;
 
-import org.springframework.http.HttpStatus;
-
 public interface DomainErrorCode {
 
-    HttpStatus httpStatus();
+    int httpStatus();
 
     String customCode();
 
