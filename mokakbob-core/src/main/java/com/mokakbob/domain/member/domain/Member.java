@@ -30,7 +30,7 @@ public class Member extends BaseEntity {
     private String email;
 
     // 소셜 로그인 사용자는 null
-    private String password;
+    private String passwordEnc;
 
     @Column(nullable = false, unique = true)
     private String nickname;
