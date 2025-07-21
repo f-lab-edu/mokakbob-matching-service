@@ -1,4 +1,4 @@
-package com.mokakbob.common.service;
+package com.mokakbob.domain.member.service.auth;
 
 public interface EmailSender {
     void sendEmail(String to, String subject, String text);

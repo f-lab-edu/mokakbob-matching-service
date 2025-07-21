@@ -1,7 +1,6 @@
 package com.mokakbob.domain.member.service.auth;
 
 import com.mokakbob.common.exception.DomainException;
-import com.mokakbob.common.service.EmailSender;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import com.mokakbob.domain.member.util.RandomNumberGenerator;

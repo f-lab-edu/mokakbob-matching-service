@@ -1,7 +1,7 @@
-package com.mokakbob.domain.member.service.auth;
+package com.mokakbob.domain.member.infrastructure;
 
 import com.mokakbob.common.exception.DomainException;
-import com.mokakbob.common.service.EmailSender;
+import com.mokakbob.domain.member.service.auth.EmailSender;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
