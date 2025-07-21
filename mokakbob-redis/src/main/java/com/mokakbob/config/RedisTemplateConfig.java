@@ -10,7 +10,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisTemplateConfig {
 
     @Bean
-    public RedisTemplate<String, String> emailAuthRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    public RedisTemplate<String, String> authRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
 
