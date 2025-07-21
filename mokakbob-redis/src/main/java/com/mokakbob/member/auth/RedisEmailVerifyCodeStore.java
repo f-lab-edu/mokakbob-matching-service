@@ -11,11 +11,15 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
 
+    private static final String EMAIL_KEY_PREFIX = "email:verify:";
+
     private final RedisTemplate<String, String> authRedisTemplate;
 
     @Override
     public void saveCode(String email, String code, Duration expiration) {
-
+        String key = EMAIL_KEY_PREFIX + email;
+        authRedisTemplate.opsForValue()
+                .set(key, code, expiration);
     }
 
     @Override
@@ -30,6 +34,9 @@ public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
 
     @Override
     public boolean hasCode(String email) {
-        return false;
+        String key = EMAIL_KEY_PREFIX + email;
+
+        return Boolean.TRUE
+                .equals(authRedisTemplate.hasKey(key));
     }
 }

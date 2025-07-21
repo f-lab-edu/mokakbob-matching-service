@@ -20,6 +20,7 @@ public class EmailAuthService {
     private final EmailSender emailSender;
 
     public void sendEmail(String email) {
+        checkCoolDown(email);
         String code = RandomNumberGenerator.generate(CODE_LENGTH);
 
         Duration expiration = Duration.ofMinutes(CODE_EXPIRATION_MINUTES);
@@ -44,5 +45,11 @@ public class EmailAuthService {
         codeStore.deleteCode(email);
 
         return true;
+    }
+
+    private void checkCoolDown(String email) {
+        if (codeStore.hasCode(email)) {
+            throw new DomainException(MemberErrorCode.TOO_MANY_REQUEST);
+        }
     }
 }
