@@ -1,4 +1,4 @@
-package com.mokakbob.domain.member.service.store;
+package com.mokakbob.domain.member.repository;
 
 import java.time.Duration;
 import java.util.Optional;

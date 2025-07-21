@@ -3,6 +3,8 @@ package com.mokakbob.domain.member.exception;
 import com.mokakbob.common.exception.DomainErrorCode;
 
 public enum MemberErrorCode implements DomainErrorCode {
+    // auth mail exception
+    MAIL_EXCEPTION(400, "E001", "메일 전송 중 오류 발생.")
     ;
 
     private final int httpStatus;

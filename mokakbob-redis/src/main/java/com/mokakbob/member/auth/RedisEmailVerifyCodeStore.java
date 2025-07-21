@@ -1,6 +1,6 @@
 package com.mokakbob.member.auth;
 
-import com.mokakbob.domain.member.service.store.EmailVerifyCodeStore;
+import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

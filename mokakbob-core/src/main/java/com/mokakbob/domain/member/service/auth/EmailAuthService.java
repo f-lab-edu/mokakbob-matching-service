@@ -1,6 +1,6 @@
 package com.mokakbob.domain.member.service.auth;
 
-import com.mokakbob.domain.member.service.store.EmailVerifyCodeStore;
+import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,4 +9,6 @@ import org.springframework.stereotype.Service;
 public class EmailAuthService {
 
     private final EmailVerifyCodeStore codeStore;
+
+
 }
