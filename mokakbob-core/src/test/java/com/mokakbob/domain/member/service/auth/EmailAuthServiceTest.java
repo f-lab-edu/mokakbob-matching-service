@@ -57,7 +57,7 @@ class EmailAuthServiceTest {
     }
 
     @Test
-    void 이메일_전송_실패_시_인증_코드_삭제(){
+    void 이메일_전송_실패_시_인증_코드_삭제() {
         // given
         String email = "fail@example.com";
         when(codeStore.hasCode(email)).thenReturn(false);
