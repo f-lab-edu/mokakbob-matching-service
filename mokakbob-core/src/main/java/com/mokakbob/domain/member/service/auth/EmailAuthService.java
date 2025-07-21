@@ -35,18 +35,6 @@ public class EmailAuthService {
         }
     }
 
-    public boolean verifyEmailCode(String email, String code) {
-        String storedCode = codeStore.getCode(email)
-                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MAIL_CODE));
-
-        if (!storedCode.equals(code)) {
-            throw new DomainException(MemberErrorCode.NOT_MATCH_MAIL_CODE);
-        }
-        codeStore.deleteCode(email);
-
-        return true;
-    }
-
     private void checkCoolDown(String email) {
         if (codeStore.hasCode(email)) {
             throw new DomainException(MemberErrorCode.TOO_MANY_REQUEST);
