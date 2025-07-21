@@ -38,9 +38,6 @@ public class Member extends BaseEntity {
     // 프로필 이미지: 선택사항
     private String profileImage;
 
-    @Column(nullable = false)
-    private String phoneNumber;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberPreference preference;
