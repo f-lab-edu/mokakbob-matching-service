@@ -3,6 +3,6 @@ rootProject.name = 'mokakbob'
 include 'mokakbob-api'
 include 'mokakbob-batch'
 include 'mokakbob-core'
-include 'mokakbob-kafka'
 include 'mokakbob-redis'
+include 'mokakbob-consumer'
 
