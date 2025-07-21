@@ -4,7 +4,9 @@ import com.mokakbob.common.exception.DomainErrorCode;
 
 public enum MemberErrorCode implements DomainErrorCode {
     // auth mail exception
-    MAIL_EXCEPTION(400, "E001", "메일 전송 중 오류 발생.")
+    MAIL_EXCEPTION(400, "E001", "메일 전송 중 오류 발생."),
+    NOT_FOUND_MAIL_CODE(404, "E002", "유효한 인증 코드를 찾을 수 없습니다."),
+    NOT_MATCH_MAIL_CODE(400, "E003", "인증 코드가 일치하지 않습니다.")
     ;
 
     private final int httpStatus;
