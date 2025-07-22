@@ -1,4 +1,4 @@
-package com.mokakbob.domain.member.domain.vo;
+package com.mokakbob.domain.member.domain.member.vo;
 
 public enum MemberPreference {
 

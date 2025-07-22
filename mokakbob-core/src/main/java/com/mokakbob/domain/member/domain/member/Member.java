@@ -1,7 +1,7 @@
-package com.mokakbob.domain.member.domain;
+package com.mokakbob.domain.member.domain.member;
 
 import com.mokakbob.common.domain.BaseEntity;
-import com.mokakbob.domain.member.domain.vo.MemberPreference;
+import com.mokakbob.domain.member.domain.member.vo.MemberPreference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
