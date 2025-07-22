@@ -7,7 +7,12 @@ public enum MemberErrorCode implements DomainErrorCode {
     MAIL_EXCEPTION(400, "E001", "메일 전송 중 오류 발생."),
     NOT_FOUND_MAIL_CODE(404, "E002", "유효한 인증 코드를 찾을 수 없습니다."),
     NOT_MATCH_MAIL_CODE(400, "E003", "인증 코드가 일치하지 않습니다."),
-    TOO_MANY_REQUEST(400, "E004", "잠시 후 요청해주세요.")
+    TOO_MANY_REQUEST(400, "E004", "잠시 후 요청해주세요."),
+
+    // jwt
+    TOKEN_EXPIRED(401, "JWT001", "토큰이 만료되었습니다."),
+    TOKEN_INVALID_SIGNATURE(401, "JWT002", "서명이 유효하지 않습니다."),
+    TOKEN_INVALID(401, "JWT003", "유효하지 않은 토큰입니다.")
     ;
 
     private final int httpStatus;
