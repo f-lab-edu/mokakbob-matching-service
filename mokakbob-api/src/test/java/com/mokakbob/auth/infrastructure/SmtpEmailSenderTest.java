@@ -1,14 +1,14 @@
-package com.mokakbob.domain.member.infrastructure;
+package com.mokakbob.auth.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.mokakbob.common.exception.DomainException;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,7 +16,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 @SuppressWarnings("NonAsciiCharacters")
 class SmtpEmailSenderTest {
 
-    private final JavaMailSender javaMailSender = mock(JavaMailSender.class);
+    private final JavaMailSender javaMailSender = Mockito.mock(JavaMailSender.class);
     private final SmtpEmailSender smtpEmailSender = new SmtpEmailSender(javaMailSender);
 
     @Test
@@ -40,7 +40,7 @@ class SmtpEmailSenderTest {
         String subject = "Subject";
         String text = "Hello";
 
-        doThrow(mock(MailException.class))
+        doThrow(Mockito.mock(MailException.class))
                 .when(javaMailSender)
                 .send(any(SimpleMailMessage.class));
 

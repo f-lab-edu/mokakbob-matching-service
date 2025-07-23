@@ -1,4 +1,4 @@
-package com.mokakbob.member.controller.auth.request;
+package com.mokakbob.auth.controller.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

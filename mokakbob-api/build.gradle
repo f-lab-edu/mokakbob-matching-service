@@ -11,6 +11,12 @@ dependencies {
     implementation project(':mokakbob-core')
     implementation project(':mokakbob-consumer')
     implementation project(':mokakbob-redis')
+
+    // mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 springBoot {

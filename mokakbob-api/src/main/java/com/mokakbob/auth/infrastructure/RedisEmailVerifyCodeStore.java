@@ -1,4 +1,4 @@
-package com.mokakbob.member.auth;
+package com.mokakbob.auth.infrastructure;
 
 import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import java.time.Duration;

@@ -1,6 +1,6 @@
 package com.mokakbob.exception.handler;
 
-import com.mokakbob.exception.response.ValidateErrorResponse;
+import com.mokakbob.exception.handler.response.ValidateErrorResponse;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

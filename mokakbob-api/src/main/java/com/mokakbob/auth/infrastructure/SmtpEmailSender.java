@@ -1,4 +1,4 @@
-package com.mokakbob.domain.member.infrastructure;
+package com.mokakbob.auth.infrastructure;
 
 import com.mokakbob.common.exception.DomainException;
 import com.mokakbob.domain.member.service.auth.EmailSender;

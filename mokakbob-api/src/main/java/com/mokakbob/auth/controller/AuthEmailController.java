@@ -1,7 +1,7 @@
-package com.mokakbob.member.controller.auth;
+package com.mokakbob.auth.controller;
 
 import com.mokakbob.domain.member.service.auth.EmailAuthService;
-import com.mokakbob.member.controller.auth.request.EmailSendRequest;
+import com.mokakbob.auth.controller.request.EmailSendRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
