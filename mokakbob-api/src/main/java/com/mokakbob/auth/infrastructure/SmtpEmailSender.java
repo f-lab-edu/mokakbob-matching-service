@@ -1,31 +1,40 @@
 package com.mokakbob.auth.infrastructure;
 
-import com.mokakbob.common.exception.DomainException;
 import com.mokakbob.domain.member.service.auth.EmailSender;
-import com.mokakbob.domain.member.exception.MemberErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SmtpEmailSender implements EmailSender {
 
     private final JavaMailSender javaMailSender;
 
     @Override
-    @Async
+    @Async(value = "EmailExecutor")
+    @Retryable(
+            retryFor = {MailException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     public void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = makeInfo(to, subject, text);
 
-        try {
-            javaMailSender.send(message);
-        } catch (MailException e) {
-            throw new DomainException(MemberErrorCode.MAIL_EXCEPTION);
-        }
+        javaMailSender.send(message);
+    }
+
+    @Recover
+    public void recover(MailException e, String to, String subject, String text) {
+        log.error("[메일 전송 실패]: {}", e.getMessage());
     }
 
     private SimpleMailMessage makeInfo(String to, String subject, String text) {
