@@ -1,4 +1,4 @@
-package com.mokakbob.exception.response;
+package com.mokakbob.exception.handler.response;
 
 public record DomainErrorResponse(
         String customCode,

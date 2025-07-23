@@ -3,7 +3,7 @@ package com.mokakbob.exception.handler;
 
 import com.mokakbob.common.exception.DomainErrorCode;
 import com.mokakbob.common.exception.DomainException;
-import com.mokakbob.exception.response.DomainErrorResponse;
+import com.mokakbob.exception.handler.response.DomainErrorResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
