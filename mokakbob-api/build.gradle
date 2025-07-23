@@ -14,6 +14,7 @@ dependencies {
 
     // mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.retry:spring-retry'
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'\
