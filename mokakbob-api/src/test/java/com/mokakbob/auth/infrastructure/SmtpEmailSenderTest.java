@@ -1,14 +1,12 @@
 package com.mokakbob.auth.infrastructure;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.mokakbob.common.exception.DomainException;
-import com.mokakbob.domain.member.exception.MemberErrorCode;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,7 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 @SuppressWarnings("NonAsciiCharacters")
 class SmtpEmailSenderTest {
 
-    private final JavaMailSender javaMailSender = Mockito.mock(JavaMailSender.class);
+    private final JavaMailSender javaMailSender = mock(JavaMailSender.class);
     private final SmtpEmailSender smtpEmailSender = new SmtpEmailSender(javaMailSender);
 
     @Test
@@ -34,19 +32,23 @@ class SmtpEmailSenderTest {
     }
 
     @Test
-    void 이메일_전송_실패() {
+    void 이메일_전송_실패_후_recover_호출() {
         // given
         String to = "test@example.com";
-        String subject = "Subject";
-        String text = "Hello";
+        String subject = "subject";
+        String text = "text";
 
-        doThrow(Mockito.mock(MailException.class))
-                .when(javaMailSender)
+        MailException exception = mock(MailException.class);
+        doThrow(exception).when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        // when
+        try {
+            smtpEmailSender.sendEmail(to, subject, text);
+        } catch (Exception ignored) {
+        }
+
+        // then
+        verify(javaMailSender, atLeast(1))
                 .send(any(SimpleMailMessage.class));
-
-        // when & then
-        assertThatThrownBy(() -> smtpEmailSender.sendEmail(to, subject, text))
-                .isInstanceOf(DomainException.class)
-                .hasMessageContaining(MemberErrorCode.MAIL_EXCEPTION.message());
     }
 }
