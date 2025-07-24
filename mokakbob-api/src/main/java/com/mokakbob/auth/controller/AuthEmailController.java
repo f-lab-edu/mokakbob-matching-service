@@ -1,5 +1,6 @@
 package com.mokakbob.auth.controller;
 
+import com.mokakbob.auth.controller.request.EmailCodeRequest;
 import com.mokakbob.domain.member.service.auth.EmailAuthService;
 import com.mokakbob.auth.controller.request.EmailSendRequest;
 import jakarta.validation.Valid;
@@ -17,9 +18,16 @@ public class AuthEmailController {
 
     private final EmailAuthService emailAuthService;
 
-    @PostMapping("/send")
+    @PostMapping("/email/send")
     public ResponseEntity<Void> sendEmailVerificationCode(@Valid @RequestBody EmailSendRequest request) {
         emailAuthService.sendEmail(request.email());
+        return ResponseEntity.ok()
+                .build();
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<Void> verifyEmailCode(@Valid @RequestBody EmailCodeRequest request) {
+        emailAuthService.checkEmailCode(request.email(), request.code());
         return ResponseEntity.ok()
                 .build();
     }
