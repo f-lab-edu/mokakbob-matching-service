@@ -24,7 +24,10 @@ public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
 
     @Override
     public Optional<String> getCode(String email) {
-        return Optional.empty();
+        String key = EMAIL_KEY_PREFIX + email;
+
+        return Optional.ofNullable(authRedisTemplate.opsForValue()
+                .get(key));
     }
 
     @Override
