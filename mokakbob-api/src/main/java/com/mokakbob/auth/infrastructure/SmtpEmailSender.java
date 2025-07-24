@@ -1,5 +1,6 @@
 package com.mokakbob.auth.infrastructure;
 
+import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import com.mokakbob.domain.member.service.auth.EmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +19,12 @@ import org.springframework.stereotype.Component;
 public class SmtpEmailSender implements EmailSender {
 
     private final JavaMailSender javaMailSender;
+    private final EmailVerifyCodeStore codeStore;
 
     @Override
     @Async(value = "EmailExecutor")
     @Retryable(
             retryFor = {MailException.class},
-            maxAttempts = 3,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public void sendEmail(String to, String subject, String text) {
@@ -34,6 +35,7 @@ public class SmtpEmailSender implements EmailSender {
 
     @Recover
     public void recover(MailException e, String to, String subject, String text) {
+        codeStore.deleteCode(to);
         log.error("[메일 전송 실패]: {}", e.getMessage());
     }
 
