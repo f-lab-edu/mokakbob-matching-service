@@ -38,6 +38,8 @@ public class EmailAuthService {
         if (!Objects.equals(redisMemberCode, code)) {
             throw new DomainException(MemberErrorCode.NOT_MATCH_MAIL_CODE);
         }
+
+        codeStore.deleteCode(email);
     }
 
     private void checkCoolDown(String email) {
