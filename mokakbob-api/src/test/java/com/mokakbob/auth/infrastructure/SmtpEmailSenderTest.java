@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -15,7 +16,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 class SmtpEmailSenderTest {
 
     private final JavaMailSender javaMailSender = mock(JavaMailSender.class);
-    private final SmtpEmailSender smtpEmailSender = new SmtpEmailSender(javaMailSender);
+    private final EmailVerifyCodeStore codeStore = mock(EmailVerifyCodeStore.class);
+    private final SmtpEmailSender smtpEmailSender = new SmtpEmailSender(javaMailSender, codeStore);
 
     @Test
     void 이메일_전송_성공() {
