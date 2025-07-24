@@ -4,7 +4,9 @@ import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
 import com.mokakbob.domain.member.service.auth.EmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.retry.annotation.Backoff;
@@ -24,7 +26,7 @@ public class SmtpEmailSender implements EmailSender {
     @Override
     @Async(value = "EmailExecutor")
     @Retryable(
-            retryFor = {MailException.class},
+            retryFor = {MailSendException.class, MailAuthenticationException.class},
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
     public void sendEmail(String to, String subject, String text) {
