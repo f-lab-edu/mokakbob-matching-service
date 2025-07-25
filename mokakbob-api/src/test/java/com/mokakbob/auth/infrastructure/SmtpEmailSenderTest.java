@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
+import com.mokakbob.auth.domain.EmailVerifyCodeStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;

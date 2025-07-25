@@ -1,4 +1,4 @@
-package com.mokakbob.auth.service;
+package com.mokakbob.auth.domain;
 
 public interface TokenProvider {
     String create(Long memberId);

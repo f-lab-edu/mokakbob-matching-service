@@ -1,4 +1,4 @@
-package com.mokakbob.domain.member.service.member;
+package com.mokakbob.domain.member.service;
 
 import org.springframework.stereotype.Service;
 
