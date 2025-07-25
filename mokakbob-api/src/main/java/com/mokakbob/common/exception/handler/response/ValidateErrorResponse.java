@@ -1,4 +1,4 @@
-package com.mokakbob.exception.handler.response;
+package com.mokakbob.common.exception.handler.response;
 
 import java.util.List;
 
