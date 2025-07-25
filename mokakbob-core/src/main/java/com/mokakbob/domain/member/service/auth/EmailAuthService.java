@@ -25,14 +25,9 @@ public class EmailAuthService {
 
         Duration expiration = Duration.ofMinutes(CODE_EXPIRATION_MINUTES);
         codeStore.saveCode(email, code, expiration);
-
         String text = String.format("인증 코드: %s\n이 코드는 %d분 후에 만료됩니다.", code, CODE_EXPIRATION_MINUTES);
 
-        try {
-            emailSender.sendEmail(email, MAIL_SUBJECT, text);
-        } catch (Exception e) {
-            codeStore.deleteCode(email);
-        }
+        emailSender.sendEmail(email, MAIL_SUBJECT, text);
     }
 
     private void checkCoolDown(String email) {

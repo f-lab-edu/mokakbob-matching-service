@@ -29,7 +29,8 @@ public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
 
     @Override
     public void deleteCode(String email) {
-
+        String key = EMAIL_KEY_PREFIX + email;
+        authRedisTemplate.delete(key);
     }
 
     @Override
