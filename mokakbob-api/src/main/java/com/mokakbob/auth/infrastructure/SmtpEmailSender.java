@@ -1,7 +1,7 @@
 package com.mokakbob.auth.infrastructure;
 
-import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
-import com.mokakbob.auth.service.EmailSender;
+import com.mokakbob.auth.domain.EmailVerifyCodeStore;
+import com.mokakbob.auth.domain.EmailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailAuthenticationException;

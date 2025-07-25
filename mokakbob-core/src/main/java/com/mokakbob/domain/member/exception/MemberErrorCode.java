@@ -3,10 +3,6 @@ package com.mokakbob.domain.member.exception;
 import com.mokakbob.common.exception.DomainErrorCode;
 
 public enum MemberErrorCode implements DomainErrorCode {
-    // auth mail exception
-    NOT_MATCH_MAIL_CODE(400, "E001", "인증 코드가 일치하지 않습니다."),
-    TOO_MANY_REQUEST(400, "E002", "잠시 후 요청해주세요."),
-    NOT_EXIST_MAIL_CODE(404, "E003", "코드 값이 존재하지 않습니다.")
     ;
 
     private final int httpStatus;
