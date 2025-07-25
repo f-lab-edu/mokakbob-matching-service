@@ -1,10 +1,11 @@
-package com.mokakbob.domain.member.service.auth;
+package com.mokakbob.auth.service;
 
 import com.mokakbob.common.exception.DomainException;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
-import com.mokakbob.domain.member.util.RandomNumberGenerator;
+import com.mokakbob.auth.util.RandomNumberGenerator;
 import java.time.Duration;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,17 @@ public class EmailAuthService {
         String text = String.format("인증 코드: %s\n이 코드는 %d분 후에 만료됩니다.", code, CODE_EXPIRATION_MINUTES);
 
         emailSender.sendEmail(email, MAIL_SUBJECT, text);
+    }
+
+    public void checkEmailCode(String email, String code) {
+        String redisMemberCode = codeStore.getCode(email)
+                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_EXIST_MAIL_CODE));
+
+        if (!Objects.equals(redisMemberCode, code)) {
+            throw new DomainException(MemberErrorCode.NOT_MATCH_MAIL_CODE);
+        }
+
+        codeStore.deleteCode(email);
     }
 
     private void checkCoolDown(String email) {
