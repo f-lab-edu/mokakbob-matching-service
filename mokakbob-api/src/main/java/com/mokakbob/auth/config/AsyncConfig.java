@@ -1,4 +1,4 @@
-package com.mokakbob.config;
+package com.mokakbob.auth.config;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;

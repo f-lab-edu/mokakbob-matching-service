@@ -2,7 +2,7 @@ package com.mokakbob.auth.controller;
 
 import com.mokakbob.auth.controller.request.EmailCodeRequest;
 import com.mokakbob.common.path.EmailApiPath;
-import com.mokakbob.domain.member.service.auth.EmailAuthService;
+import com.mokakbob.auth.service.EmailAuthService;
 import com.mokakbob.auth.controller.request.EmailSendRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

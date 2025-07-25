@@ -1,9 +1,9 @@
-package com.mokakbob.domain.member.service.auth;
+package com.mokakbob.auth.service;
 
 import com.mokakbob.common.exception.DomainException;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
-import com.mokakbob.domain.member.util.RandomNumberGenerator;
+import com.mokakbob.auth.util.RandomNumberGenerator;
 import java.time.Duration;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
