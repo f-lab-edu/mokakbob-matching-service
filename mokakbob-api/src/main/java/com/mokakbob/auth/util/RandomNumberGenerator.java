@@ -1,4 +1,4 @@
-package com.mokakbob.domain.member.util;
+package com.mokakbob.auth.util;
 
 import java.security.SecureRandom;
 
