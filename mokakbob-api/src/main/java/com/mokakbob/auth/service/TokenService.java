@@ -36,7 +36,7 @@ public class TokenService {
     private void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie(COOKIE_NAME, refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath(AuthApiPath.REISSUE);
         cookie.setMaxAge((int) REFRESH_TTL.getSeconds());
         response.addCookie(cookie);
