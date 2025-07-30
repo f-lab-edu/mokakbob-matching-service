@@ -19,18 +19,30 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider implements TokenProvider {
 
     private final Key secretKey;
-    private final long expirationPeriod;
+    private final long accessExpirationPeriod;
+    private final long refreshExpirationPeriod;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration-period}") long expirationPeriod
+            @Value("${jwt.access.expiration-period}") long accessExpirationPeriod,
+            @Value("${jwt.refresh.expiration-period}") long refreshExpirationPeriod
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.expirationPeriod = expirationPeriod;
+        this.accessExpirationPeriod = accessExpirationPeriod;
+        this.refreshExpirationPeriod = refreshExpirationPeriod;
     }
 
     @Override
-    public String create(Long memberId) {
+    public String createAccessToken(Long memberId) {
+        return create(memberId, accessExpirationPeriod);
+    }
+
+    @Override
+    public String createRefreshToken(Long memberId) {
+        return create(memberId, refreshExpirationPeriod);
+    }
+
+    public String create(Long memberId, long expirationPeriod) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + expirationPeriod);
 

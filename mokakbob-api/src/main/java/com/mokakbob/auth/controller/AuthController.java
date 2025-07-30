@@ -25,7 +25,7 @@ public class AuthController {
     @PostMapping(AuthApiPath.LOGIN)
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         Member member = authService.login(request.email(), request.password());
-        String token = tokenProvider.create(member.getId());
+        String token = tokenProvider.createAccessToken(member.getId());
 
         return ResponseEntity.ok(new LoginResponse(
                 token,
