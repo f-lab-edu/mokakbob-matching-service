@@ -11,7 +11,10 @@ public enum AuthApiErrorCode implements ApiErrorCode {
     // token exception
     TOKEN_EXPIRED(401, "JWT001", "토큰이 만료되었습니다."),
     TOKEN_INVALID_SIGNATURE(401, "JWT002", "토큰 서명이 유효하지 않습니다."),
-    TOKEN_INVALID(401, "JWT003", "유효하지 않은 토큰입니다.")
+    TOKEN_INVALID(401, "JWT003", "유효하지 않은 토큰입니다."),
+
+    // auth login exception
+    NOT_MATCH_PASSWORD(401, "L001", "비밀번호가 일치하지 않습니다.")
     ;
 
     private final int httpStatus;
