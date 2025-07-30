@@ -7,4 +7,5 @@ public class AuthApiPath {
     private static final String BASE = ApiVersion.V1 + "/auth";
 
     public static final String SIGN_UP = BASE + "/signUp";
+    public static final String LOGIN = BASE + "/login";
 }
