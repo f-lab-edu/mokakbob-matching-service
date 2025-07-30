@@ -4,10 +4,11 @@ import com.mokakbob.auth.controller.request.LoginRequest;
 import com.mokakbob.auth.controller.request.SignUpRequest;
 import com.mokakbob.auth.controller.response.LoginResponse;
 import com.mokakbob.auth.controller.response.SignUpResponse;
-import com.mokakbob.auth.infrastructure.JwtTokenProvider;
 import com.mokakbob.auth.service.AuthService;
+import com.mokakbob.auth.service.TokenService;
 import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.domain.member.domain.Member;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +21,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtTokenProvider tokenProvider;
+    private final TokenService tokenService;
 
     @PostMapping(AuthApiPath.LOGIN)
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
         Member member = authService.login(request.email(), request.password());
-        String token = tokenProvider.createAccessToken(member.getId());
+        String accessToken = tokenService.createAccessToken(member.getId());
+        String refreshToken = tokenService.createRefreshToken(member.getId());
+        tokenService.addRefreshTokenToCookie(response, refreshToken);
 
         return ResponseEntity.ok(new LoginResponse(
-                token,
+                accessToken,
                 member.getId(),
                 member.getEmail(),
                 member.getNickname(),

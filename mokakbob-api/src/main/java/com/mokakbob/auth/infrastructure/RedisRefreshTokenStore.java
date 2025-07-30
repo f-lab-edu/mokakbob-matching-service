@@ -4,7 +4,7 @@ import com.mokakbob.auth.domain.RefreshTokenStore;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,29 +13,29 @@ public class RedisRefreshTokenStore implements RefreshTokenStore {
 
     private static final String TOKEN_KEY_PREFIX = "refresh:";
 
-    private final StringRedisTemplate redisTemplate;
+    private final RedisTemplate<String, String> authRedisTemplate;
 
     @Override
     public void save(Long memberId, String refreshToken, Duration ttl) {
-        redisTemplate.opsForValue()
+        authRedisTemplate.opsForValue()
                 .set(key(memberId), refreshToken, ttl);
     }
 
     @Override
     public Optional<String> get(Long memberId) {
-        return Optional.ofNullable(redisTemplate.opsForValue()
+        return Optional.ofNullable(authRedisTemplate.opsForValue()
                 .get(key(memberId)));
     }
 
     @Override
     public void delete(Long memberId) {
-        redisTemplate.delete(key(memberId));
+        authRedisTemplate.delete(key(memberId));
     }
 
     @Override
     public boolean exists(Long memberId) {
         return Boolean.TRUE
-                .equals(redisTemplate.hasKey(key(memberId)));
+                .equals(authRedisTemplate.hasKey(key(memberId)));
     }
 
     private String key(Long memberId) {
