@@ -4,10 +4,12 @@ import com.mokakbob.auth.controller.request.LoginRequest;
 import com.mokakbob.auth.controller.request.SignUpRequest;
 import com.mokakbob.auth.controller.response.LoginResponse;
 import com.mokakbob.auth.controller.response.SignUpResponse;
+import com.mokakbob.auth.controller.response.TokenReissueResponse;
 import com.mokakbob.auth.service.AuthService;
 import com.mokakbob.auth.service.TokenService;
 import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.domain.member.domain.Member;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,7 @@ public class AuthController {
     ) {
         Member member = authService.login(request.email(), request.password());
         String accessToken = tokenService.createAccessToken(member.getId());
-        String refreshToken = tokenService.createRefreshToken(member.getId());
-        tokenService.addRefreshTokenToCookie(response, refreshToken);
+        tokenService.createRefreshToken(member.getId(), response);
 
         return ResponseEntity.ok(new LoginResponse(
                 accessToken,
@@ -52,5 +53,15 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(new SignUpResponse(member.getEmail(), member.getNickname()));
+    }
+
+    @PostMapping(AuthApiPath.REISSUE)
+    public ResponseEntity<TokenReissueResponse> reissue(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String newToken = tokenService.reissue(response, request);
+
+        return ResponseEntity.ok(new TokenReissueResponse(newToken));
     }
 }
