@@ -16,6 +16,7 @@ public class AuthService {
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public Member signUp(String email, String password, String nickName, MemberPreference preference) {
         String passwordEnc = passwordEncoder.encode(password);
 
