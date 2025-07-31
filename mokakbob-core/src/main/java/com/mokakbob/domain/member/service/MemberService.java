@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MemberService {
 
@@ -19,6 +18,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional
     public Member createMember(String email, String passwordEnc, String nickName, MemberPreference preference) {
         validateDuplicateEmail(email);
         validateDuplicateNickName(nickName);
