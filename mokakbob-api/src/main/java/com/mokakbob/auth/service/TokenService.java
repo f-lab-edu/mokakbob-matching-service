@@ -5,11 +5,11 @@ import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.auth.exception.AuthApiErrorCode;
 import com.mokakbob.common.exception.exceptions.ApiException;
 import com.mokakbob.common.path.auth.AuthApiPath;
+import com.mokakbob.common.util.TokenExtractor;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +22,7 @@ public class TokenService {
 
     private final TokenProvider tokenProvider;
     private final RefreshTokenStore refreshTokenStore;
+    private final TokenExtractor extractor;
 
     public String createAccessToken(Long memberId) {
         return tokenProvider.createAccessToken(memberId);
@@ -43,15 +44,11 @@ public class TokenService {
     }
 
     public String reissue(HttpServletResponse response, HttpServletRequest request) {
-        String refreshToken = extractRefreshTokenFromCookie(request);
+        validateAccessToken(request);
+
+        String refreshToken = extractor.extractRefreshToken(request);
         Long memberId = tokenProvider.extractMemberId(refreshToken);
-
-        String savedToken = refreshTokenStore.get(memberId)
-                .orElseThrow(() -> new ApiException(AuthApiErrorCode.TOKEN_NOT_FOUND));
-
-        if (!savedToken.equals(refreshToken)) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_INVALID);
-        }
+        validateRefreshToken(refreshToken, memberId);
 
         String newAccessToken = tokenProvider.createAccessToken(memberId);
         createRefreshToken(memberId, response);
@@ -59,15 +56,19 @@ public class TokenService {
         return newAccessToken;
     }
 
-    private String extractRefreshTokenFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_NOT_FOUND);
+    private void validateAccessToken(HttpServletRequest request) {
+        String accessToken = extractor.extractAccessToken(request);
+        if (!tokenProvider.isAccessTokenExpired(accessToken)) {
+            throw new ApiException(AuthApiErrorCode.TOKEN_NOT_EXPIRED);
         }
+    }
 
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
+    private void validateRefreshToken(String refreshToken, Long memberId) {
+        String savedToken = refreshTokenStore.get(memberId)
                 .orElseThrow(() -> new ApiException(AuthApiErrorCode.TOKEN_NOT_FOUND));
+
+        if (!savedToken.equals(refreshToken)) {
+            throw new ApiException(AuthApiErrorCode.TOKEN_INVALID);
+        }
     }
 }
