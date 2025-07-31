@@ -60,6 +60,18 @@ public class JwtTokenProvider implements TokenProvider {
         return Long.valueOf(claims.getSubject());
     }
 
+    @Override
+    public boolean isAccessTokenExpired(String token) {
+        try {
+            Claims claims = parseToken(token);
+
+            return claims.getExpiration()
+                    .before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
+    }
+
     private Claims parseToken(String token) {
         try {
             return Jwts.parserBuilder()
