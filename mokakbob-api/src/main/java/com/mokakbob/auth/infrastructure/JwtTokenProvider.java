@@ -19,32 +19,32 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider implements TokenProvider {
 
     private final Key secretKey;
-    private final long accessExpirationPeriod;
-    private final long refreshExpirationPeriod;
+    private final long accessExpirationPeriodMillis;
+    private final long refreshExpirationPeriodMillis;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.access.expiration-period}") long accessExpirationPeriod,
-            @Value("${jwt.refresh.expiration-period}") long refreshExpirationPeriod
+            @Value("${jwt.access.expiration-period}") long accessExpirationPeriodMillis,
+            @Value("${jwt.refresh.expiration-period}") long refreshExpirationPeriodMillis
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.accessExpirationPeriod = accessExpirationPeriod;
-        this.refreshExpirationPeriod = refreshExpirationPeriod;
+        this.accessExpirationPeriodMillis = accessExpirationPeriodMillis;
+        this.refreshExpirationPeriodMillis = refreshExpirationPeriodMillis;
     }
 
     @Override
     public String createAccessToken(Long memberId) {
-        return create(memberId, accessExpirationPeriod);
+        return create(memberId, accessExpirationPeriodMillis);
     }
 
     @Override
     public String createRefreshToken(Long memberId) {
-        return create(memberId, refreshExpirationPeriod);
+        return create(memberId, refreshExpirationPeriodMillis);
     }
 
-    public String create(Long memberId, long expirationPeriod) {
+    public String create(Long memberId, long expirationPeriodMillis) {
         Date now = new Date();
-        Date expire = new Date(now.getTime() + expirationPeriod);
+        Date expire = new Date(now.getTime() + expirationPeriodMillis);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(memberId))
