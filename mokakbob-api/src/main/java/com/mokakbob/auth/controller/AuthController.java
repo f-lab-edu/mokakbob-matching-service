@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,13 +36,17 @@ public class AuthController {
         String accessToken = tokenService.createAccessToken(member.getId());
         tokenService.createRefreshToken(member.getId(), response);
 
-        return ResponseEntity.ok(new LoginResponse(
-                accessToken,
-                member.getId(),
-                member.getEmail(),
-                member.getNickname(),
-                member.getProfileImage()
-        ));
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Authorization", "Bearer " + accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .headers(httpHeaders)
+                .body(new LoginResponse(
+                        member.getId(),
+                        member.getEmail(),
+                        member.getNickname(),
+                        member.getProfileImage()
+                ));
     }
 
     @PostMapping(AuthApiPath.SIGN_UP)
