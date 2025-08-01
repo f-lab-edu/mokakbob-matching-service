@@ -4,4 +4,5 @@ public interface AuthClient {
 
     String getLoginUrl();
     String requestAccessToken(String code);
+    OauthUser requestUserInfo(String accessToken);
 }
