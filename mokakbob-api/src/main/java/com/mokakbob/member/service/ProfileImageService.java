@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -23,14 +24,16 @@ public class ProfileImageService {
     private final ProfileImageUploader uploader;
     private final MemberService memberService;
 
+    @Transactional
     public String uploadProfileImage(MultipartFile file, Long memberId) {
         validateFile(file);
 
-        Member member = memberService.findMember(memberId);
-        deleteProfileImage(member.getProfileImage());
-
         String extension = getExtension(Objects.requireNonNull(file.getOriginalFilename()));
         String fileKey = DEFAULT_PROFILE_PATH + memberId + "." + extension;
+
+        Member member = memberService.findMember(memberId);
+        deleteProfileImage(member.getProfileImage());
+        member.updateProfileImage(fileKey);
 
         return uploader.upload(file, fileKey);
     }
