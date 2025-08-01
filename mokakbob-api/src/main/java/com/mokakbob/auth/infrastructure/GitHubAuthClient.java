@@ -10,10 +10,10 @@ public class GitHubAuthClient implements AuthClient {
 
     private static final String GITHUB_LOGIN_URL = "https://github.com/login/oauth/authorize";
 
-    @Value("${oauth.github.client.idl}")
+    @Value("${oauth.github.client.id}")
     private String clientId;
 
-    @Value("${oauth.github.client.secretl}")
+    @Value("${oauth.github.client.secret}")
     private String clientSecret;
 
     @Value("${oauth.github.redirect.url}")
