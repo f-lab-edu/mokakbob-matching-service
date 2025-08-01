@@ -49,4 +49,8 @@ public class Member extends BaseEntity {
     // 가상 포인트: 기본값 2000
     @Column(nullable = false)
     private Integer depositPoint;
+
+    public void updateProfileImage(String newProfile) {
+        this.profileImage = newProfile;
+    }
 }

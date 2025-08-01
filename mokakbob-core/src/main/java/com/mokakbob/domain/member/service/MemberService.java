@@ -40,6 +40,12 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
+    @Transactional(readOnly = true)
+    public Member findMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(()-> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
+    }
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new DomainException(MemberErrorCode.DUPLICATE_EMAIL);
