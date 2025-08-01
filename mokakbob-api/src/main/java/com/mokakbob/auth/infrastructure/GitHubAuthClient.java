@@ -26,7 +26,7 @@ public class GitHubAuthClient implements AuthClient {
     public String getLoginUrl() {
         return UriComponentsBuilder.fromUriString(GITHUB_LOGIN_URL)
                 .queryParam("client_id", clientId)
-                .queryParam("redirect_uri", clientSecret)
+                .queryParam("redirect_uri", redirectUrl)
                 .queryParam("scope", scope)
                 .build()
                 .toUriString();
