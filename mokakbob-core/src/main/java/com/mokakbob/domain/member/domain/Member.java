@@ -35,7 +35,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    // 프로필 이미지: 선택사항
+    @Column(nullable = false)
     private String profileImage;
 
     @Enumerated(EnumType.STRING)

@@ -18,13 +18,15 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+
+
     public Member findMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER_BY_EMAIL));
     }
 
     @Transactional
-    public Member createMember(String email, String passwordEnc, String nickName, MemberPreference preference) {
+    public Member createMember(String email, String passwordEnc, String nickName, String defaultImagePath, MemberPreference preference) {
         validateDuplicateEmail(email);
         validateDuplicateNickName(nickName);
 
@@ -32,6 +34,7 @@ public class MemberService {
                 .email(email)
                 .passwordEnc(passwordEnc)
                 .nickname(nickName)
+                .profileImage(defaultImagePath)
                 .preference(preference)
                 .score(DEFAULT_SCORE)
                 .depositPoint(DEFAULT_POINT)

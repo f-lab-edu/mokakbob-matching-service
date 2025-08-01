@@ -17,7 +17,7 @@ public class ProfileImageUploaderConfig {
     }
 
     @Bean
-    @Profile("s3")
+    @Profile("prod")
     public S3ProfileImageUploader s3ProfileImageUploader(S3Client s3Client) {
         return new S3ProfileImageUploader(s3Client);
     }

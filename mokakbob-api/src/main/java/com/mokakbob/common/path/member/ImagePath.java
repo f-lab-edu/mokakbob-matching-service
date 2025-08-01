@@ -7,4 +7,5 @@ public class ImagePath {
     private static final String BASE = ApiVersion.V1 + "/image";
 
     public static final String UPLOAD = BASE + "/upload";
+    public static final String DEFAULT = BASE + "/default";
 }

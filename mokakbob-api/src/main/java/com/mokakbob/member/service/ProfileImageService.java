@@ -8,6 +8,7 @@ import com.mokakbob.member.exception.MemberApiErrorCode;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,9 @@ public class ProfileImageService {
     private final ProfileImageUploader uploader;
     private final MemberService memberService;
 
+    @Value("${profile.default.image.url}")
+    private String defaultProfileImageUrl;
+
     @Transactional
     public String uploadProfileImage(MultipartFile file, Long memberId) {
         validateFile(file);
@@ -38,6 +42,20 @@ public class ProfileImageService {
         return uploader.upload(file, fileKey);
     }
 
+    @Transactional
+    public String applyDefaultImage(Long memberId) {
+        Member member = memberService.findMember(memberId);
+
+        String previousImagePath = member.getProfileImage();
+        if (previousImagePath != null && !previousImagePath.isBlank() &&
+                !previousImagePath.equals(defaultProfileImageUrl)) {
+            uploader.delete(previousImagePath);
+        }
+
+        member.updateProfileImage(defaultProfileImageUrl);
+
+        return defaultProfileImageUrl;
+    }
 
     private void deleteProfileImage(String previousImagePath) {
         if (previousImagePath != null && !previousImagePath.isBlank()) {

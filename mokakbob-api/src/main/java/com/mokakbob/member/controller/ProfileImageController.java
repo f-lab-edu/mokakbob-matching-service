@@ -25,4 +25,10 @@ public class ProfileImageController {
         String imagePath = profileImageService.uploadProfileImage(file, memberId);
         return ResponseEntity.ok(new ImageResponse(imagePath));
     }
+
+    @PostMapping(ImagePath.DEFAULT)
+    public ResponseEntity<ImageResponse> defaultImage(@MemberId Long memberId) {
+        String imagePath = profileImageService.applyDefaultImage(memberId);
+        return ResponseEntity.ok(new ImageResponse(imagePath));
+    }
 }

@@ -6,6 +6,7 @@ import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.domain.vo.MemberPreference;
 import com.mokakbob.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,9 @@ public class AuthService {
 
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${profile.default.image.url}")
+    private String defaultProfileImageUrl;
 
     public Member login(String email, String password) {
         Member member = memberService.findMemberByEmail(email);
@@ -33,6 +37,7 @@ public class AuthService {
                 email,
                 passwordEnc,
                 nickName,
+                defaultProfileImageUrl,
                 preference
         );
     }
