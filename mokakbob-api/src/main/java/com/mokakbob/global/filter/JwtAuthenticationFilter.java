@@ -3,6 +3,7 @@ package com.mokakbob.global.filter;
 import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.common.path.auth.EmailApiPath;
+import com.mokakbob.common.path.auth.GitHubOauthApiPath;
 import com.mokakbob.common.util.TokenExtractor;
 import com.mokakbob.global.support.AuthConstants;
 import jakarta.servlet.FilterChain;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         return uri.startsWith(AuthApiPath.BASE) ||
-                uri.startsWith(EmailApiPath.BASE);
+                uri.startsWith(EmailApiPath.BASE) ||
+                uri.startsWith(GitHubOauthApiPath.BASE);
     }
 }
