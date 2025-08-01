@@ -1,4 +1,6 @@
-package com.mokakbob.common.path;
+package com.mokakbob.common.path.auth;
+
+import com.mokakbob.common.path.ApiVersion;
 
 public class EmailApiPath {
 
