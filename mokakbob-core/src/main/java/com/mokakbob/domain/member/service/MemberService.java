@@ -18,6 +18,11 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    public Member findMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER_BY_EMAIL));
+    }
+
     @Transactional
     public Member createMember(String email, String passwordEnc, String nickName, MemberPreference preference) {
         validateDuplicateEmail(email);
