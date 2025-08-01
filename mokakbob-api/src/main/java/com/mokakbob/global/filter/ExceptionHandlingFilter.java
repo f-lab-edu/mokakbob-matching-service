@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
-public class ExceptionHandlerFilter extends OncePerRequestFilter {
+public class ExceptionHandlingFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper;
 
