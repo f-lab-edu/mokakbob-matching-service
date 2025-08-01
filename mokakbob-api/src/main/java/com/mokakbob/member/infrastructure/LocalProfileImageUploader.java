@@ -6,7 +6,6 @@ import com.mokakbob.member.exception.MemberApiErrorCode;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,28 +13,21 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class LocalProfileImageUploader implements ProfileImageUploader {
 
-    private static final String FILE_NAME_CONNECTOR = "_";
+    private static final String PATH_SEPARATOR = "/";
 
     @Value("${local.upload.profile.directory}")
     private String uploadDir;
 
     @Override
-    public String upload(MultipartFile file, String directory) {
+    public String upload(MultipartFile file, String fileKey) {
         try {
-            String filename = UUID.randomUUID() + FILE_NAME_CONNECTOR + file.getOriginalFilename();
-            String folderPath = Paths.get(uploadDir, directory)
-                    .toString();
-            File folder = new File(folderPath);
+            String fullPath = Paths.get(uploadDir, fileKey).toString();
+            File folder = new File(Paths.get(uploadDir, getDirectory(fileKey)).toString());
 
             validateFolderExist(folder);
 
-            String filePath = Paths.get(folderPath, filename)
-                    .toString();
-            file.transferTo(new File(filePath));
-
-            return Paths.get(directory, filename)
-                    .toString()
-                    .replace("\\", "/");
+            file.transferTo(new File(fullPath));
+            return fileKey.replace("\\", PATH_SEPARATOR);
         } catch (IOException e) {
             throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED);
         }
@@ -63,4 +55,15 @@ public class LocalProfileImageUploader implements ProfileImageUploader {
             }
         }
     }
+
+    private String getDirectory(String fileKey) {
+        int index = fileKey.lastIndexOf(PATH_SEPARATOR);
+
+        if (index != -1) {
+            return fileKey.substring(0, index);
+        }
+
+        return "";
+    }
+
 }

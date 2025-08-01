@@ -4,7 +4,6 @@ import com.mokakbob.common.exception.exceptions.ApiException;
 import com.mokakbob.member.domain.ProfileImageUploader;
 import com.mokakbob.member.exception.MemberApiErrorCode;
 import java.io.IOException;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,19 +17,13 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @RequiredArgsConstructor
 public class S3ProfileImageUploader implements ProfileImageUploader {
 
-    private static final String DIRECTORY_CONNECTOR = "/";
-
     private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
     @Override
-    public String upload(MultipartFile file, String directory) {
-        String originalFilename = file.getOriginalFilename();
-        String extension = getExtension(originalFilename);
-        String fileKey = directory + DIRECTORY_CONNECTOR + UUID.randomUUID() + extension;
-
+    public String upload(MultipartFile file, String fileKey) {
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
@@ -53,9 +46,5 @@ public class S3ProfileImageUploader implements ProfileImageUploader {
                 .build();
 
         s3Client.deleteObject(deleteRequest);
-    }
-
-    private String getExtension(String filename) {
-        return filename.substring(filename.lastIndexOf("."));
     }
 }
