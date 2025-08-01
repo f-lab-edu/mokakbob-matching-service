@@ -1,7 +1,7 @@
 package com.mokakbob.member.controller;
 
 import com.mokakbob.common.path.member.ImagePath;
-import com.mokakbob.global.resolver.annotation.Auth;
+import com.mokakbob.global.resolver.annotation.MemberId;
 import com.mokakbob.member.controller.response.ImageResponse;
 import com.mokakbob.member.service.ProfileImageService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class ProfileImageController {
     @PostMapping(ImagePath.UPLOAD)
     public ResponseEntity<ImageResponse> uploadImage(
             @RequestPart("file") MultipartFile file,
-            @Auth Long memberId
+            @MemberId Long memberId
     ) {
         String imagePath = profileImageService.uploadProfileImage(file, memberId);
         return ResponseEntity.ok(new ImageResponse(imagePath));

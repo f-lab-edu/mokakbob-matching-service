@@ -2,7 +2,7 @@ package com.mokakbob.global.resolver;
 
 import com.mokakbob.common.exception.exceptions.ApiException;
 import com.mokakbob.global.exception.GlobalErrorCode;
-import com.mokakbob.global.resolver.annotation.Auth;
+import com.mokakbob.global.resolver.annotation.MemberId;
 import com.mokakbob.global.support.AuthConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Objects;
@@ -18,7 +18,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(Auth.class)
+        return parameter.hasParameterAnnotation(MemberId.class)
                 && parameter.getParameterType().equals(Long.class);
     }
 
