@@ -1,14 +1,21 @@
 package com.mokakbob.auth.infrastructure;
 
 import com.mokakbob.auth.domain.AuthClient;
+import com.mokakbob.auth.infrastructure.response.GithubAccessTokenResponse;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
+@RequiredArgsConstructor
 public class GitHubAuthClient implements AuthClient {
 
     private static final String GITHUB_LOGIN_URL = "https://github.com/login/oauth/authorize";
+
+    private final WebClient githubTokenWebClient;
 
     @Value("${oauth.github.client.id}")
     private String clientId;
@@ -30,5 +37,22 @@ public class GitHubAuthClient implements AuthClient {
                 .queryParam("scope", scope)
                 .build()
                 .toUriString();
+    }
+
+    @Override
+    public String requestAccessToken(String code) {
+        return githubTokenWebClient
+                .post()
+                .uri("/login/oauth/access_token")
+                .bodyValue(Map.of(
+                        "client_id", clientId,
+                        "client_secret", clientSecret,
+                        "code", code,
+                        "redirect_uri", redirectUrl
+                ))
+                .retrieve()
+                .bodyToMono(GithubAccessTokenResponse.class)
+                .map(GithubAccessTokenResponse::accessToken)
+                .block();
     }
 }
