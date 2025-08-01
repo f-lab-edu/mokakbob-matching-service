@@ -4,6 +4,7 @@ import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.common.path.auth.EmailApiPath;
 import com.mokakbob.common.util.TokenExtractor;
+import com.mokakbob.global.support.AuthConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,8 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String TOKEN_INFORMATION = "memberId";
-
     private final TokenExtractor extractor;
     private final TokenProvider tokenProvider;
 
@@ -25,7 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String rawToken = extractor.extractAccessToken(request);
         Long memberId = tokenProvider.extractMemberId(rawToken);
-        request.setAttribute(TOKEN_INFORMATION, memberId);
+        request.setAttribute(AuthConstants.TOKEN_ATTRIBUTE, memberId);
         filterChain.doFilter(request, response);
     }
 
