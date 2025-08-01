@@ -4,12 +4,17 @@ import com.mokakbob.auth.controller.request.LoginRequest;
 import com.mokakbob.auth.controller.request.SignUpRequest;
 import com.mokakbob.auth.controller.response.LoginResponse;
 import com.mokakbob.auth.controller.response.SignUpResponse;
-import com.mokakbob.auth.infrastructure.JwtTokenProvider;
+import com.mokakbob.auth.controller.response.TokenReissueResponse;
 import com.mokakbob.auth.service.AuthService;
+import com.mokakbob.auth.service.TokenService;
 import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.domain.member.domain.Member;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,20 +25,28 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtTokenProvider tokenProvider;
+    private final TokenService tokenService;
 
     @PostMapping(AuthApiPath.LOGIN)
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletResponse response
+    ) {
         Member member = authService.login(request.email(), request.password());
-        String token = tokenProvider.create(member.getId());
+        String accessToken = tokenService.createAccessToken(member.getId());
+        tokenService.createRefreshToken(member.getId(), response);
 
-        return ResponseEntity.ok(new LoginResponse(
-                token,
-                member.getId(),
-                member.getEmail(),
-                member.getNickname(),
-                member.getProfileImage()
-        ));
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Authorization", "Bearer " + accessToken);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .headers(httpHeaders)
+                .body(new LoginResponse(
+                        member.getId(),
+                        member.getEmail(),
+                        member.getNickname(),
+                        member.getProfileImage()
+                ));
     }
 
     @PostMapping(AuthApiPath.SIGN_UP)
@@ -46,5 +59,15 @@ public class AuthController {
         );
 
         return ResponseEntity.ok(new SignUpResponse(member.getEmail(), member.getNickname()));
+    }
+
+    @PostMapping(AuthApiPath.REISSUE)
+    public ResponseEntity<TokenReissueResponse> reissue(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String newToken = tokenService.reissue(response, request);
+
+        return ResponseEntity.ok(new TokenReissueResponse(newToken));
     }
 }

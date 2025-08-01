@@ -1,6 +1,8 @@
 package com.mokakbob.auth.domain;
 
 public interface TokenProvider {
-    String create(Long memberId);
+    String createAccessToken(Long memberId);
+    String createRefreshToken(Long memberId);
     Long extractMemberId(String token);
+    boolean isAccessTokenExpired(String token);
 }

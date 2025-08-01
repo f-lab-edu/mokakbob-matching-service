@@ -19,20 +19,32 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider implements TokenProvider {
 
     private final Key secretKey;
-    private final long expirationPeriod;
+    private final long accessExpirationPeriodMillis;
+    private final long refreshExpirationPeriodMillis;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration-period}") long expirationPeriod
+            @Value("${jwt.access.expiration-period}") long accessExpirationPeriodMillis,
+            @Value("${jwt.refresh.expiration-period}") long refreshExpirationPeriodMillis
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.expirationPeriod = expirationPeriod;
+        this.accessExpirationPeriodMillis = accessExpirationPeriodMillis;
+        this.refreshExpirationPeriodMillis = refreshExpirationPeriodMillis;
     }
 
     @Override
-    public String create(Long memberId) {
+    public String createAccessToken(Long memberId) {
+        return create(memberId, accessExpirationPeriodMillis);
+    }
+
+    @Override
+    public String createRefreshToken(Long memberId) {
+        return create(memberId, refreshExpirationPeriodMillis);
+    }
+
+    public String create(Long memberId, long expirationPeriodMillis) {
         Date now = new Date();
-        Date expire = new Date(now.getTime() + expirationPeriod);
+        Date expire = new Date(now.getTime() + expirationPeriodMillis);
 
         return Jwts.builder()
                 .setSubject(String.valueOf(memberId))
@@ -46,6 +58,18 @@ public class JwtTokenProvider implements TokenProvider {
     public Long extractMemberId(String token) {
         Claims claims = parseToken(token);
         return Long.valueOf(claims.getSubject());
+    }
+
+    @Override
+    public boolean isAccessTokenExpired(String token) {
+        try {
+            Claims claims = parseToken(token);
+
+            return claims.getExpiration()
+                    .before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
     private Claims parseToken(String token) {
