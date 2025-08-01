@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class LocalProfileImageUploader implements ProfileImageUploader {
 
-    private static final String FILE_NAME_CONNECTING = "_";
+    private static final String FILE_NAME_CONNECTOR = "_";
 
     @Value("${local.upload.profile.directory}")
     private String uploadDir;
@@ -22,7 +22,7 @@ public class LocalProfileImageUploader implements ProfileImageUploader {
     @Override
     public String upload(MultipartFile file, String directory) {
         try {
-            String filename = UUID.randomUUID() + FILE_NAME_CONNECTING + file.getOriginalFilename();
+            String filename = UUID.randomUUID() + FILE_NAME_CONNECTOR + file.getOriginalFilename();
             String folderPath = Paths.get(uploadDir, directory)
                     .toString();
             File folder = new File(folderPath);
