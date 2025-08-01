@@ -5,7 +5,8 @@ import com.mokakbob.common.exception.DomainErrorCode;
 public enum MemberErrorCode implements DomainErrorCode {
     DUPLICATE_EMAIL(409, "M001", "중복되는 이메일입니다."),
     DUPLICATE_NICKNAME(409, "M002", "중복되는 이메일입니다."),
-    NOT_FOUND_MEMBER_BY_EMAIL(404, "M003", "이메일에 해당하는 유저 정보가 없습니다.")
+    NOT_FOUND_MEMBER_BY_EMAIL(404, "M003", "이메일에 해당하는 유저 정보가 없습니다."),
+    NOT_FOUND_MEMBER(404, "M004", "유저를 찾을 수 없습니다.")
     ;
 
     private final int httpStatus;
