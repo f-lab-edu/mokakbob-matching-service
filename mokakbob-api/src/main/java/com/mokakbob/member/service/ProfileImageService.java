@@ -42,6 +42,21 @@ public class ProfileImageService {
         return uploader.upload(file, fileKey);
     }
 
+    @Transactional
+    public String applyDefaultImage(Long memberId) {
+        Member member = memberService.findMember(memberId);
+
+        String previousImagePath = member.getProfileImage();
+        if (previousImagePath != null && !previousImagePath.isBlank() &&
+                !previousImagePath.equals(defaultProfileImageUrl)) {
+            uploader.delete(previousImagePath);
+        }
+
+        member.updateProfileImage(defaultProfileImageUrl);
+
+        return defaultProfileImageUrl;
+    }
+
     private void deleteProfileImage(String previousImagePath) {
         if (previousImagePath != null && !previousImagePath.isBlank()) {
             uploader.delete(previousImagePath);
