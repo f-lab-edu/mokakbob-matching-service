@@ -5,6 +5,7 @@ import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.domain.vo.MemberPreference;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import com.mokakbob.domain.member.repository.MemberRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +19,12 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional(readOnly = true)
+    public Optional<Member> findByNickName(String nickName) {
+        return memberRepository.findByNickname(nickName);
+    }
 
-
+    @Transactional(readOnly = true)
     public Member findMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER_BY_EMAIL));
