@@ -21,6 +21,6 @@ public record GItHubUser(
 
     @Override
     public String getProfileImageUrl() {
-        return "";
+        return profileImageUrl;
     }
 }

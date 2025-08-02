@@ -7,7 +7,6 @@ import com.mokakbob.auth.controller.response.SignUpResponse;
 import com.mokakbob.auth.controller.response.TokenReissueResponse;
 import com.mokakbob.auth.service.AuthService;
 import com.mokakbob.auth.service.TokenService;
-import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.domain.member.domain.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final TokenService tokenService;
 
-    @PostMapping(AuthApiPath.LOGIN)
+    @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response
@@ -49,7 +48,7 @@ public class AuthController {
                 ));
     }
 
-    @PostMapping(AuthApiPath.SIGN_UP)
+    @PostMapping("/auth/signUp")
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
         Member member = authService.signUp(
                 request.email(),
@@ -61,7 +60,7 @@ public class AuthController {
         return ResponseEntity.ok(new SignUpResponse(member.getEmail(), member.getNickname()));
     }
 
-    @PostMapping(AuthApiPath.REISSUE)
+    @PostMapping("/auth/reissue")
     public ResponseEntity<TokenReissueResponse> reissue(
             HttpServletRequest request,
             HttpServletResponse response

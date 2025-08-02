@@ -1,9 +1,6 @@
 package com.mokakbob.global.filter;
 
 import com.mokakbob.auth.domain.TokenProvider;
-import com.mokakbob.common.path.auth.AuthApiPath;
-import com.mokakbob.common.path.auth.EmailApiPath;
-import com.mokakbob.common.path.auth.GitHubOauthApiPath;
 import com.mokakbob.common.util.TokenExtractor;
 import com.mokakbob.global.support.AuthConstants;
 import jakarta.servlet.FilterChain;
@@ -33,8 +30,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String uri = request.getRequestURI();
 
-        return uri.startsWith(AuthApiPath.BASE) ||
-                uri.startsWith(EmailApiPath.BASE) ||
-                uri.startsWith(GitHubOauthApiPath.BASE);
+        return uri.startsWith("/api/v1/auth") ||
+                uri.startsWith("/api/v1/oauth") ||
+                uri.startsWith("/api/v1/email")
+                ;
     }
 }

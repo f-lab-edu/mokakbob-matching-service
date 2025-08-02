@@ -31,7 +31,11 @@ dependencies {
     implementation 'software.amazon.awssdk:s3:2.25.11'
 
     // webClient
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation('org.springframework.boot:spring-boot-starter-webflux') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-reactor-netty'
+        exclude group: 'io.projectreactor.netty', module: 'reactor-netty-http'
+        exclude group: 'io.projectreactor.netty', module: 'reactor-netty-core'
+    }
 }
 
 springBoot {
