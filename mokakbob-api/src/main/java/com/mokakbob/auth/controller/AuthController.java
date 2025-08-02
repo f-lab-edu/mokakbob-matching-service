@@ -5,6 +5,7 @@ import com.mokakbob.auth.controller.request.SignUpRequest;
 import com.mokakbob.auth.controller.response.LoginResponse;
 import com.mokakbob.auth.controller.response.SignUpResponse;
 import com.mokakbob.auth.controller.response.TokenReissueResponse;
+import com.mokakbob.auth.facade.LoginFacade;
 import com.mokakbob.auth.service.AuthService;
 import com.mokakbob.auth.service.TokenService;
 import com.mokakbob.domain.member.domain.Member;
@@ -12,8 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +24,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final TokenService tokenService;
+    private final LoginFacade loginFacade;
 
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(
@@ -32,20 +32,14 @@ public class AuthController {
             HttpServletResponse response
     ) {
         Member member = authService.login(request.email(), request.password());
-        String accessToken = tokenService.createAccessToken(member.getId());
-        tokenService.createRefreshToken(member.getId(), response);
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", "Bearer " + accessToken);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .headers(httpHeaders)
-                .body(new LoginResponse(
-                        member.getId(),
-                        member.getEmail(),
-                        member.getNickname(),
-                        member.getProfileImage()
-                ));
+        return loginFacade.successLogin(
+                member.getId(),
+                response,
+                member.getEmail(),
+                member.getNickname(),
+                member.getProfileImage()
+        );
     }
 
     @PostMapping("/auth/signUp")
