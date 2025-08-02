@@ -17,9 +17,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class GitHubAuthClient implements AuthClient {
 
     private static final String GITHUB_LOGIN_URL = "https://github.com/login/oauth/authorize";
+    private static final String GITHUB_TOKEN_URL = "/login/oauth/access_token";
     private static final String REQUEST_USER_URI = "/user";
 
     private final WebClient githubTokenWebClient;
+    private final WebClient githubApiWebClient;
 
     @Value("${oauth.github.client.id}")
     private String clientId;
@@ -47,7 +49,7 @@ public class GitHubAuthClient implements AuthClient {
     public String requestAccessToken(String code) {
         return githubTokenWebClient
                 .post()
-                .uri("/login/oauth/access_token")
+                .uri(GITHUB_TOKEN_URL)
                 .bodyValue(Map.of(
                         "client_id", clientId,
                         "client_secret", clientSecret,
@@ -62,7 +64,7 @@ public class GitHubAuthClient implements AuthClient {
 
     @Override
     public OauthUser requestUserInfo(String accessToken) {
-        return githubTokenWebClient
+        return githubApiWebClient
                 .get()
                 .uri(REQUEST_USER_URI)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
