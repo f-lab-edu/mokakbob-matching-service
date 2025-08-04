@@ -1,0 +1,36 @@
+package com.mokakbob.auth.exception;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mokakbob.common.exception.handler.response.CustomErrorResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+
+@RequiredArgsConstructor
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+                         AuthenticationException authException) throws IOException, ServletException {
+        AuthApiErrorCode errorCode = AuthApiErrorCode.TOKEN_INVALID;
+
+        response.setStatus(errorCode.httpStatus());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        CustomErrorResponse errorResponse = new CustomErrorResponse(
+                errorCode.customCode(),
+                errorCode.message()
+        );
+
+        response.getWriter()
+                .write(objectMapper.writeValueAsString(errorResponse));
+    }
+}
