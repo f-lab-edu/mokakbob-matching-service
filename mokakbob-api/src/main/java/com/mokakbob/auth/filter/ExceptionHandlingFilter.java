@@ -1,4 +1,4 @@
-package com.mokakbob.global.filter;
+package com.mokakbob.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokakbob.common.exception.exceptions.ApiException;
@@ -11,8 +11,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Component
 @RequiredArgsConstructor
 public class ExceptionHandlingFilter extends OncePerRequestFilter {
 
