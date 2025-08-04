@@ -1,5 +1,6 @@
 package com.mokakbob.member.controller;
 
+import com.mokakbob.common.path.member.ProfilePath;
 import com.mokakbob.global.resolver.annotation.MemberId;
 import com.mokakbob.member.controller.response.ImageResponse;
 import com.mokakbob.member.service.ProfileImageService;
@@ -16,7 +17,7 @@ public class ProfileImageController {
 
     private final ProfileImageService profileImageService;
 
-    @PostMapping("/image/upload")
+    @PostMapping(ProfilePath.UPLOAD)
     public ResponseEntity<ImageResponse> uploadImage(
             @RequestPart("file") MultipartFile file,
             @MemberId Long memberId
@@ -25,7 +26,7 @@ public class ProfileImageController {
         return ResponseEntity.ok(new ImageResponse(imagePath));
     }
 
-    @PostMapping("/image/default")
+    @PostMapping(ProfilePath.DEFAULT)
     public ResponseEntity<ImageResponse> defaultImage(@MemberId Long memberId) {
         String imagePath = profileImageService.applyDefaultImage(memberId);
         return ResponseEntity.ok(new ImageResponse(imagePath));

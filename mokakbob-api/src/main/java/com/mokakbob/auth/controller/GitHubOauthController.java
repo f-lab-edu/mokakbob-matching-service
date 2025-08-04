@@ -6,6 +6,7 @@ import com.mokakbob.auth.controller.response.UrlResponse;
 import com.mokakbob.auth.facade.LoginFacade;
 import com.mokakbob.auth.service.GitHubAuthService;
 import com.mokakbob.auth.service.response.MemberExistResponse;
+import com.mokakbob.common.path.auth.OauthPath;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +24,14 @@ public class GitHubOauthController {
     private final GitHubAuthService gitHubAuthService;
     private final LoginFacade loginFacade;
 
-    @GetMapping("/oauth/github/url")
+    @GetMapping(OauthPath.GITHUB_URL)
     public ResponseEntity<UrlResponse> getGithubLoginUrl() {
         String url = gitHubAuthService.getLoginUrl();
 
         return ResponseEntity.ok(new UrlResponse(url));
     }
 
-    @PostMapping("/oauth/github/callback")
+    @PostMapping(OauthPath.GITHUB_CALL_BACK)
     public ResponseEntity<?> callback(
             @RequestBody OauthCodeRequest request,
             HttpServletResponse response
