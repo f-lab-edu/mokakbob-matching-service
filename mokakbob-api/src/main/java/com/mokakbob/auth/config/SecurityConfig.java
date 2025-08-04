@@ -62,9 +62,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 PermitPath.AUTH_BASE + WILD_CARD_PATH,          // 일반 회원가입
-                                PermitPath.OAUTH_BASE + WILD_CARD_PATH,         // GitHub 로그인 진입점
                                 PermitPath.EMAIL_BASE + WILD_CARD_PATH,        // 이메일 인증
-                                "/login/oauth2/**"          // GitHub 콜백 URI
+                                "/login/oauth2/**"          // Oauth 콜백 URI
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
