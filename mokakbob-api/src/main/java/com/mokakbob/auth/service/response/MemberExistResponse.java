@@ -1,7 +1,11 @@
 package com.mokakbob.auth.service.response;
 
-import com.mokakbob.auth.domain.OauthUser;
-import com.mokakbob.domain.member.domain.Member;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 public record MemberExistResponse(
         boolean isMember,
@@ -9,25 +13,44 @@ public record MemberExistResponse(
         String email,
         String nickName,
         String profileImage
-) {
+) implements OAuth2User {
 
-    public static MemberExistResponse fromMember(Member member) {
-        return new MemberExistResponse(
-                true,
-                member.getId(),
-                member.getEmail(),
-                member.getNickname(),
-                member.getProfileImage()
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of(
+                "email", email,
+                "login", nickName,
+                "avatar_url", profileImage
         );
     }
 
-    public static MemberExistResponse fromOauthUser(OauthUser user) {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getName() {
+        return nickName;
+    }
+
+    public static MemberExistResponse fromMember(Long memberId, String email, String nickName, String profileImage) {
+        return new MemberExistResponse(
+                true,
+                memberId,
+                email,
+                nickName,
+                profileImage
+        );
+    }
+
+    public static MemberExistResponse fromOauthUser(String email, String nickName, String profileImage) {
         return new MemberExistResponse(
                 false,
                 null,
-                user.getEmail(),
-                user.getNickname(),
-                user.getProfileImageUrl()
+                email,
+                nickName,
+                profileImage
         );
     }
 }

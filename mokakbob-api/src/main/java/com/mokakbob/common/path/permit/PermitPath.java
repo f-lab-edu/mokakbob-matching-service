@@ -1,6 +1,6 @@
-package com.mokakbob.common.path.filter;
+package com.mokakbob.common.path.permit;
 
-public class TokenFilterPath {
+public class PermitPath {
 
     public static final String EMAIL_BASE = "/api/v1/email";
     public static final String AUTH_BASE = "/api/v1/auth";

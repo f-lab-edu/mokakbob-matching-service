@@ -1,7 +1,7 @@
-package com.mokakbob.auth.controller.response;
+package com.mokakbob.auth.handler.response;
 
 public record SignUpRequireResponse(
-        String status,
+        boolean signUpStatus,
         String email,
         String nickName,
         String profileImage
