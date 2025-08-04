@@ -41,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         return uri.startsWith(PermitPath.AUTH_BASE) ||
-                uri.startsWith(PermitPath.OAUTH_BASE) ||
                 uri.startsWith(PermitPath.EMAIL_BASE)
                 ;
     }
