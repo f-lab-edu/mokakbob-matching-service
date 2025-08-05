@@ -13,29 +13,29 @@ public class RedisRefreshTokenStore implements RefreshTokenStore {
 
     private static final String TOKEN_KEY_PREFIX = "refresh:";
 
-    private final RedisTemplate<String, String> authRedisTemplate;
+    private final RedisTemplate<String, String> basicRedisTemplate;
 
     @Override
     public void save(Long memberId, String refreshToken, Duration ttl) {
-        authRedisTemplate.opsForValue()
+        basicRedisTemplate.opsForValue()
                 .set(key(memberId), refreshToken, ttl);
     }
 
     @Override
     public Optional<String> get(Long memberId) {
-        return Optional.ofNullable(authRedisTemplate.opsForValue()
+        return Optional.ofNullable(basicRedisTemplate.opsForValue()
                 .get(key(memberId)));
     }
 
     @Override
     public void delete(Long memberId) {
-        authRedisTemplate.delete(key(memberId));
+        basicRedisTemplate.delete(key(memberId));
     }
 
     @Override
     public boolean exists(Long memberId) {
         return Boolean.TRUE
-                .equals(authRedisTemplate.hasKey(key(memberId)));
+                .equals(basicRedisTemplate.hasKey(key(memberId)));
     }
 
     private String key(Long memberId) {
