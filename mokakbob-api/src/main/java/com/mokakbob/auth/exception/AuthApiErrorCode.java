@@ -16,7 +16,10 @@ public enum AuthApiErrorCode implements ApiErrorCode {
     TOKEN_NOT_EXPIRED(400, "JWT005", "accessToken 이 아직 유효합니다."),
 
     // auth login exception
-    NOT_MATCH_PASSWORD(401, "L001", "비밀번호가 일치하지 않습니다.")
+    NOT_MATCH_PASSWORD(401, "L001", "비밀번호가 일치하지 않습니다."),
+
+    // oauth security
+    FORBIDDEN(403, "OAUTH001", "권한이 없습니다.")
     ;
 
     private final int httpStatus;

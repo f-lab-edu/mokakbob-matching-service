@@ -4,7 +4,6 @@ import com.mokakbob.auth.domain.RefreshTokenStore;
 import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.auth.exception.AuthApiErrorCode;
 import com.mokakbob.common.exception.exceptions.ApiException;
-import com.mokakbob.common.path.auth.AuthApiPath;
 import com.mokakbob.common.util.TokenExtractor;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +18,7 @@ public class TokenService {
 
     private static final String COOKIE_NAME = "refreshToken";
     private static final Duration REFRESH_TTL = Duration.ofDays(7);
+    private static final String REISSUE_API_PATH = "/api/v1/auth/reissue";
 
     private final TokenProvider tokenProvider;
     private final RefreshTokenStore refreshTokenStore;
@@ -38,7 +38,7 @@ public class TokenService {
         Cookie cookie = new Cookie(COOKIE_NAME, refreshToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setPath(AuthApiPath.REISSUE);
+        cookie.setPath(REISSUE_API_PATH);
         cookie.setMaxAge((int) REFRESH_TTL.getSeconds());
         response.addCookie(cookie);
     }

@@ -7,7 +7,7 @@ import com.mokakbob.auth.controller.response.SignUpResponse;
 import com.mokakbob.auth.controller.response.TokenReissueResponse;
 import com.mokakbob.auth.service.AuthService;
 import com.mokakbob.auth.service.TokenService;
-import com.mokakbob.common.path.auth.AuthApiPath;
+import com.mokakbob.common.path.auth.AuthPath;
 import com.mokakbob.domain.member.domain.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,29 +27,31 @@ public class AuthController {
     private final AuthService authService;
     private final TokenService tokenService;
 
-    @PostMapping(AuthApiPath.LOGIN)
+    @PostMapping(AuthPath.LOGIN)
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response
     ) {
         Member member = authService.login(request.email(), request.password());
-        String accessToken = tokenService.createAccessToken(member.getId());
-        tokenService.createRefreshToken(member.getId(), response);
+        Long memberId = member.getId();
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", "Bearer " + accessToken);
+        String accessToken = tokenService.createAccessToken(member.getId());
+        tokenService.createRefreshToken(memberId, response);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .headers(httpHeaders)
+                .headers(headers)
                 .body(new LoginResponse(
-                        member.getId(),
+                        memberId,
                         member.getEmail(),
                         member.getNickname(),
                         member.getProfileImage()
                 ));
     }
 
-    @PostMapping(AuthApiPath.SIGN_UP)
+    @PostMapping(AuthPath.SIGN_UP)
     public ResponseEntity<SignUpResponse> signUp(@Valid @RequestBody SignUpRequest request) {
         Member member = authService.signUp(
                 request.email(),
@@ -61,7 +63,7 @@ public class AuthController {
         return ResponseEntity.ok(new SignUpResponse(member.getEmail(), member.getNickname()));
     }
 
-    @PostMapping(AuthApiPath.REISSUE)
+    @PostMapping(AuthPath.REISSUE)
     public ResponseEntity<TokenReissueResponse> reissue(
             HttpServletRequest request,
             HttpServletResponse response

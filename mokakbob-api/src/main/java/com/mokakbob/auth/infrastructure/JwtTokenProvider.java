@@ -12,7 +12,12 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,7 +47,7 @@ public class JwtTokenProvider implements TokenProvider {
         return create(memberId, refreshExpirationPeriodMillis);
     }
 
-    public String create(Long memberId, long expirationPeriodMillis) {
+    private String create(Long memberId, long expirationPeriodMillis) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + expirationPeriodMillis);
 
@@ -70,6 +75,24 @@ public class JwtTokenProvider implements TokenProvider {
         } catch (ExpiredJwtException e) {
             return true;
         }
+    }
+
+    @Override
+    public Authentication getAuthentication(Long memberId) {
+        List<SimpleGrantedAuthority> authorities =
+                List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+        User principal = new User(
+                String.valueOf(memberId),
+                "",
+                authorities
+        );
+
+        return new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                authorities
+        );
     }
 
     private Claims parseToken(String token) {
