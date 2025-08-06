@@ -53,4 +53,8 @@ public class Member extends BaseEntity {
     public void updateProfileImage(String newProfile) {
         this.profileImage = newProfile;
     }
+
+    public void deductPoint(int point) {
+        this.depositPoint -= point;
+    }
 }
