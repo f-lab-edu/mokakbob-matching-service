@@ -17,14 +17,14 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
     private static final String ZSET_CATEGORY_KEY = "matching:zset:%s:%d";
     private static final String MEMBER_KEY = "member:";
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> basicRedisTemplate;
 
     @Override
     public void addToQueue(MatchingCategory category, int count, Long memberId) {
         String zsetKey = zsetKey(category, count);
         double score = System.currentTimeMillis();
 
-        redisTemplate.opsForZSet()
+        basicRedisTemplate.opsForZSet()
                 .add(zsetKey, memberKey(memberId), score);
     }
 
@@ -32,7 +32,7 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
     public void removeFromQueue(MatchingCategory category, int count, Long memberId) {
         String zsetKey = zsetKey(category, count);
 
-        redisTemplate.opsForZSet()
+        basicRedisTemplate.opsForZSet()
                 .remove(zsetKey, memberKey(memberId));
     }
 
@@ -40,7 +40,7 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
     public List<Long> findWaitingUsers(MatchingCategory category, int count) {
         String zsetKey = zsetKey(category, count);
 
-        Set<String> members = redisTemplate.opsForZSet()
+        Set<String> members = basicRedisTemplate.opsForZSet()
                 .range(zsetKey, 0, count - 1);
 
         if (members == null || members.isEmpty()) {
