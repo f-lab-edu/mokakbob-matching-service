@@ -5,6 +5,7 @@ import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
+import com.mokakbob.matching.domain.CategoryQueueStore;
 import com.mokakbob.matching.domain.ParticipantGeoStore;
 import com.mokakbob.matching.exception.MatchingErrorCode;
 import com.mokakbob.matching.infrastructure.ParticipantRedisStore;
@@ -22,6 +23,7 @@ public class MatchingStartService {
     private final ParticipantGeoStore geoStore;
     private final MemberService memberService;
     private final MatchingService matchingService;
+    private final CategoryQueueStore categoryQueueStore;
 
     public void startMatching(double lat, double lng, MatchingCategory category, int participantCount, Long memberId) {
         validateExistParticipating(memberId);
@@ -36,6 +38,8 @@ public class MatchingStartService {
         );
 
         geoStore.addUserLocation(memberId, lng, lat);
+        participantStore.transitionToParticipating(memberId);
+        categoryQueueStore.addToQueue(category, participantCount, memberId);
     }
 
     private void deducePoint(Long memberId) {
