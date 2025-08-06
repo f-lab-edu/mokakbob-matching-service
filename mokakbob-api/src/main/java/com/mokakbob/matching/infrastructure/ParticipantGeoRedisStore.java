@@ -19,12 +19,13 @@ import org.springframework.stereotype.Component;
 public class ParticipantGeoRedisStore implements ParticipantGeoStore {
 
     private static final String GEO_KEY = "matching:geo";
+    private static final String MEMBER_KEY = "member:";
 
     private final RedisTemplate<String, String> basicRedisTemplate;
 
     @Override
-    public void addUserLocation(Long userId, double lng, double lat) {
-        String member = userKey(userId);
+    public void addUserLocation(Long memberId, double lng, double lat) {
+        String member = memberKey(memberId);
 
         basicRedisTemplate.opsForGeo()
                 .add(GEO_KEY, new Point(lng, lat), member);
@@ -49,17 +50,17 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     }
 
     @Override
-    public void removeUserLocation(Long userId) {
+    public void removeUserLocation(Long memberId) {
         basicRedisTemplate.opsForZSet()
-                .remove(GEO_KEY, userKey(userId));
+                .remove(GEO_KEY, memberKey(memberId));
     }
 
-    private String userKey(Long userId) {
-        return "user:" + userId;
+    private String memberKey(Long memberId) {
+        return MEMBER_KEY + memberId;
     }
 
     private Optional<Long> extractUserId(String value) {
-        if (value != null && value.startsWith("user:")) {
+        if (value != null && value.startsWith(MEMBER_KEY)) {
             try {
                 return Optional.of(Long.parseLong(value.substring(5)));
             } catch (NumberFormatException e) {

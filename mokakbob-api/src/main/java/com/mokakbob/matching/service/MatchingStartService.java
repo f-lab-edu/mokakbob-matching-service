@@ -5,6 +5,7 @@ import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
+import com.mokakbob.matching.domain.ParticipantGeoStore;
 import com.mokakbob.matching.exception.MatchingErrorCode;
 import com.mokakbob.matching.infrastructure.ParticipantRedisStore;
 import java.math.BigDecimal;
@@ -18,12 +19,14 @@ public class MatchingStartService {
     private static final int DEFAULT_DEDUCE_POINT = 2000;
 
     private final ParticipantRedisStore participantStore;
+    private final ParticipantGeoStore geoStore;
     private final MemberService memberService;
     private final MatchingService matchingService;
 
     public void startMatching(double lat, double lng, MatchingCategory category, int participantCount, Long memberId) {
         validateExistParticipating(memberId);
         deducePoint(memberId);
+
         matchingService.saveMatchingRequest(
                 memberId,
                 category,
@@ -31,6 +34,8 @@ public class MatchingStartService {
                 new BigDecimal(lat),
                 new BigDecimal(lng)
         );
+
+        geoStore.addUserLocation(memberId, lng, lat);
     }
 
     private void deducePoint(Long memberId) {
