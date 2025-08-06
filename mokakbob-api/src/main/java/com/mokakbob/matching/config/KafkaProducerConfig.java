@@ -1,7 +1,7 @@
 package com.mokakbob.matching.config;
 
 import com.mokakbob.matching.infrastructure.KafkaProducerLoggingListener;
-import com.nimbusds.jose.shaded.gson.JsonSerializer;
+
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package com.mokakbob.matching.config;
+package com.mokakbob.matching.constant;
 
 public class KafkaTopics {
 

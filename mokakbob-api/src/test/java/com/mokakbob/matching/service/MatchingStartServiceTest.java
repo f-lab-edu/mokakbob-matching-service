@@ -9,7 +9,7 @@ import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
-import com.mokakbob.matching.config.KafkaTopics;
+import com.mokakbob.matching.constant.KafkaTopics;
 import com.mokakbob.matching.domain.CategoryQueueStore;
 import com.mokakbob.matching.domain.ParticipantGeoStore;
 import com.mokakbob.matching.infrastructure.ParticipantRedisStore;
