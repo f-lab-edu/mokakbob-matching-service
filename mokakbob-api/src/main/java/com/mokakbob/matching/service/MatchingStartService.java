@@ -6,7 +6,7 @@ import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
 import com.mokakbob.matching.exception.MatchingErrorCode;
-import com.mokakbob.matching.infrastructure.MatchingParticipantStore;
+import com.mokakbob.matching.infrastructure.ParticipantRedisStore;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class MatchingStartService {
 
     private static final int DEFAULT_DEDUCE_POINT = 2000;
 
-    private final MatchingParticipantStore participantStore;
+    private final ParticipantRedisStore participantStore;
     private final MemberService memberService;
     private final MatchingService matchingService;
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class MatchingParticipantStore implements ParticipantStore {
+public class ParticipantRedisStore implements ParticipantStore {
 
     private static final String PARTICIPATE_KEY = "user:%d:matching:participate";
     private static final String FOUND_KEY = "user:%d:matching:found";
@@ -71,5 +71,4 @@ public class MatchingParticipantStore implements ParticipantStore {
     private String foundKey(Long memberId) {
         return FOUND_KEY.formatted(memberId);
     }
-
 }
