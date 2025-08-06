@@ -9,17 +9,20 @@ import jakarta.validation.constraints.NotBlank;
 
 public record MatchingStartRequest(
         @NotBlank
-        @DecimalMin("-90.0") @DecimalMax("90.0")
+        @DecimalMin("-90.0")
+        @DecimalMax("90.0")
         Double lat,
 
         @NotBlank
-        @DecimalMin("-180.0") @DecimalMax("180.0")
+        @DecimalMin("-180.0")
+        @DecimalMax("180.0")
         Double lng,
 
         @NotBlank
         MatchingCategory category,
 
-        @Min(1) @Max(4)
+        @Min(1)
+        @Max(4)
         int participantCount
 ) {
 }
