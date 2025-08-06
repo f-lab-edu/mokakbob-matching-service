@@ -20,7 +20,15 @@ public class MatchingController {
     public ResponseEntity<Void> startMatching(
             @RequestBody MatchingStartRequest request,
             @MemberId Long memberId
-            ) {
+    ) {
+        startService.participateMatching(
+                request.lat(),
+                request.lng(),
+                request.category(),
+                request.participantCount(),
+                memberId
+        );
+
         return ResponseEntity.ok()
                 .build();
     }
