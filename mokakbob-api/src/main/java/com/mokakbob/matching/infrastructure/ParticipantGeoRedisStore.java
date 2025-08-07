@@ -24,7 +24,7 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     private final RedisTemplate<String, String> basicRedisTemplate;
 
     @Override
-    public void addUserLocation(Long memberId, double lng, double lat) {
+    public void addMemberLocation(Long memberId, double lng, double lat) {
         String member = memberKey(memberId);
 
         basicRedisTemplate.opsForGeo()
@@ -32,7 +32,7 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     }
 
     @Override
-    public List<Long> findNearbyUsers(double lng, double lat, double radiusInMeters) {
+    public List<Long> findNearbyMembers(double lng, double lat, double radiusInMeters) {
         GeoResults<GeoLocation<String>> results = basicRedisTemplate.opsForGeo()
                 .radius(
                         GEO_KEY,
