@@ -13,12 +13,12 @@ public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
 
     private static final String EMAIL_KEY_PREFIX = "email:verify:";
 
-    private final RedisTemplate<String, String> authRedisTemplate;
+    private final RedisTemplate<String, String> basicRedisTemplate;
 
     @Override
     public void saveCode(String email, String code, Duration expiration) {
         String key = EMAIL_KEY_PREFIX + email;
-        authRedisTemplate.opsForValue()
+        basicRedisTemplate.opsForValue()
                 .set(key, code, expiration);
     }
 
@@ -26,14 +26,14 @@ public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
     public Optional<String> getCode(String email) {
         String key = EMAIL_KEY_PREFIX + email;
 
-        return Optional.ofNullable(authRedisTemplate.opsForValue()
+        return Optional.ofNullable(basicRedisTemplate.opsForValue()
                 .get(key));
     }
 
     @Override
     public void deleteCode(String email) {
         String key = EMAIL_KEY_PREFIX + email;
-        authRedisTemplate.delete(key);
+        basicRedisTemplate.delete(key);
     }
 
     @Override
@@ -41,6 +41,6 @@ public class RedisEmailVerifyCodeStore implements EmailVerifyCodeStore {
         String key = EMAIL_KEY_PREFIX + email;
 
         return Boolean.TRUE
-                .equals(authRedisTemplate.hasKey(key));
+                .equals(basicRedisTemplate.hasKey(key));
     }
 }

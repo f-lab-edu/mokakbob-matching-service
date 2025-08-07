@@ -1,6 +1,5 @@
 package com.mokakbob.auth.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokakbob.auth.handler.OAuth2SuccessLoginHandler;
 import com.mokakbob.auth.service.CustomOAuth2UserService;
 import com.mokakbob.common.path.permit.PermitPath;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,16 +35,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring()
-                .requestMatchers(
-                        "/favicon.ico",
-                        "/error"
-                );
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper mapper) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // 기본 보안 설정 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
@@ -63,7 +52,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 PermitPath.AUTH_BASE + WILD_CARD_PATH,          // 일반 회원가입
                                 PermitPath.EMAIL_BASE + WILD_CARD_PATH,        // 이메일 인증
-                                "/login/oauth2/**"          // Oauth 콜백 URI
+                                "/login/oauth2/**",                         // Oauth 콜백 URI
+                                "/favicon.ico",
+                                "/error"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

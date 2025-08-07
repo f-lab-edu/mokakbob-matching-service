@@ -2,8 +2,10 @@ package com.mokakbob.domain.matching.domain.vo;
 
 public enum MatchingRequestStatus {
 
-    WAITING,
-    MATCHED,
+    NONE,
+    PARTICIPATE,
+    FOUND,
+    REJECTED,
     CANCELED,
     EXPIRED
 }
