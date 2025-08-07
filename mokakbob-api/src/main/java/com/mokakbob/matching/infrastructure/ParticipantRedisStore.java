@@ -45,7 +45,7 @@ public class ParticipantRedisStore implements ParticipantStore {
     }
 
     @Override
-    public MatchingRequestStatus getStatue(Long memberId) {
+    public MatchingRequestStatus getStatus(Long memberId) {
         if (Boolean.TRUE.equals(basicRedisTemplate.hasKey(foundKey(memberId)))) {
             return MatchingRequestStatus.FOUND;
         }

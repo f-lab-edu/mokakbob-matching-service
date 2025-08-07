@@ -7,5 +7,5 @@ public interface ParticipantStore {
     void transitionToParticipating(Long memberId);
     void transitionToFound(Long memberId);
     void clearAll(Long memberId);
-    MatchingRequestStatus getStatue(Long memberId);
+    MatchingRequestStatus getStatus(Long memberId);
 }

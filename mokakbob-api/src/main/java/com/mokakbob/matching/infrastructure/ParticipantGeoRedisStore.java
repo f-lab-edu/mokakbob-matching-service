@@ -50,8 +50,8 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     }
 
     @Override
-    public void removeUserLocation(Long memberId) {
-        basicRedisTemplate.opsForZSet()
+    public void removeMemberLocation(Long memberId) {
+        basicRedisTemplate.opsForGeo()
                 .remove(GEO_KEY, memberKey(memberId));
     }
 
