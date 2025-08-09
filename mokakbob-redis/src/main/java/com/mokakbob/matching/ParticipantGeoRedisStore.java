@@ -1,6 +1,6 @@
-package com.mokakbob.matching.infrastructure;
+package com.mokakbob.matching;
 
-import com.mokakbob.matching.domain.ParticipantGeoStore;
+import com.mokakbob.cache.ParticipantGeoStore;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

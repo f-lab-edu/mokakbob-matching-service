@@ -6,7 +6,7 @@ import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
 import com.mokakbob.matching.exception.MatchingErrorCode;
-import com.mokakbob.matching.infrastructure.ParticipantRedisStore;
+import com.mokakbob.matching.ParticipantRedisStore;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;

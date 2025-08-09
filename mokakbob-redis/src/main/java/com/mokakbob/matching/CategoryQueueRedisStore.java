@@ -1,7 +1,7 @@
-package com.mokakbob.matching.infrastructure;
+package com.mokakbob.matching;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
-import com.mokakbob.matching.domain.CategoryQueueStore;
+import com.mokakbob.cache.CategoryQueueStore;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

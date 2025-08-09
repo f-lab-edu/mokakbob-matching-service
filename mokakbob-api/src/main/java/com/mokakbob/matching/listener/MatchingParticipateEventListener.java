@@ -1,9 +1,9 @@
 package com.mokakbob.matching.listener;
 
 import com.mokakbob.matching.constant.KafkaTopics;
-import com.mokakbob.matching.domain.CategoryQueueStore;
-import com.mokakbob.matching.domain.ParticipantGeoStore;
-import com.mokakbob.matching.domain.ParticipantStore;
+import com.mokakbob.cache.CategoryQueueStore;
+import com.mokakbob.cache.ParticipantGeoStore;
+import com.mokakbob.cache.ParticipantStore;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;

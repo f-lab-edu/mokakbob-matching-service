@@ -1,4 +1,4 @@
-package com.mokakbob.matching.domain;
+package com.mokakbob.cache;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import java.util.List;
