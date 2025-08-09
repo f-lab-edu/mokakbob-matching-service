@@ -1,7 +1,5 @@
-package com.mokakbob.domain.matching.domain;
+package com.mokakbob.domain.outbox.domain;
 
-
-import com.mokakbob.common.domain.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,14 +16,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class MatchingRequestOutbox extends BaseEntity {
+public class Outbox {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String aggregateId;
+    private Long aggregateId;
 
     @Column(nullable = false)
     private String eventType;
