@@ -1,4 +1,4 @@
-package com.mokakbob.matching.domain;
+package com.mokakbob.cache;
 
 import java.util.List;
 

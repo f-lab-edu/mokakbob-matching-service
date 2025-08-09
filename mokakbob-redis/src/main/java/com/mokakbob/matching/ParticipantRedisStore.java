@@ -1,7 +1,7 @@
-package com.mokakbob.matching.infrastructure;
+package com.mokakbob.matching;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingRequestStatus;
-import com.mokakbob.matching.domain.ParticipantStore;
+import com.mokakbob.cache.ParticipantStore;
 import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
