@@ -3,7 +3,7 @@ package com.mokakbob.matching.exception;
 import com.mokakbob.common.exception.exceptions.ApiErrorCode;
 
 public enum MatchingErrorCode implements ApiErrorCode {
-    EXIST_MATCHING(400, "M001", "이미 매칭에 참여 중입니다.")
+    EXIST_MATCHING(400, "M001", "이미 매칭에 참여 중입니다."),
     ;
     private final int httpStatus;
     private final String customCode;
