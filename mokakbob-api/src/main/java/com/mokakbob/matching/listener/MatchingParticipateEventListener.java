@@ -33,8 +33,8 @@ public class MatchingParticipateEventListener {
 
     private void sendKafkaTopic(MatchingParticipateEvent event) {
         try {
-            String key = String.valueOf(event.memberId());
-            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE.getTopicName(), key, event);
+            String idempotencyKey = generateIdempotencyKey(String.valueOf(event.memberId()));
+            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE.getTopicName(), idempotencyKey, event);
         } catch (Exception e) {
             log.error("카프카 토픽 발급 실패: {}\n실패한 이벤트: {}\n재처리 필요 정보 - memberId: {}, key: {}, lat: {}, lng: {}, category: {}, participantCount: {}",
                     e.getMessage(),
@@ -46,5 +46,10 @@ public class MatchingParticipateEventListener {
                     event.category(),
                     event.participantCount());
         }
+    }
+
+    private String generateIdempotencyKey(String memberId) {
+        long timestamp = System.currentTimeMillis();
+        return memberId + "-" + timestamp;
     }
 }
