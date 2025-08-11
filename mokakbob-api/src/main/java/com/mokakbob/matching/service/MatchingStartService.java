@@ -34,10 +34,11 @@ public class MatchingStartService {
         matchingService.saveMatchingRequest(memberId, category, participantCount, new BigDecimal(lat),
                 new BigDecimal(lng));
 
-        eventPublisher.publishEvent(
-                new MatchingParticipateEvent(memberId, lat, lng, category, participantCount)
-        );
+        MatchingParticipateEvent event = new MatchingParticipateEvent(memberId, lat, lng, category, participantCount);
+
+        eventPublisher.publishEvent(event);
     }
+
 
     private void deducePoint(Long memberId) {
         Member member = memberService.findMember(memberId);

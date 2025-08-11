@@ -5,11 +5,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.mokakbob.topic.KafkaTopic;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
-import com.mokakbob.matching.constant.KafkaTopics;
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.matching.ParticipantRedisStore;
@@ -71,6 +71,6 @@ class MatchingStartServiceTest {
         verify(geoStore).addMemberLocation(memberId, lng, lat);
         verify(participantStore).transitionToParticipating(memberId);
         verify(categoryQueueStore).addToQueue(category, participantCount, memberId);
-        verify(kafkaTemplate).send(eq(KafkaTopics.MATCHING_PARTICIPATE), any(MatchingParticipateEvent.class));
+        verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE.getTopicName()), any(MatchingParticipateEvent.class));
     }
 }
