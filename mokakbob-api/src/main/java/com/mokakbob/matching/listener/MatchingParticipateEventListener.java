@@ -3,7 +3,7 @@ package com.mokakbob.matching.listener;
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
-import com.mokakbob.matching.constant.KafkaTopics;
+import com.mokakbob.domain.log.domain.vo.KafkaTopic;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class MatchingParticipateEventListener {
     private void sendKafkaTopic(MatchingParticipateEvent event) {
         try {
             String key = String.valueOf(event.memberId());
-            kafkaTemplate.send(KafkaTopics.MATCHING_PARTICIPATE, key, event);
+            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE.getTopicName(), key, event);
         } catch (Exception e) {
             log.error("카프카 토픽 발급 실패: {}", e.getMessage());
             log.error("실패한 이벤트: {}", event);
