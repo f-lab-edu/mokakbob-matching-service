@@ -33,7 +33,8 @@ public class MatchingParticipateEventListener {
 
     private void sendKafkaTopic(MatchingParticipateEvent event) {
         try {
-            kafkaTemplate.send(KafkaTopics.MATCHING_PARTICIPATE, event);
+            String key = String.valueOf(event.memberId());
+            kafkaTemplate.send(KafkaTopics.MATCHING_PARTICIPATE, key, event);
         } catch (Exception e) {
             log.error("카프카 토픽 발급 실패: {}", e.getMessage());
             log.error("실패한 이벤트: {}", event);
