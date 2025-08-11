@@ -3,7 +3,7 @@ package com.mokakbob.matching.listener;
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
-import com.mokakbob.domain.log.domain.vo.KafkaTopic;
+import com.mokakbob.topic.KafkaTopic;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class MatchingParticipateEventListener {
     private final ParticipantStore participantStore;
     private final ParticipantGeoStore geoStore;
     private final CategoryQueueStore categoryQueueStore;
-    private final KafkaTemplate<String, MatchingParticipateEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMatchingParticipateEvent(MatchingParticipateEvent event) {

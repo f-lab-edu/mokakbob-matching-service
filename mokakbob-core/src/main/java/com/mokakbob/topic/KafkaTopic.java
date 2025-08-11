@@ -1,4 +1,4 @@
-package com.mokakbob.domain.log.domain.vo;
+package com.mokakbob.topic;
 
 import lombok.Getter;
 
