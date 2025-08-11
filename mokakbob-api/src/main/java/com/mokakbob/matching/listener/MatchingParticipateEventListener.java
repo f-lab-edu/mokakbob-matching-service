@@ -39,8 +39,8 @@ public class MatchingParticipateEventListener {
             log.error("카프카 토픽 발급 실패: {}", e.getMessage());
             log.error("실패한 이벤트: {}", event);
 
-            log.error("재처리 필요 정보 - memberId: {}, lat: {}, lng: {}, category: {}, participantCount: {}",
-                    event.memberId(), event.lat(), event.lng(), event.category(), event.participantCount());
+            log.error("재처리 필요 정보 - memberId: {}, key: {}, lat: {}, lng: {}, category: {}, participantCount: {}",
+                    event.memberId(), event.memberId(), event.lat(), event.lng(), event.category(), event.participantCount());
         }
     }
 }
