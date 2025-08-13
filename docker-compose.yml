@@ -1,14 +1,24 @@
-version: '3.8'
-
 services:
-  redis:
+  redis-master:
     image: redis:7.2
-    container_name: redis
+    container_name: redis-master
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - redis-master-data:/data
     restart: always
+
+  redis-slave:
+    image: redis:7.2
+    container_name: redis-slave
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-slave-data:/data
+    restart: always
+    depends_on:
+      - redis-master
+    command: ["redis-server", "--replicaof", "redis-master", "6379"]
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -22,6 +32,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
     ports:
       - "9092:9092"
     environment:
@@ -36,4 +47,6 @@ services:
     restart: always
 
 volumes:
+  redis-master-data:
+  redis-slave-data:
   redis-data:
