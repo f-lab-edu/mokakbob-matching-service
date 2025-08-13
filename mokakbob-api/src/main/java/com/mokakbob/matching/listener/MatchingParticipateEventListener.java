@@ -28,7 +28,10 @@ public class MatchingParticipateEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMatchingParticipateEvent(MatchingParticipateEvent event) {
         sendKafkaTopic(event);
-        saveMatchingParticipateEvent(event);
+
+        saveParticipantInfo(event);
+        saveGeo(event);
+        saveQueue(event);
     }
 
     @Retryable(
@@ -36,9 +39,25 @@ public class MatchingParticipateEventListener {
             maxAttempts = 5,
             backoff = @Backoff(delay = 2000)
     )
-    private void saveMatchingParticipateEvent(MatchingParticipateEvent event) {
+    private void saveParticipantInfo(MatchingParticipateEvent event) {
         participantStore.transitionToParticipating(event.memberId());
+    }
+
+    @Retryable(
+            retryFor = RedisConnectionFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 2000)
+    )
+    private void saveGeo(MatchingParticipateEvent event) {
         geoStore.addMemberLocation(event.memberId(), event.lng(), event.lat());
+    }
+
+    @Retryable(
+            retryFor = RedisConnectionFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 2000)
+    )
+    private void saveQueue(MatchingParticipateEvent event) {
         categoryQueueStore.addToQueue(event.category(), event.participantCount(), event.memberId());
     }
 
