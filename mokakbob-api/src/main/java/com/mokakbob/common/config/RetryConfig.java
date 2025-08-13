@@ -1,4 +1,4 @@
-package com.mokakbob.auth.config;
+package com.mokakbob.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;

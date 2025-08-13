@@ -7,7 +7,10 @@ import com.mokakbob.topic.KafkaTopic;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -25,7 +28,15 @@ public class MatchingParticipateEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMatchingParticipateEvent(MatchingParticipateEvent event) {
         sendKafkaTopic(event);
+        saveMatchingParticipateEvent(event);
+    }
 
+    @Retryable(
+            retryFor = RedisConnectionFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 2000)
+    )
+    private void saveMatchingParticipateEvent(MatchingParticipateEvent event) {
         participantStore.transitionToParticipating(event.memberId());
         geoStore.addMemberLocation(event.memberId(), event.lng(), event.lat());
         categoryQueueStore.addToQueue(event.category(), event.participantCount(), event.memberId());
