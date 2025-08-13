@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 PermitPath.AUTH_BASE + WILD_CARD_PATH,          // 일반 회원가입
                                 PermitPath.EMAIL_BASE + WILD_CARD_PATH,        // 이메일 인증
+                                PermitPath.ADMIN_BASE + WILD_CARD_PATH,        // admin
                                 "/login/oauth2/**",                         // Oauth 콜백 URI
                                 "/favicon.ico",
                                 "/error"
