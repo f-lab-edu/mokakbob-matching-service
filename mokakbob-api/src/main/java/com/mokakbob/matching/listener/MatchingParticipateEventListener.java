@@ -3,14 +3,12 @@ package com.mokakbob.matching.listener;
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
+import com.mokakbob.matching.annotation.RedisRetryable;
 import com.mokakbob.topic.KafkaTopic;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -34,29 +32,17 @@ public class MatchingParticipateEventListener {
         saveQueue(event);
     }
 
-    @Retryable(
-            retryFor = RedisConnectionFailureException.class,
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 2000)
-    )
+    @RedisRetryable
     private void saveParticipantInfo(MatchingParticipateEvent event) {
         participantStore.transitionToParticipating(event.memberId());
     }
 
-    @Retryable(
-            retryFor = RedisConnectionFailureException.class,
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 2000)
-    )
+    @RedisRetryable
     private void saveGeo(MatchingParticipateEvent event) {
         geoStore.addMemberLocation(event.memberId(), event.lng(), event.lat());
     }
 
-    @Retryable(
-            retryFor = RedisConnectionFailureException.class,
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 2000)
-    )
+    @RedisRetryable
     private void saveQueue(MatchingParticipateEvent event) {
         categoryQueueStore.addToQueue(event.category(), event.participantCount(), event.memberId());
     }
