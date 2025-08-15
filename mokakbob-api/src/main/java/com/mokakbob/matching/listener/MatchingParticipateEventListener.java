@@ -1,9 +1,6 @@
 package com.mokakbob.matching.listener;
 
-import com.mokakbob.cache.CategoryQueueStore;
-import com.mokakbob.cache.ParticipantGeoStore;
-import com.mokakbob.cache.ParticipantStore;
-import com.mokakbob.matching.annotation.RedisRetryable;
+import com.mokakbob.matching.service.MatchingWriterService;
 import com.mokakbob.topic.KafkaTopic;
 import com.mokakbob.matching.service.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
@@ -18,33 +15,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class MatchingParticipateEventListener {
 
-    private final ParticipantStore participantStore;
-    private final ParticipantGeoStore geoStore;
-    private final CategoryQueueStore categoryQueueStore;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final MatchingWriterService matchingWriterService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMatchingParticipateEvent(MatchingParticipateEvent event) {
         sendKafkaTopic(event);
 
-        saveParticipantInfo(event);
-        saveGeo(event);
-        saveQueue(event);
-    }
-
-    @RedisRetryable
-    private void saveParticipantInfo(MatchingParticipateEvent event) {
-        participantStore.transitionToParticipating(event.memberId());
-    }
-
-    @RedisRetryable
-    private void saveGeo(MatchingParticipateEvent event) {
-        geoStore.addMemberLocation(event.memberId(), event.lng(), event.lat());
-    }
-
-    @RedisRetryable
-    private void saveQueue(MatchingParticipateEvent event) {
-        categoryQueueStore.addToQueue(event.category(), event.participantCount(), event.memberId());
+        matchingWriterService.saveParticipantInfo(event);
+        matchingWriterService.saveGeo(event);
+        matchingWriterService.saveQueue(event);
     }
 
     private void sendKafkaTopic(MatchingParticipateEvent event) {
