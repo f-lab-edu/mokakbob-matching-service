@@ -1,14 +1,76 @@
-version: '3.8'
-
 services:
-  redis:
+  redis-master:
     image: redis:7.2
-    container_name: redis
-    ports:
-      - "6379:6379"
+    container_name: redis-master
+    ports: [ "6379:6379" ]
     volumes:
-      - redis-data:/data
+      - redis-master-data:/data
     restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 2s
+      timeout: 1s
+      retries: 20
+
+  redis-slave:
+    image: redis:7.2
+    container_name: redis-slave
+    ports: [ "6380:6379" ]
+    volumes:
+      - redis-slave-data:/data
+    restart: always
+    depends_on:
+      redis-master:
+        condition: service_healthy
+    command: [ "redis-server", "--replicaof", "redis-master", "6379" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-p", "6379", "ping" ]
+      interval: 2s
+      timeout: 1s
+      retries: 20
+
+  sentinel-1:
+    image: redis:7.2
+    container_name: sentinel-1
+    ports: [ "26379:26379" ]
+    volumes:
+      - ./sentinel/sentinel-1.conf:/etc/redis/sentinel-1.conf
+    command: [ "redis-sentinel", "/etc/redis/sentinel-1.conf" ]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-slave:
+        condition: service_started
+    restart: always
+
+  sentinel-2:
+    image: redis:7.2
+    container_name: sentinel-2
+    ports: [ "26380:26379" ]
+    volumes:
+      - ./sentinel/sentinel-2.conf:/etc/redis/sentinel-2.conf
+    command: [ "redis-sentinel", "/etc/redis/sentinel-2.conf" ]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-slave:
+        condition: service_started
+    restart: always
+
+  sentinel-3:
+    image: redis:7.2
+    container_name: sentinel-3
+    ports: [ "26381:26379" ]
+    volumes:
+      - ./sentinel/sentinel-3.conf:/etc/redis/sentinel-3.conf
+    command: [ "redis-sentinel", "/etc/redis/sentinel-3.conf" ]
+    depends_on:
+      redis-master:
+        condition: service_healthy
+      redis-slave:
+        condition: service_started
+    restart: always
+
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -22,6 +84,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
     ports:
       - "9092:9092"
     environment:
@@ -36,4 +99,5 @@ services:
     restart: always
 
 volumes:
-  redis-data:
+  redis-master-data:
+  redis-slave-data:
