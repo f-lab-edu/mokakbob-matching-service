@@ -21,7 +21,7 @@ public class MatchingController {
             @RequestBody MatchingStartRequest request,
             @MemberId Long memberId
     ) {
-        startService.participateMatching(
+        startService.participateMatchingWithLock(
                 request.lat(),
                 request.lng(),
                 request.category(),
