@@ -69,6 +69,11 @@ public class MatchingStartService {
 
     private void deducePoint(Long memberId) {
         Member member = memberService.findMember(memberId);
+
+        if(member.getDepositPoint() < DEFAULT_DEDUCE_POINT) {
+            throw new ApiException(MatchingErrorCode.NOT_ENOUGH_MATCHING_POINT);
+        }
+
         member.deductPoint(DEFAULT_DEDUCE_POINT);
     }
 
