@@ -41,7 +41,7 @@ public class MatchingTransactionService {
 
 
     private void deducePoint(Long memberId) {
-        Member member = memberService.findMember(memberId);
+        Member member = memberService.findMemberForUpdate(memberId);
 
         if(member.getDepositPoint() < DEFAULT_DEDUCE_POINT) {
             throw new ApiException(MatchingErrorCode.NOT_ENOUGH_MATCHING_POINT);
