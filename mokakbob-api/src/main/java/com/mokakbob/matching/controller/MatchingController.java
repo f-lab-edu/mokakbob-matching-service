@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MatchingController {
 
-    private final MatchingStartService startService;
+    private final MatchingStartService matchingStartService;
 
     @PostMapping(MatchingPath.PARTICIPATE)
     public ResponseEntity<Void> startMatching(
             @RequestBody MatchingStartRequest request,
             @MemberId Long memberId
     ) {
-        startService.participateMatchingWithLock(
+        matchingStartService.participateMatchingWithLock(
                 request.lat(),
                 request.lng(),
                 request.category(),
