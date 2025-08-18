@@ -1,0 +1,6 @@
+sentinelServersConfig:
+  masterName: "mymaster"
+  sentinelAddresses:
+    - "redis://127.0.0.1:26379"
+    - "redis://127.0.0.1:26380"
+    - "redis://127.0.0.1:26381"
