@@ -1,27 +1,23 @@
 package com.mokakbob.config;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
-    @Value("${spring.redis.sentinel.master}")
-    private String master;
-
-    @Value("${spring.redis.sentinel.nodes}")
-    private List<String> sentinelNodes;
+    private final RedisSentinelProps props;
 
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         RedisSentinelConfiguration sentinelConfig = new RedisSentinelConfiguration()
-                .master(master);
+                .master(props.getMaster());
 
-        for (String node : sentinelNodes) {
+        for (String node : props.getNodes()) {
             String[] parts = node.split(":");
             sentinelConfig.sentinel(parts[0], Integer.parseInt(parts[1]));
         }
