@@ -54,6 +54,12 @@ public class MemberService {
                 .orElseThrow(()-> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
 
+    @Transactional
+    public Member findMemberForUpdate(Long memberId) {
+        return memberRepository.findByIdForUpdate(memberId)
+                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
+    }
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new DomainException(MemberErrorCode.DUPLICATE_EMAIL);

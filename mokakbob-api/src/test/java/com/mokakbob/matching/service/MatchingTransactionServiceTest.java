@@ -23,10 +23,10 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("NonAsciiCharacters")
-class MatchingStartServiceTest {
+class MatchingTransactionServiceTest {
 
     @InjectMocks
-    private MatchingStartService matchingStartService;
+    private MatchingTransactionService matchingTransactionService;
 
     @Mock
     private ParticipantRedisStore participantStore;
@@ -62,7 +62,7 @@ class MatchingStartServiceTest {
         given(memberService.findMember(memberId)).willReturn(fakeMember);
 
         // when
-        matchingStartService.participateMatching(lat, lng, category, participantCount, memberId);
+        matchingTransactionService.participateMatching(lat, lng, category, participantCount, memberId);
 
         // then
         verify(participantStore).isAlreadyParticipating(memberId);
