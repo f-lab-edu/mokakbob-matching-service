@@ -1,7 +1,7 @@
 package com.mokakbob.admin.service;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
-import com.mokakbob.matching.service.event.MatchingParticipateEvent;
+import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import com.mokakbob.topic.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

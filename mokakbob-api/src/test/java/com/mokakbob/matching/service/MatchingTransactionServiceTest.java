@@ -13,7 +13,7 @@ import com.mokakbob.domain.member.service.MemberService;
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.matching.ParticipantRedisStore;
-import com.mokakbob.matching.service.event.MatchingParticipateEvent;
+import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

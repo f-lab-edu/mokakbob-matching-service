@@ -4,7 +4,7 @@ import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
 import com.mokakbob.matching.annotation.RedisRetryable;
-import com.mokakbob.matching.service.event.MatchingParticipateEvent;
+import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
