@@ -44,6 +44,15 @@ public class MatchingParticipateService {
                 location[0],
                 RADIUS_METERS
         );
+
+        // 기준이 되는 오래된 사용자 자신을 제외한 인원 수 검증
+        List<Long> candidates = nearby.stream()
+                .filter(id -> !id.equals(memberDelimiter))
+                .toList();
+
+        if (candidates.size() < participantCount - 1) {
+            return;
+        }
     }
 
     private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
