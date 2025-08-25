@@ -21,7 +21,7 @@ public class KafkaListenerContainerConfig {
 
         var factory = new ConcurrentKafkaListenerContainerFactory<String, MatchingParticipateEvent>();
         factory.setConsumerFactory(matchingParticipateConsumerFactory);
-        factory.setConcurrency(3);
+        factory.setConcurrency(1);
         factory.getContainerProperties().setAckMode(
                 org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL_IMMEDIATE
         );
