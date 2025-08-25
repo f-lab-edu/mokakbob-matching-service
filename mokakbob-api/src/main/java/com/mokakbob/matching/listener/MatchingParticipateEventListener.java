@@ -31,7 +31,7 @@ public class MatchingParticipateEventListener {
         String idempotencyKey = generateIdempotencyKey(String.valueOf(event.memberId()));
 
         try {
-            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE.getTopicName(), idempotencyKey, event);
+            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE, idempotencyKey, event);
         } catch (Exception e) {
             log.error("카프카 토픽 발급 실패: {}\n실패한 이벤트: {}\n재처리 필요 정보 - memberId: {}, key: {}, lat: {}, lng: {}, category: {}, participantCount: {}",
                     e.getMessage(),

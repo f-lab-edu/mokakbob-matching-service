@@ -21,7 +21,7 @@ public class AdminKafkaService {
         );
 
         try {
-            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE.getTopicName(), key, event);
+            kafkaTemplate.send(KafkaTopic.MATCHING_PARTICIPATE, key, event);
         } catch (Exception e) {
             log.error("카프카 토픽 재발급 실패: {}\n실패한 이벤트: {}\n재처리 필요 정보 - memberId: {}, key: {}, lat: {}, lng: {}, category: {}, participantCount: {}",
                     e.getMessage(),

@@ -1,19 +1,12 @@
 package com.mokakbob.topic;
 
-import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-@Getter
-public enum KafkaTopic {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class KafkaTopic {
 
-    // 매칭 참여 토픽
-    MATCHING_PARTICIPATE("matching.participate"),
-    MATCHING_FOUND("matching.found"),
-    MATCHING_SUCCESS("matching.success")
-    ;
-
-    private final String topicName;
-
-    KafkaTopic(String topicName) {
-        this.topicName = topicName;
-    }
+    public static final String MATCHING_PARTICIPATE = "matching.participate";
+    public static final String MATCHING_FOUND       = "matching.found";
+    public static final String MATCHING_SUCCESS     = "matching.success";
 }

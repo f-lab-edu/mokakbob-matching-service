@@ -71,6 +71,6 @@ class MatchingTransactionServiceTest {
         verify(geoStore).addMemberLocation(memberId, lng, lat);
         verify(participantStore).transitionToParticipating(memberId);
         verify(categoryQueueStore).addToQueue(category, participantCount, memberId);
-        verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE.getTopicName()), any(MatchingParticipateEvent.class));
+        verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE), any(MatchingParticipateEvent.class));
     }
 }
