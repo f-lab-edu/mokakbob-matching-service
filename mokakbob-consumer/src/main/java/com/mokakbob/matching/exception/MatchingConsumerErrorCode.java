@@ -4,7 +4,7 @@ import com.mokakbob.matching.common.exception.exceptions.ConsumerErrorCode;
 
 public enum MatchingConsumerErrorCode implements ConsumerErrorCode {
 
-    ALREADY_PARTICIPATE_MATCHING(400, "C001", "이미 매칭 참여중입니다.")
+    NOT_FOUND_LOCATION(401, "C001", "매칭하려는 사용자의 위치 정보를 가져올 수 없습니다.")
     ;
     private final int httpStatus;
     private final String customCode;
