@@ -2,10 +2,13 @@ package com.mokakbob.matching;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.cache.CategoryQueueStore;
+import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +18,7 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
 
     private static final String ZSET_CATEGORY_KEY = "matching:zset:%s:%d";
     private static final String MEMBER_KEY = "member:";
+    private static final String RESERVE_KEY = "matching:reserve:%s";
 
     private final RedisTemplate<String, String> basicRedisTemplate;
 
@@ -61,11 +65,61 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
         return extractMemberId(value);
     }
 
+    @Override
+    public List<Long> reserveOldestMember(MatchingCategory category, int count, String reserveId, Duration ttl) {
+        String key = zsetKey(category, count);
+
+        // 가장 오래된 사용자 하나 뽑기
+        Set<ZSetOperations.TypedTuple<String>> popped = basicRedisTemplate.opsForZSet()
+                .popMin(key, 1);
+        if (popped == null || popped.isEmpty()) {
+            return List.of();
+        }
+
+        String value = popped.iterator().next()
+                .getValue();
+        Long memberId = extractMemberId(value)
+                .orElse(null);
+        if (memberId == null) {
+            return List.of();
+        }
+
+        // TTL
+        String reserveKey = RESERVE_KEY.formatted(reserveId);
+        basicRedisTemplate.opsForList()
+                .rightPush(reserveKey, memberKey(memberId));
+        basicRedisTemplate.expire(reserveKey, ttl);
+
+        return List.of(memberId);
+    }
+
+    @Override
+    public void commitReservation(String reserveId, MatchingCategory category, int count) {
+        basicRedisTemplate.delete(RESERVE_KEY.formatted(reserveId));
+    }
+
+    @Override
+    public void rollbackReservation(String reserveId, MatchingCategory category, int count) {
+        String reserveKey = RESERVE_KEY.formatted(reserveId);
+        List<String> reserved = basicRedisTemplate.opsForList()
+                .range(reserveKey, 0, -1);
+
+        if (reserved != null) {
+            reserved.forEach(v -> basicRedisTemplate.opsForZSet()
+                    .add(
+                            zsetKey(category, count), v, System.currentTimeMillis()
+                    ));
+        }
+
+        basicRedisTemplate.delete(reserveKey);
+    }
+
     private Optional<Long> extractMemberId(String value) {
         if (value != null && value.startsWith(MEMBER_KEY)) {
             try {
                 return Optional.of(Long.parseLong(value.substring(MEMBER_KEY.length())));
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
         return Optional.empty();
     }

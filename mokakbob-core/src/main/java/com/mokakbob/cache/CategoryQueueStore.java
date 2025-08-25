@@ -1,6 +1,8 @@
 package com.mokakbob.cache;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
+import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 public interface CategoryQueueStore {
@@ -8,4 +10,7 @@ public interface CategoryQueueStore {
     void removeFromQueue(MatchingCategory category, int count, Long memberId);
     boolean hasEnoughForMatching(MatchingCategory category, int participantCount);
     Optional<Long> popOldestMember(MatchingCategory category, int count);
+    List<Long> reserveOldestMember(MatchingCategory category, int count, String reserveId, Duration ttl);
+    void commitReservation(String reserveId, MatchingCategory category, int count);
+    void rollbackReservation(String reserveId, MatchingCategory category, int count);
 }
