@@ -2,10 +2,12 @@ package com.mokakbob.matching.service;
 
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
+import com.mokakbob.cache.ParticipantStore;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +17,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MatchingParticipateService {
 
+    private static final double RADIUS_METERS = 1500.0;
+
     private final CategoryQueueStore queueStore;
     private final ParticipantGeoStore geoStore;
-    private static final double RADIUS_METERS = 1500.0;
+    private final ParticipantStore participantStore;
 
     public void participateMatching(MatchingParticipateEvent event) {
         MatchingCategory category = event.category();
@@ -53,6 +57,14 @@ public class MatchingParticipateService {
         if (candidates.size() < participantCount - 1) {
             return;
         }
+
+        // 매칭 성공 시 자신(오래된 사용자)을 포함한 인원 가져오기
+        List<Long> matched = new ArrayList<>();
+        matched.add(memberDelimiter);
+        matched.addAll(candidates.subList(0, participantCount - 1));
+
+        // 상태 전환
+        matched.forEach(participantStore::transitionToFound);
     }
 
     private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
