@@ -4,9 +4,11 @@ import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
+import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class MatchingParticipateService {
 
     private static final double RADIUS_METERS = 1500.0;
+    private static final int MATCHING_ACCEPT_EXPIRE_TIME = 180;
 
     private final CategoryQueueStore queueStore;
     private final ParticipantGeoStore geoStore;
@@ -65,6 +68,24 @@ public class MatchingParticipateService {
 
         // 상태 전환
         matched.forEach(participantStore::transitionToFound);
+
+        // 대기열 상태 삭제
+        deleteMemberInfo(matched, category, participantCount);
+
+        // 매칭 found 이벤트 발행
+        MatchingFoundEvent foundEvent = new MatchingFoundEvent(
+                category,
+                participantCount,
+                matched,
+                Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME)
+        );
+    }
+
+    private void deleteMemberInfo(List<Long> matched, MatchingCategory category, int participantCount) {
+        matched.forEach(id -> {
+            queueStore.removeFromQueue(category, participantCount, id);
+            geoStore.removeMemberLocation(category, participantCount, id);
+        });
     }
 
     private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
