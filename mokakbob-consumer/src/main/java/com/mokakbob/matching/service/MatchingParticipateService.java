@@ -8,10 +8,11 @@ import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,63 +30,87 @@ public class MatchingParticipateService {
     public void participateMatching(MatchingParticipateEvent event) {
         MatchingCategory category = event.category();
         int participantCount = event.participantCount();
+        String reserveId = UUID.randomUUID()
+                .toString();
 
         if(!queueStore.hasEnoughForMatching(category, participantCount)) {
             return;
         }
 
-        // [카테고리 / 인원] 기준 가장 오래된 사용자 뽑기
-        Optional<Long> oldestMember = queueStore.popOldestMember(category, participantCount);
-        if(oldestMember.isEmpty()) {
-            return;
+        try {
+            List<Long> reservedMember = reserveMember(event, reserveId);
+            if (reservedMember.isEmpty()) {
+                return;
+            }
+
+            Long delimiterMemberId = reservedMember.get(0);
+            double[] location = findMemberDelimiterPlace(category, participantCount, delimiterMemberId);
+            List<Long> candidates = findCandidates(event, delimiterMemberId, location);
+
+            if (!(candidates.size() >= participantCount - 1)) {
+                rollback(reserveId, event);
+                return;
+            }
+
+            List<Long> matched = buildMatchedGroup(delimiterMemberId, candidates, event.participantCount());
+            matched.forEach(participantStore::transitionToFound);
+            commitReservation(reserveId, matched, event);
+
+            MatchingFoundEvent matchingFoundEvent = new MatchingFoundEvent(
+                    UUID.randomUUID().toString(),
+                    category,
+                    participantCount,
+                    matched,
+                    Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME)
+            );
+
+        } catch (Exception e) {
+            rollback(reserveId, event);
+            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_PARTICIPATE_CONSUMER_EXCEPTION);
         }
-        Long memberDelimiter = oldestMember.get();
+    }
 
+    private List<Long> buildMatchedGroup(Long pivotId, List<Long> candidates, int participantCount) {
+        List<Long> matched = new ArrayList<>();
+        matched.add(pivotId);
+        matched.addAll(candidates.subList(0, participantCount - 1));
+        return matched;
+    }
 
-        // 오래된 사용자 위치 조회 및 해당 정보로 근처 사용자 가져오기
-        double[] location = findMemberDelimiterPlace(category, participantCount, memberDelimiter);
+    private void rollback(String reserveId, MatchingParticipateEvent event) {
+        queueStore.rollbackReservation(reserveId, event.category(), event.participantCount());
+    }
+
+    private void commitReservation(String reserveId, List<Long> matched, MatchingParticipateEvent event) {
+        matched.forEach(id -> {
+            queueStore.removeFromQueue(event.category(), event.participantCount(), id);
+            geoStore.removeMemberLocation(event.category(), event.participantCount(), id);
+        });
+
+        queueStore.commitReservation(reserveId, event.category(), event.participantCount());
+    }
+
+    private List<Long> findCandidates(MatchingParticipateEvent event, Long memberId, double[] location) {
         List<Long> nearby = geoStore.findNearbyMembers(
-                category,
-                participantCount,
-                location[1],
-                location[0],
+                event.category(),
+                event.participantCount(),
+                location[1], // lng
+                location[0], // lat
                 RADIUS_METERS
         );
 
-        // 기준이 되는 오래된 사용자 자신을 제외한 인원 수 검증
-        List<Long> candidates = nearby.stream()
-                .filter(id -> !id.equals(memberDelimiter))
+        return nearby.stream()
+                .filter(id -> !id.equals(memberId))
                 .toList();
-
-        if (candidates.size() < participantCount - 1) {
-            return;
-        }
-
-        // 매칭 성공 시 자신(오래된 사용자)을 포함한 인원 가져오기
-        List<Long> matched = new ArrayList<>();
-        matched.add(memberDelimiter);
-        matched.addAll(candidates.subList(0, participantCount - 1));
-
-        // 상태 전환
-        matched.forEach(participantStore::transitionToFound);
-
-        // 대기열 상태 삭제
-        deleteMemberInfo(matched, category, participantCount);
-
-        // 매칭 found 이벤트 발행
-        MatchingFoundEvent foundEvent = new MatchingFoundEvent(
-                category,
-                participantCount,
-                matched,
-                Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME)
-        );
     }
 
-    private void deleteMemberInfo(List<Long> matched, MatchingCategory category, int participantCount) {
-        matched.forEach(id -> {
-            queueStore.removeFromQueue(category, participantCount, id);
-            geoStore.removeMemberLocation(category, participantCount, id);
-        });
+    private List<Long> reserveMember(MatchingParticipateEvent event, String reserveId) {
+        return queueStore.reserveOldestMember(
+                event.category(),
+                event.participantCount(),
+                reserveId,
+                Duration.ofSeconds(10)
+        );
     }
 
     private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
