@@ -68,7 +68,7 @@ class MatchingTransactionServiceTest {
         verify(participantStore).isAlreadyParticipating(memberId);
         verify(memberService).findMember(memberId);
         verify(matchingService).saveMatchingRequest(eq(memberId), eq(category), eq(participantCount), any(), any());
-        verify(geoStore).addMemberLocation(memberId, lng, lat);
+        verify(geoStore).addMemberLocation(category, participantCount, memberId, lng, lat);
         verify(participantStore).transitionToParticipating(memberId);
         verify(categoryQueueStore).addToQueue(category, participantCount, memberId);
         verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE), any(MatchingParticipateEvent.class));

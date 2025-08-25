@@ -1,6 +1,7 @@
 package com.mokakbob.matching;
 
 import com.mokakbob.cache.ParticipantGeoStore;
+import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -18,41 +19,61 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ParticipantGeoRedisStore implements ParticipantGeoStore {
 
-    private static final String GEO_KEY = "matching:geo";
+    private static final String GEO_KEY = "matching:geo:%s:%d";
     private static final String MEMBER_KEY = "member:";
 
     private final RedisTemplate<String, String> basicRedisTemplate;
 
     @Override
-    public void addMemberLocation(Long memberId, double lng, double lat) {
-        String member = memberKey(memberId);
-
+    public void addMemberLocation(MatchingCategory category, int count, Long memberId, double lng, double lat) {
         basicRedisTemplate.opsForGeo()
-                .add(GEO_KEY, new Point(lng, lat), member);
+                .add(
+                        geoKey(category, count),
+                        new Point(lng, lat),
+                        memberKey(memberId)
+                );
     }
 
     @Override
-    public List<Long> findNearbyMembers(double lng, double lat, double radiusInMeters) {
+    public List<Long> findNearbyMembers(MatchingCategory category, int count, double lng, double lat, double radiusInMeters) {
         GeoResults<GeoLocation<String>> results = basicRedisTemplate.opsForGeo()
                 .radius(
-                        GEO_KEY,
+                        geoKey(category, count),
                         new Circle(new Point(lng, lat), new Distance(radiusInMeters, Metrics.METERS))
                 );
 
-        if (results == null) {
+        if (results == null || results.getContent().isEmpty()) {
             return Collections.emptyList();
         }
 
         return results.getContent().stream()
-                .map(result -> extractUserId(result.getContent().getName()))
+                .map(r -> extractUserId(r.getContent().getName()))
                 .flatMap(Optional::stream)
                 .toList();
     }
 
     @Override
-    public void removeMemberLocation(Long memberId) {
+    public void removeMemberLocation(MatchingCategory category, int count, Long memberId) {
         basicRedisTemplate.opsForGeo()
-                .remove(GEO_KEY, memberKey(memberId));
+                .remove(geoKey(category, count), memberKey(memberId));
+    }
+
+    @Override
+    public Optional<double[]> getLocation(MatchingCategory category, int count, Long memberId) {
+        List<Point> points = basicRedisTemplate.opsForGeo()
+                .position(geoKey(category, count), memberKey(memberId));
+
+        if (points == null || points.isEmpty() || points.get(0) == null) {
+            return Optional.empty();
+        }
+
+        Point p = points.get(0);
+
+        return Optional.of(new double[]{p.getY(), p.getX()});
+    }
+
+    private String geoKey(MatchingCategory category, int count) {
+        return GEO_KEY.formatted(category.name(), count);
     }
 
     private String memberKey(Long memberId) {
@@ -62,7 +83,7 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     private Optional<Long> extractUserId(String value) {
         if (value != null && value.startsWith(MEMBER_KEY)) {
             try {
-                return Optional.of(Long.parseLong(value.substring(5)));
+                return Optional.of(Long.parseLong(value.substring(MEMBER_KEY.length())));
             } catch (NumberFormatException e) {
                 return Optional.empty();
             }
