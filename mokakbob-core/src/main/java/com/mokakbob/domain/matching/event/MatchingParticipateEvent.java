@@ -1,4 +1,4 @@
-package com.mokakbob.matching.service.event;
+package com.mokakbob.domain.matching.event;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 

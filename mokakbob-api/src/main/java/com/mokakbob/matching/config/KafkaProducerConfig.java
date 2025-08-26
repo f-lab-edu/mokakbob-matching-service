@@ -21,7 +21,7 @@ public class KafkaProducerConfig {
 
     private final KafkaProducerLoggingListener loggingListener;
 
-    @Value("${spring.kafka.bootstrap-servers}")
+    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
     private String bootstrapServers;
 
     @Bean

@@ -13,7 +13,7 @@ import com.mokakbob.domain.member.service.MemberService;
 import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.matching.ParticipantRedisStore;
-import com.mokakbob.matching.service.event.MatchingParticipateEvent;
+import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,6 +71,6 @@ class MatchingTransactionServiceTest {
         verify(geoStore).addMemberLocation(memberId, lng, lat);
         verify(participantStore).transitionToParticipating(memberId);
         verify(categoryQueueStore).addToQueue(category, participantCount, memberId);
-        verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE.getTopicName()), any(MatchingParticipateEvent.class));
+        verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE), any(MatchingParticipateEvent.class));
     }
 }

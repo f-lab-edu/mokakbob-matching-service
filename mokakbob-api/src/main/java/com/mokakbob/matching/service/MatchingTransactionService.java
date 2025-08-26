@@ -7,7 +7,7 @@ import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
 import com.mokakbob.matching.exception.MatchingErrorCode;
 import com.mokakbob.matching.ParticipantRedisStore;
-import com.mokakbob.matching.service.event.MatchingParticipateEvent;
+import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
