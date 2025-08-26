@@ -9,7 +9,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -48,30 +47,11 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
     }
 
     @Override
-    public Optional<Long> popOldestMember(MatchingCategory category, int count) {
-        String zsetKey = zsetKey(category, count);
-
-        Set<TypedTuple<String>> members =
-                basicRedisTemplate.opsForZSet().popMin(zsetKey, 1);
-
-        if (members == null || members.isEmpty()) {
-            return Optional.empty();
-        }
-
-        String value = members.iterator()
-                .next()
-                .getValue();
-
-        return extractMemberId(value);
-    }
-
-    @Override
     public List<Long> reserveOldestMember(MatchingCategory category, int count, String reserveId, Duration ttl) {
         String key = zsetKey(category, count);
 
         // 가장 오래된 사용자 하나 뽑기
-        Set<ZSetOperations.TypedTuple<String>> popped = basicRedisTemplate.opsForZSet()
-                .popMin(key, 1);
+        Set<ZSetOperations.TypedTuple<String>> popped = basicRedisTemplate.opsForZSet().popMin(key, 1);
         if (popped == null || popped.isEmpty()) {
             return List.of();
         }
@@ -85,13 +65,44 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
             return List.of();
         }
 
-        // 예약 키에 원래 score 넣어서 저장
+        // 예약 키
         String reserveKey = RESERVE_KEY.formatted(reserveId);
         basicRedisTemplate.opsForList()
-                .rightPush(reserveKey, value + ":" + originalScore);
+                .rightPush(reserveKey, memberId + ":" + originalScore);
         basicRedisTemplate.expire(reserveKey, ttl);
 
         return List.of(memberId);
+    }
+
+    @Override
+    public boolean reserveSpecificMember(MatchingCategory category, int count, Long memberId, String reserveId,
+                                         Duration ttl) {
+        String zsetKey = zsetKey(category, count);
+        String memberKey = memberKey(memberId);
+
+        // 원래 score 조회
+        Double originalScore = basicRedisTemplate.opsForZSet()
+                .score(zsetKey, memberKey);
+        if (originalScore == null) { // 큐에 없거나 이미 다른 데서 pop 된 경우
+            return false;
+        }
+
+        // 예약 상태로 빼기
+        Long removed = basicRedisTemplate.opsForZSet()
+                .remove(zsetKey, memberKey);
+        if (removed == null || removed == 0) { // 이미 누군가 빼간 경우
+            return false;
+        }
+
+        // 예약 리스트에 저장
+        String reserveKey = RESERVE_KEY.formatted(reserveId);
+        basicRedisTemplate.opsForList()
+                .rightPush(reserveKey, memberId + ":" + originalScore);
+
+        // TTL 연장
+        basicRedisTemplate.expire(reserveKey, ttl);
+
+        return true;
     }
 
     @Override
@@ -108,16 +119,15 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
         if (reserved != null) {
             reserved.forEach(v -> {
                 String[] parts = v.split(":");
-
-                if (parts.length < 3) {
+                if (parts.length != 2) {
                     return;
                 }
 
-                String memberKey = parts[0] + ":" + parts[1];
-                double originalScore = Double.parseDouble(parts[2]);
+                Long memberId = Long.parseLong(parts[0]);
+                double originalScore = Double.parseDouble(parts[1]);
 
                 basicRedisTemplate.opsForZSet()
-                        .add(zsetKey(category, count), memberKey, originalScore);
+                        .add(zsetKey(category, count), memberKey(memberId), originalScore);
             });
         }
 

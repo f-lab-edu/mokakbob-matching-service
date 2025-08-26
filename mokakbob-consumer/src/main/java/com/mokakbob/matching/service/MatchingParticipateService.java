@@ -47,7 +47,7 @@ public class MatchingParticipateService {
 
             Long delimiterMemberId = reservedMember.get(0);
             double[] location = findMemberDelimiterPlace(category, participantCount, delimiterMemberId);
-            List<Long> candidates = findCandidates(event, delimiterMemberId, location);
+            List<Long> candidates = findAndReserveCandidates(event, delimiterMemberId, location, reserveId);
 
             if (candidates.size() < participantCount - 1) {
                 rollback(reserveId, event);
@@ -83,7 +83,7 @@ public class MatchingParticipateService {
         queueStore.rollbackReservation(reserveId, event.category(), event.participantCount());
     }
 
-    private List<Long> findCandidates(MatchingParticipateEvent event, Long memberId, double[] location) {
+    private List<Long> findAndReserveCandidates(MatchingParticipateEvent event, Long memberId, double[] location, String reserveId) {
         List<Long> nearby = geoStore.findNearbyMembers(
                 event.category(),
                 event.participantCount(),
@@ -92,9 +92,25 @@ public class MatchingParticipateService {
                 RADIUS_METERS
         );
 
-        return nearby.stream()
-                .filter(id -> !id.equals(memberId))
-                .toList();
+        List<Long> reserved = new ArrayList<>();
+
+        for (Long candidateId : nearby) {
+            if (candidateId.equals(memberId)) {
+                continue;
+            }
+            boolean success = queueStore.reserveSpecificMember(
+                    event.category(),
+                    event.participantCount(),
+                    candidateId,
+                    reserveId,
+                    Duration.ofSeconds(10)
+            );
+            if (success) {
+                reserved.add(candidateId);
+            }
+        }
+
+        return reserved;
     }
 
     private List<Long> reserveMember(MatchingParticipateEvent event, String reserveId) {
