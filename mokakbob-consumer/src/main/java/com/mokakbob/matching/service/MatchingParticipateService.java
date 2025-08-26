@@ -56,7 +56,6 @@ public class MatchingParticipateService {
 
             List<Long> matched = buildMatchedGroup(delimiterMemberId, candidates, event.participantCount());
             matched.forEach(participantStore::transitionToFound);
-            commitReservation(reserveId, matched, event);
 
             MatchingFoundEvent matchingFoundEvent = new MatchingFoundEvent(
                     UUID.randomUUID().toString(),
@@ -82,15 +81,6 @@ public class MatchingParticipateService {
 
     private void rollback(String reserveId, MatchingParticipateEvent event) {
         queueStore.rollbackReservation(reserveId, event.category(), event.participantCount());
-    }
-
-    private void commitReservation(String reserveId, List<Long> matched, MatchingParticipateEvent event) {
-        matched.forEach(id -> {
-            queueStore.removeFromQueue(event.category(), event.participantCount(), id);
-            geoStore.removeMemberLocation(event.category(), event.participantCount(), id);
-        });
-
-        queueStore.commitReservation(reserveId, event.category(), event.participantCount());
     }
 
     private List<Long> findCandidates(MatchingParticipateEvent event, Long memberId, double[] location) {
