@@ -2,10 +2,6 @@ package com.mokakbob.matching;
 
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.cache.CategoryQueueStore;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -37,20 +33,11 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
     }
 
     @Override
-    public List<Long> findWaitingUsers(MatchingCategory category, int count) {
-        String zsetKey = zsetKey(category, count);
+    public boolean hasEnoughForMatching(MatchingCategory category, int participantCount) {
+        Long existMembers = basicRedisTemplate.opsForZSet()
+                .zCard(zsetKey(category, participantCount));
 
-        Set<String> members = basicRedisTemplate.opsForZSet()
-                .range(zsetKey, 0, count - 1);
-
-        if (members == null || members.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return members.stream()
-                .map(this::extractMemberId)
-                .flatMap(Optional::stream)
-                .toList();
+        return existMembers != null && existMembers >= participantCount;
     }
 
     private String zsetKey(MatchingCategory category, int participantCount) {
@@ -59,17 +46,5 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
 
     private String memberKey(Long memberId) {
         return MEMBER_KEY + memberId;
-    }
-
-    private Optional<Long> extractMemberId(String value) {
-        if (value != null && value.startsWith(MEMBER_KEY)) {
-            try {
-                return Optional.of(Long.parseLong(value.substring(7)));
-            } catch (NumberFormatException e) {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.empty();
     }
 }
