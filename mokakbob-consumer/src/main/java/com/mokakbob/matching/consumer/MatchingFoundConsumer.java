@@ -1,6 +1,8 @@
 package com.mokakbob.matching.consumer;
 
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
+import com.mokakbob.matching.service.NotificationService;
+import com.mokakbob.matching.service.request.NotificationRequest;
 import com.mokakbob.topic.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MatchingFoundConsumer {
 
+    private final NotificationService notificationService;
+
     @KafkaListener(
             topics = KafkaTopic.MATCHING_FOUND,
             containerFactory = "matchingFoundKafkaListenerContainerFactory"
@@ -19,6 +23,14 @@ public class MatchingFoundConsumer {
     public void consume(MatchingFoundEvent event) {
         log.info("[Kafka] MATCHING_FOUND 이벤트 수신: {}", event);
 
-        // to do
+        event.matched()
+                .forEach(memberId -> {
+                    NotificationRequest request = new NotificationRequest(
+                            memberId,
+                            "MATCHING_FOUND",
+                            event.toString()
+                    );
+                    notificationService.send(request);
+                });
     }
 }
