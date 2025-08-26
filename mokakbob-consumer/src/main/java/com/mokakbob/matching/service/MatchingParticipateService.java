@@ -7,6 +7,7 @@ import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
+import com.mokakbob.matching.event.MatchFoundEventPublisher;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,6 +27,7 @@ public class MatchingParticipateService {
     private final CategoryQueueStore queueStore;
     private final ParticipantGeoStore geoStore;
     private final ParticipantStore participantStore;
+    private final MatchFoundEventPublisher publisher;
 
     public void participateMatching(MatchingParticipateEvent event) {
         MatchingCategory category = event.category();
@@ -47,7 +49,7 @@ public class MatchingParticipateService {
             double[] location = findMemberDelimiterPlace(category, participantCount, delimiterMemberId);
             List<Long> candidates = findCandidates(event, delimiterMemberId, location);
 
-            if (!(candidates.size() >= participantCount - 1)) {
+            if (candidates.size() < participantCount - 1) {
                 rollback(reserveId, event);
                 return;
             }
@@ -63,6 +65,7 @@ public class MatchingParticipateService {
                     matched,
                     Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME)
             );
+            publisher.publishFound(matchingFoundEvent);
 
         } catch (Exception e) {
             rollback(reserveId, event);
