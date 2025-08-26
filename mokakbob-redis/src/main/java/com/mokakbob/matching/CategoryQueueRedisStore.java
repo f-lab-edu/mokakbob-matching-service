@@ -76,18 +76,19 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
             return List.of();
         }
 
-        String value = popped.iterator().next()
-                .getValue();
-        Long memberId = extractMemberId(value)
-                .orElse(null);
-        if (memberId == null) {
+        ZSetOperations.TypedTuple<String> tuple = popped.iterator().next();
+        String value = tuple.getValue();
+        Double originalScore = tuple.getScore(); // 원래 score
+        Long memberId = extractMemberId(value).orElse(null);
+
+        if (memberId == null || originalScore == null) {
             return List.of();
         }
 
-        // TTL
+        // 예약 키에 원래 score 넣어서 저장
         String reserveKey = RESERVE_KEY.formatted(reserveId);
         basicRedisTemplate.opsForList()
-                .rightPush(reserveKey, memberKey(memberId));
+                .rightPush(reserveKey, value + ":" + originalScore);
         basicRedisTemplate.expire(reserveKey, ttl);
 
         return List.of(memberId);
@@ -105,10 +106,19 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
                 .range(reserveKey, 0, -1);
 
         if (reserved != null) {
-            reserved.forEach(v -> basicRedisTemplate.opsForZSet()
-                    .add(
-                            zsetKey(category, count), v, System.currentTimeMillis()
-                    ));
+            reserved.forEach(v -> {
+                String[] parts = v.split(":");
+
+                if (parts.length < 3) {
+                    return;
+                }
+
+                String memberKey = parts[0] + ":" + parts[1];
+                double originalScore = Double.parseDouble(parts[2]);
+
+                basicRedisTemplate.opsForZSet()
+                        .add(zsetKey(category, count), memberKey, originalScore);
+            });
         }
 
         basicRedisTemplate.delete(reserveKey);
