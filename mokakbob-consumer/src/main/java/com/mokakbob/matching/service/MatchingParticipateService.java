@@ -33,7 +33,7 @@ public class MatchingParticipateService {
      * 매칭 참여 이벤트를 처리한다.
      * <p>
      * 1. 큐에서 충분한 인원이 있는지 확인
-     * 2. 가장 오래된 멤버를 예약 (delimiter로 사용)
+     * 2. 매칭 들어온 유저를 기준으로 선정 (delimiter로 사용)
      * 3. delimiter 기준으로 주변 후보자를 탐색 및 예약
      * 4. 인원이 부족하면 롤백 후 종료
      * 5. 매칭 그룹 확정 후 상태 전환, 이벤트 발행
