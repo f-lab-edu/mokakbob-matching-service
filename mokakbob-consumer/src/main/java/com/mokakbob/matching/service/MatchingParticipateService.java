@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 public class MatchingParticipateService {
 
     private static final double RADIUS_METERS = 1500.0;
-    private static final int MATCHING_ACCEPT_EXPIRE_TIME = 180;
+    private static final int MATCHING_ACCEPT_EXPIRE_TIME_SECONDS = 180;
 
     private final CategoryQueueStore queueStore;
     private final ParticipantGeoStore geoStore;
@@ -62,7 +62,7 @@ public class MatchingParticipateService {
                     category,
                     participantCount,
                     matched,
-                    Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME)
+                    Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME_SECONDS)
             );
             publisher.publishFound(matchingFoundEvent);
 
