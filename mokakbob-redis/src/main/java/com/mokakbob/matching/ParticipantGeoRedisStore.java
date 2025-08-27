@@ -2,6 +2,7 @@ package com.mokakbob.matching;
 
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
 
     private static final String GEO_KEY = "matching:geo:%s:%d";
     private static final String MEMBER_KEY = "member:";
+    private static final String RESERVE_KEY = "matching:geo:reserve:%s";
 
     private final RedisTemplate<String, String> basicRedisTemplate;
 
@@ -35,7 +37,8 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     }
 
     @Override
-    public List<Long> findNearbyMembers(MatchingCategory category, int count, double lng, double lat, double radiusInMeters) {
+    public List<Long> findNearbyMembers(MatchingCategory category, int count, double lng, double lat,
+                                        double radiusInMeters) {
         GeoResults<GeoLocation<String>> results = basicRedisTemplate.opsForGeo()
                 .radius(
                         geoKey(category, count),
@@ -70,6 +73,49 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
         Point p = points.get(0);
 
         return Optional.of(new double[]{p.getY(), p.getX()});
+    }
+
+    @Override
+    public boolean reserveMember(MatchingCategory category, int count, Long memberId, String reserveId, Duration ttl) {
+        String geoKey = geoKey(category, count);
+        String memberKey = memberKey(memberId);
+
+        Long removed = basicRedisTemplate.opsForGeo()
+                .remove(geoKey, memberKey);
+
+        if (removed == null || removed == 0) {
+            return false;
+        }
+
+        String reserveKey = RESERVE_KEY.formatted(reserveId);
+        basicRedisTemplate.opsForList()
+                .rightPush(reserveKey, memberKey);
+
+        basicRedisTemplate.expire(reserveKey, ttl);
+
+        return true;
+    }
+
+    @Override
+    public void rollbackReservation(String reserveId, MatchingCategory category, int count) {
+        String reserveKey = RESERVE_KEY.formatted(reserveId);
+        List<String> reserved = basicRedisTemplate.opsForList()
+                .range(reserveKey, 0, -1);
+
+        if (reserved != null) {
+            reserved.forEach(value -> {
+                extractUserId(value).ifPresent(memberId -> getLocation(category, count, memberId).ifPresent(loc -> {
+                    basicRedisTemplate.opsForGeo()
+                            .add(
+                                    geoKey(category, count),
+                                    new Point(loc[1], loc[0]),
+                                    memberKey(memberId)
+                            );
+                }));
+            });
+        }
+
+        basicRedisTemplate.delete(reserveKey);
     }
 
     private String geoKey(MatchingCategory category, int count) {
