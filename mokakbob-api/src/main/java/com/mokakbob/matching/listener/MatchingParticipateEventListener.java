@@ -24,7 +24,6 @@ public class MatchingParticipateEventListener {
 
         matchingWriterService.saveParticipantInfo(event);
         matchingWriterService.saveGeo(event);
-        matchingWriterService.saveQueue(event);
     }
 
     private void sendKafkaTopic(MatchingParticipateEvent event) {

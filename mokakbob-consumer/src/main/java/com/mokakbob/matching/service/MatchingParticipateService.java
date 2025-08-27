@@ -1,6 +1,5 @@
 package com.mokakbob.matching.service;
 
-import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
@@ -16,6 +15,21 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * 매칭 참여 이벤트를 처리하는 서비스.
+ * <p>
+ * 동작 시나리오:
+ * <ol>
+ *   <li>기준 멤버(매칭 요청한 유저)를 예약 상태로 전환</li>
+ *   <li>기준 멤버의 위치 정보를 기준으로 주변 후보자를 탐색</li>
+ *   <li>후보자들을 순차적으로 예약 시도</li>
+ *   <li>필요한 인원수가 모이지 않으면 예약한 멤버들을 모두 롤백</li>
+ *   <li>충분한 인원이 모이면 최종 매칭 그룹 확정 후 상태 전환 및 이벤트 발행</li>
+ * </ol>
+ *
+ * 멱등성을 보장하기 위해 reserveId(=idempotencyKey)를 사용하여
+ * 동일한 Kafka 메시지 재처리 시 중복 매칭을 방지한다.
+ */
 @Service
 @RequiredArgsConstructor
 public class MatchingParticipateService {
@@ -23,7 +37,6 @@ public class MatchingParticipateService {
     private static final double RADIUS_METERS = 1500.0;
     private static final int MATCHING_ACCEPT_EXPIRE_TIME_SECONDS = 180;
 
-    private final CategoryQueueStore queueStore;
     private final ParticipantGeoStore geoStore;
     private final ParticipantStore participantStore;
     private final MatchFoundEventPublisher publisher;
@@ -31,12 +44,6 @@ public class MatchingParticipateService {
 
     /**
      * 매칭 참여 이벤트를 처리한다.
-     * <p>
-     * 1. 큐에서 충분한 인원이 있는지 확인
-     * 2. 매칭 들어온 유저를 기준으로 선정 (delimiter로 사용)
-     * 3. delimiter 기준으로 주변 후보자를 탐색 및 예약
-     * 4. 인원이 부족하면 롤백 후 종료
-     * 5. 매칭 그룹 확정 후 상태 전환, 이벤트 발행
      *
      * @param event 매칭 참여 이벤트 (카테고리, 인원수, 멤버 정보 포함)
      * @throws ConsumerException 매칭 처리 중 예외 발생 시
@@ -45,27 +52,24 @@ public class MatchingParticipateService {
         MatchingCategory category = event.category();
         int participantCount = event.participantCount();
         String idempotencyKey = event.idempotencyKey();
-
-        if(!queueStore.hasEnoughForMatching(category, participantCount)) {
-            return;
-        }
+        Long memberId = event.memberId();
 
         try {
-            List<Long> reservedMember = reserveMember(event, idempotencyKey);
-            if (reservedMember.isEmpty()) {
-                return;
+            double[] location = findMemberDelimiterPlace(category, participantCount, memberId);
+
+            boolean reservedMember = geoStore.reserveMember(category, participantCount, memberId, idempotencyKey, Duration.ofSeconds(10));
+            if (!reservedMember) {
+                return; // 이미 다른 매칭에서 처리된 경우
             }
 
-            Long delimiterMemberId = reservedMember.get(0);
-            double[] location = findMemberDelimiterPlace(category, participantCount, delimiterMemberId);
-            List<Long> candidates = findAndReserveCandidates(event, delimiterMemberId, location, idempotencyKey);
+            List<Long> candidates = findAndReserveCandidates(event, memberId, location, idempotencyKey);
 
             if (candidates.size() < participantCount - 1) {
                 rollback(idempotencyKey, event);
                 return;
             }
 
-            List<Long> matched = buildMatchedGroup(delimiterMemberId, candidates, event.participantCount());
+            List<Long> matched = buildMatchedGroup(memberId, candidates, event.participantCount());
             matched.forEach(participantStore::transitionToFound);
 
             MatchingFoundEvent matchingFoundEvent = new MatchingFoundEvent(
@@ -91,7 +95,7 @@ public class MatchingParticipateService {
     }
 
     private void rollback(String reserveId, MatchingParticipateEvent event) {
-        queueStore.rollbackReservation(reserveId, event.category(), event.participantCount());
+        geoStore.rollbackReservation(reserveId, event.category(), event.participantCount());
     }
 
     /**
@@ -106,7 +110,7 @@ public class MatchingParticipateService {
     private List<Long> findAndReserveCandidates(MatchingParticipateEvent event, Long memberId, double[] location, String reserveId) {
         List<Long> nearby = geoStore.findNearbyMembers(
                 event.category(),
-                event.participantCount(),
+                event.participantCount() - 1,
                 location[1], // lng
                 location[0], // lat
                 RADIUS_METERS
@@ -118,7 +122,7 @@ public class MatchingParticipateService {
             if (candidateId.equals(memberId)) {
                 continue;
             }
-            boolean success = queueStore.reserveSpecificMember(
+            boolean success = geoStore.reserveMember(
                     event.category(),
                     event.participantCount(),
                     candidateId,
@@ -131,22 +135,6 @@ public class MatchingParticipateService {
         }
 
         return reserved;
-    }
-
-    private List<Long> reserveMember(MatchingParticipateEvent event, String reserveId) {
-        boolean success = queueStore.reserveSpecificMember(
-                event.category(),
-                event.participantCount(),
-                event.memberId(),
-                reserveId,
-                Duration.ofSeconds(10)
-        );
-
-        if (success) {
-            return List.of(event.memberId());
-        }
-
-        return List.of();
     }
 
     private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
