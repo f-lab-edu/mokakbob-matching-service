@@ -34,11 +34,16 @@ public class MatchingTransactionService {
         matchingService.saveMatchingRequest(memberId, category, participantCount, new BigDecimal(lat),
                 new BigDecimal(lng));
 
-        MatchingParticipateEvent event = new MatchingParticipateEvent(memberId, lat, lng, category, participantCount);
+        String idempotencyKey = generateIdempotencyKey(String.valueOf(memberId));
+        MatchingParticipateEvent event = new MatchingParticipateEvent(idempotencyKey, memberId, lat, lng, category, participantCount);
 
         eventPublisher.publishEvent(event);
     }
 
+    private String generateIdempotencyKey(String memberId) {
+        long timestamp = System.currentTimeMillis();
+        return memberId + "-" + timestamp;
+    }
 
     private void deducePoint(Long memberId) {
         Member member = memberService.findMemberForUpdate(memberId);

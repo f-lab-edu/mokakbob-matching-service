@@ -58,7 +58,7 @@ public class MatchingParticipateService {
             matched.forEach(participantStore::transitionToFound);
 
             MatchingFoundEvent matchingFoundEvent = new MatchingFoundEvent(
-                    UUID.randomUUID().toString(),
+                    reserveId,
                     category,
                     participantCount,
                     matched,
