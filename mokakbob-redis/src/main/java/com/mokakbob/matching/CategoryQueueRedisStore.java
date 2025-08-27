@@ -11,6 +11,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
+/**
+ * 카테고리별 매칭 대기열을 Redis 기반으로 관리하는 구현체.
+ * <p>
+ * Redis 구조
+ * - ZSET_CATEGORY_KEY : ZSet (카테고리+참여인원 단위로 대기열 관리, score = 대기 시작 시간)
+ * - RESERVE_KEY       : List (reserveId 단위로 임시 예약 멤버 관리, 원복 가능)
+ */
 @Component
 @RequiredArgsConstructor
 public class CategoryQueueRedisStore implements CategoryQueueStore {
@@ -21,6 +28,18 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
 
     private final RedisTemplate<String, String> basicRedisTemplate;
 
+    /**
+     * 매칭 대기열에 새로운 멤버를 추가한다.
+     *
+     * @param category 매칭 카테고리
+     * @param count    필요한 참가자 수
+     * @param memberId 대기열에 추가할 멤버 ID
+     * <p>
+     * Redis ZSET 사용:
+     * - key : "matching:zset:{category}:{count}"
+     * - value : "member:{memberId}"
+     * - score : System.currentTimeMillis() (대기 시작 시각)
+     */
     @Override
     public void addToQueue(MatchingCategory category, int count, Long memberId) {
         String zsetKey = zsetKey(category, count);
@@ -30,6 +49,15 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
                 .add(zsetKey, memberKey(memberId), score);
     }
 
+    /**
+     * 매칭 대기열에서 특정 멤버를 제거한다.
+     *
+     * @param category 매칭 카테고리
+     * @param count    필요한 참가자 수
+     * @param memberId 제거할 멤버 ID
+     *
+     * Redis ZSET에서 해당 멤버를 삭제한다.
+     */
     @Override
     public void removeFromQueue(MatchingCategory category, int count, Long memberId) {
         String zsetKey = zsetKey(category, count);
@@ -38,6 +66,16 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
                 .remove(zsetKey, memberKey(memberId));
     }
 
+    /**
+     * 해당 카테고리/인원 수 기준으로 매칭을 시도할 수 있는지 확인한다.
+     *
+     * @param category 매칭 카테고리
+     * @param participantCount 필요한 참가자 수
+     * @return true  : 현재 큐에 참가자가 충분함
+     *         false : 참가자가 부족함
+     *
+     * Redis ZSET의 cardinality(원소 개수)를 조회한다.
+     */
     @Override
     public boolean hasEnoughForMatching(MatchingCategory category, int participantCount) {
         Long existMembers = basicRedisTemplate.opsForZSet()
@@ -46,6 +84,20 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
         return existMembers != null && existMembers >= participantCount;
     }
 
+    /**
+     * 대기열에서 가장 오래된 멤버 1명을 꺼내 예약 상태로 이동시킨다.
+     *
+     * @param category 매칭 카테고리
+     * @param count    필요한 참가자 수
+     * @param reserveId 예약 식별자
+     * @param ttl      예약 보관 TTL
+     * @return 예약된 멤버 ID (없으면 빈 리스트)
+     * <p>
+     * 동작:
+     * 1. ZSET에서 가장 오래된 멤버(popMin) 추출
+     * 2. 추출한 멤버를 예약 리스트("matching:reserve:{reserveId}")에 기록 (memberId:score 형식)
+     * 3. 예약 리스트 TTL 설정
+     */
     @Override
     public List<Long> reserveOldestMember(MatchingCategory category, int count, String reserveId, Duration ttl) {
         String key = zsetKey(category, count);
@@ -74,6 +126,22 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
         return List.of(memberId);
     }
 
+    /**
+     * 특정 멤버를 대기열에서 꺼내 예약 상태로 이동시킨다.
+     *
+     * @param category 매칭 카테고리
+     * @param count    필요한 참가자 수
+     * @param memberId 예약할 멤버 ID
+     * @param reserveId 예약 식별자
+     * @param ttl      예약 보관 TTL
+     * @return true  : 예약 성공
+     *         false : 이미 다른 매칭에서 꺼내간 경우
+     * <p>
+     * 동작:
+     * 1. ZSET에서 해당 멤버의 원래 score 조회
+     * 2. 멤버 제거(remove) 시도 → 성공하면 예약 리스트("matching:reserve:{reserveId}")에 기록
+     * 3. TTL 설정
+     */
     @Override
     public boolean reserveSpecificMember(MatchingCategory category, int count, Long memberId, String reserveId,
                                          Duration ttl) {
@@ -105,11 +173,18 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
         return true;
     }
 
-    @Override
-    public void commitReservation(String reserveId, MatchingCategory category, int count) {
-        basicRedisTemplate.delete(RESERVE_KEY.formatted(reserveId));
-    }
-
+    /**
+     * 예약을 취소(rollback)한다.
+     *
+     * @param reserveId 예약 식별자
+     * @param category  매칭 카테고리
+     * @param count     참가자 수
+     * <p>
+     * 동작:
+     * 1. 예약 리스트("matching:reserve:{reserveId}")를 읽어 멤버 ID와 originalScore 복원
+     * 2. 다시 ZSET에 추가
+     * 3. 예약 리스트 삭제
+     */
     @Override
     public void rollbackReservation(String reserveId, MatchingCategory category, int count) {
         String reserveKey = RESERVE_KEY.formatted(reserveId);

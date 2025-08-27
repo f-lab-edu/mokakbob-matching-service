@@ -10,6 +10,5 @@ public interface CategoryQueueStore {
     boolean hasEnoughForMatching(MatchingCategory category, int participantCount);
     List<Long> reserveOldestMember(MatchingCategory category, int count, String reserveId, Duration ttl);
     boolean reserveSpecificMember(MatchingCategory category, int count, Long memberId, String reserveId, Duration ttl);
-    void commitReservation(String reserveId, MatchingCategory category, int count);
     void rollbackReservation(String reserveId, MatchingCategory category, int count);
 }
