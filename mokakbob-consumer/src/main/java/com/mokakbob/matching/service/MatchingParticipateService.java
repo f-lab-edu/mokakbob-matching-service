@@ -28,6 +28,19 @@ public class MatchingParticipateService {
     private final ParticipantStore participantStore;
     private final MatchFoundEventPublisher publisher;
 
+
+    /**
+     * 매칭 참여 이벤트를 처리한다.
+     * <p>
+     * 1. 큐에서 충분한 인원이 있는지 확인
+     * 2. 가장 오래된 멤버를 예약 (delimiter로 사용)
+     * 3. delimiter 기준으로 주변 후보자를 탐색 및 예약
+     * 4. 인원이 부족하면 롤백 후 종료
+     * 5. 매칭 그룹 확정 후 상태 전환, 이벤트 발행
+     *
+     * @param event 매칭 참여 이벤트 (카테고리, 인원수, 멤버 정보 포함)
+     * @throws ConsumerException 매칭 처리 중 예외 발생 시
+     */
     public void participateMatching(MatchingParticipateEvent event) {
         MatchingCategory category = event.category();
         int participantCount = event.participantCount();
@@ -70,9 +83,9 @@ public class MatchingParticipateService {
         }
     }
 
-    private List<Long> buildMatchedGroup(Long pivotId, List<Long> candidates, int participantCount) {
+    private List<Long> buildMatchedGroup(Long delimiterMemberId, List<Long> candidates, int participantCount) {
         List<Long> matched = new ArrayList<>();
-        matched.add(pivotId);
+        matched.add(delimiterMemberId);
         matched.addAll(candidates.subList(0, participantCount - 1));
         return matched;
     }
@@ -81,6 +94,15 @@ public class MatchingParticipateService {
         queueStore.rollbackReservation(reserveId, event.category(), event.participantCount());
     }
 
+    /**
+     * 기준 멤버(delimiter) 위치를 기반으로 근처 후보자를 찾고 예약한다.
+     *
+     * @param event     매칭 이벤트
+     * @param memberId  기준 멤버 ID
+     * @param location  기준 멤버의 위치 [lat, lng]
+     * @param reserveId 예약 식별자
+     * @return 예약에 성공한 후보자 ID 리스트
+     */
     private List<Long> findAndReserveCandidates(MatchingParticipateEvent event, Long memberId, double[] location, String reserveId) {
         List<Long> nearby = geoStore.findNearbyMembers(
                 event.category(),
