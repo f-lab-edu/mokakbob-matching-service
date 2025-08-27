@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,25 +31,24 @@ public class MatchingParticipateService {
     public void participateMatching(MatchingParticipateEvent event) {
         MatchingCategory category = event.category();
         int participantCount = event.participantCount();
-        String reserveId = UUID.randomUUID()
-                .toString();
+        String idempotencyKey = event.idempotencyKey();
 
         if(!queueStore.hasEnoughForMatching(category, participantCount)) {
             return;
         }
 
         try {
-            List<Long> reservedMember = reserveMember(event, reserveId);
+            List<Long> reservedMember = reserveMember(event, idempotencyKey);
             if (reservedMember.isEmpty()) {
                 return;
             }
 
             Long delimiterMemberId = reservedMember.get(0);
             double[] location = findMemberDelimiterPlace(category, participantCount, delimiterMemberId);
-            List<Long> candidates = findAndReserveCandidates(event, delimiterMemberId, location, reserveId);
+            List<Long> candidates = findAndReserveCandidates(event, delimiterMemberId, location, idempotencyKey);
 
             if (candidates.size() < participantCount - 1) {
-                rollback(reserveId, event);
+                rollback(idempotencyKey, event);
                 return;
             }
 
@@ -58,7 +56,7 @@ public class MatchingParticipateService {
             matched.forEach(participantStore::transitionToFound);
 
             MatchingFoundEvent matchingFoundEvent = new MatchingFoundEvent(
-                    reserveId,
+                    idempotencyKey,
                     category,
                     participantCount,
                     matched,
@@ -67,7 +65,7 @@ public class MatchingParticipateService {
             publisher.publishFound(matchingFoundEvent);
 
         } catch (Exception e) {
-            rollback(reserveId, event);
+            rollback(idempotencyKey, event);
             throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_PARTICIPATE_CONSUMER_EXCEPTION);
         }
     }
