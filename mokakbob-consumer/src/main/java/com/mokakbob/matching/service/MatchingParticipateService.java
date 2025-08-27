@@ -134,12 +134,19 @@ public class MatchingParticipateService {
     }
 
     private List<Long> reserveMember(MatchingParticipateEvent event, String reserveId) {
-        return queueStore.reserveOldestMember(
+        boolean success = queueStore.reserveSpecificMember(
                 event.category(),
                 event.participantCount(),
+                event.memberId(),
                 reserveId,
                 Duration.ofSeconds(10)
         );
+
+        if (success) {
+            return List.of(event.memberId());
+        }
+
+        return List.of();
     }
 
     private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {

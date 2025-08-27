@@ -17,7 +17,7 @@ public class AdminKafkaService {
 
     public void resendParticipateTopic(String key, Long memberId, double lat, double lng, MatchingCategory category, int participantCount) {
         MatchingParticipateEvent event = new MatchingParticipateEvent(
-              memberId, lat, lng, category, participantCount
+              key, memberId, lat, lng, category, participantCount
         );
 
         try {

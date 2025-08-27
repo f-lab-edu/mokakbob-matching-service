@@ -4,11 +4,8 @@ import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.cache.CategoryQueueStore;
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 /**
@@ -82,48 +79,6 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
                 .zCard(zsetKey(category, participantCount));
 
         return existMembers != null && existMembers >= participantCount;
-    }
-
-    /**
-     * 대기열에서 가장 오래된 멤버 1명을 꺼내 예약 상태로 이동시킨다.
-     *
-     * @param category 매칭 카테고리
-     * @param count    필요한 참가자 수
-     * @param reserveId 예약 식별자
-     * @param ttl      예약 보관 TTL
-     * @return 예약된 멤버 ID (없으면 빈 리스트)
-     * <p>
-     * 동작:
-     * 1. ZSET에서 가장 오래된 멤버(popMin) 추출
-     * 2. 추출한 멤버를 예약 리스트("matching:reserve:{reserveId}")에 기록 (memberId:score 형식)
-     * 3. 예약 리스트 TTL 설정
-     */
-    @Override
-    public List<Long> reserveOldestMember(MatchingCategory category, int count, String reserveId, Duration ttl) {
-        String key = zsetKey(category, count);
-
-        // 가장 오래된 사용자 하나 뽑기
-        Set<ZSetOperations.TypedTuple<String>> popped = basicRedisTemplate.opsForZSet().popMin(key, 1);
-        if (popped == null || popped.isEmpty()) {
-            return List.of();
-        }
-
-        ZSetOperations.TypedTuple<String> tuple = popped.iterator().next();
-        String value = tuple.getValue();
-        Double originalScore = tuple.getScore(); // 원래 score
-        Long memberId = extractMemberId(value).orElse(null);
-
-        if (memberId == null || originalScore == null) {
-            return List.of();
-        }
-
-        // 예약 키
-        String reserveKey = RESERVE_KEY.formatted(reserveId);
-        basicRedisTemplate.opsForList()
-                .rightPush(reserveKey, memberId + ":" + originalScore);
-        basicRedisTemplate.expire(reserveKey, ttl);
-
-        return List.of(memberId);
     }
 
     /**
@@ -207,16 +162,6 @@ public class CategoryQueueRedisStore implements CategoryQueueStore {
         }
 
         basicRedisTemplate.delete(reserveKey);
-    }
-
-    private Optional<Long> extractMemberId(String value) {
-        if (value != null && value.startsWith(MEMBER_KEY)) {
-            try {
-                return Optional.of(Long.parseLong(value.substring(MEMBER_KEY.length())));
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return Optional.empty();
     }
 
     private String zsetKey(MatchingCategory category, int participantCount) {
