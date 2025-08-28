@@ -12,7 +12,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,10 +39,36 @@ public class MatchingParticipateService {
 
     private static final double RADIUS_METERS = 1500.0;
     private static final int MATCHING_ACCEPT_EXPIRE_TIME_SECONDS = 180;
+    private static final int LIMIT_LOCK_CATCH_TIME = 3;
+    private static final int LOCK_DURATION_TIME = 10;
 
     private final ParticipantGeoStore geoStore;
     private final ParticipantStore participantStore;
     private final MatchFoundEventPublisher publisher;
+    private final RedissonClient redissonClient;
+
+    /**
+     * category + participantCount 단위로 락을 잡고 participateMatching 실행
+     */
+    public void lockParticipateMatching(MatchingParticipateEvent event) {
+        String lockKey = "lock:matching:" + event.category().name() + ":" + event.participantCount();
+        RLock lock = redissonClient.getLock(lockKey);
+
+        try {
+            if (lock.tryLock(LIMIT_LOCK_CATCH_TIME, LOCK_DURATION_TIME, TimeUnit.SECONDS)) {
+                participateMatching(event);
+            } else {
+                throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_LOCK_ACQUIRE_FAILED);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_LOCK_INTERRUPTED);
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
 
 
     /**
