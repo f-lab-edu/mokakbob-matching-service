@@ -35,8 +35,8 @@ public class MatchingParticipateEventListener {
                     event,
                     event.memberId(),
                     event.idempotencyKey(),
-                    event.lat(),
-                    event.lng(),
+                    event.location().getLatitude(),
+                    event.location().getLongitude(),
                     event.category(),
                     event.participantCount());
         }

@@ -1,6 +1,8 @@
 package com.mokakbob.matching.service;
 
+
 import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
@@ -27,15 +29,15 @@ public class MatchingTransactionService {
 
     @Transactional
     public void participateMatching(double lat, double lng, MatchingCategory category, int participantCount,
-                                     Long memberId) {
+                                    Long memberId) {
         validateExistParticipating(memberId);
         deducePoint(memberId);
 
-        matchingService.saveMatchingRequest(memberId, category, participantCount, new BigDecimal(lat),
-                new BigDecimal(lng));
+        Location location = Location.of(BigDecimal.valueOf(lat), BigDecimal.valueOf(lng));
+        matchingService.saveMatchingRequest(memberId, category, participantCount, location);
 
         String idempotencyKey = generateIdempotencyKey(String.valueOf(memberId));
-        MatchingParticipateEvent event = new MatchingParticipateEvent(idempotencyKey, memberId, lat, lng, category, participantCount);
+        MatchingParticipateEvent event = new MatchingParticipateEvent(idempotencyKey, memberId, location, category, participantCount);
 
         eventPublisher.publishEvent(event);
     }

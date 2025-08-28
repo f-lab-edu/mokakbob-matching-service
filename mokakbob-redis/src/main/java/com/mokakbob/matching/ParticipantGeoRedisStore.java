@@ -1,7 +1,9 @@
 package com.mokakbob.matching;
 
 import com.mokakbob.cache.ParticipantGeoStore;
+import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -41,15 +43,14 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
      * @param category 매칭 카테고리
      * @param count    필요 인원 수
      * @param memberId 참가자 ID
-     * @param lng      경도 (longitude)
-     * @param lat      위도 (latitude)
+     * @param location 사용자 위치
      */
     @Override
-    public void addMemberLocation(MatchingCategory category, int count, Long memberId, double lng, double lat) {
+    public void addMemberLocation(MatchingCategory category, int count, Long memberId, Location location) {
         basicRedisTemplate.opsForGeo()
                 .add(
                         geoKey(category, count),
-                        new Point(lng, lat),
+                        new Point(location.getLongitude().doubleValue(), location.getLatitude().doubleValue()),
                         memberKey(memberId)
                 );
     }
@@ -59,18 +60,19 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
      *
      * @param category       매칭 카테고리
      * @param count          필요 인원 수
-     * @param lng            중심 경도
-     * @param lat            중심 위도
+     * @param location       위치
      * @param radiusInMeters 탐색 반경 (미터 단위)
      * @return 반경 내 참가자 ID 리스트
      */
     @Override
-    public List<Long> findNearbyMembers(MatchingCategory category, int count, double lng, double lat,
+    public List<Long> findNearbyMembers(MatchingCategory category, int count, Location location,
                                         double radiusInMeters) {
         GeoResults<GeoLocation<String>> results = basicRedisTemplate.opsForGeo()
                 .radius(
                         geoKey(category, count),
-                        new Circle(new Point(lng, lat), new Distance(radiusInMeters, Metrics.METERS))
+                        new Circle(
+                                new Point(location.getLongitude().doubleValue(), location.getLatitude().doubleValue()),
+                                new Distance(radiusInMeters, Metrics.METERS))
                 );
 
         if (results == null || results.getContent().isEmpty()) {
@@ -90,7 +92,7 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     }
 
     @Override
-    public Optional<double[]> getLocation(MatchingCategory category, int count, Long memberId) {
+    public Optional<Location> getLocation(MatchingCategory category, int count, Long memberId) {
         List<Point> points = basicRedisTemplate.opsForGeo()
                 .position(geoKey(category, count), memberKey(memberId));
 
@@ -100,7 +102,10 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
 
         Point p = points.get(0);
 
-        return Optional.of(new double[]{p.getY(), p.getX()});
+        return Optional.of(Location.of(
+                BigDecimal.valueOf(p.getY()),
+                BigDecimal.valueOf(p.getX())
+        ));
     }
 
     /**
@@ -113,9 +118,7 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
      * @param ttl       예약 유지 시간 (TTL)
      * @return true  : 예약 성공 false : 이미 다른 매칭에서 제거된 경우
      * <p>
-     * 동작:
-     * 1. GEO에서 해당 멤버 제거
-     * 2. 예약 리스트("matching:geo:reserve:{reserveId}")에 저장 3. TTL 설정 (자동 만료 방지)
+     * 동작: 1. GEO에서 해당 멤버 제거 2. 예약 리스트("matching:geo:reserve:{reserveId}")에 저장 3. TTL 설정 (자동 만료 방지)
      */
     @Override
     public boolean reserveMember(MatchingCategory category, int count, Long memberId, String reserveId, Duration ttl) {
@@ -144,11 +147,8 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
      * @param reserveId 예약 식별자
      * @param category  매칭 카테고리
      * @param count     필요 인원 수
-     * <p>
-     * 동작:
-     * 1. 예약 리스트("matching:geo:reserve:{reserveId}")를 조회
-     * 2. 각 멤버를 GEO에 다시 추가
-     * 3. 예약 리스트 삭제
+     *                  <p>
+     *                  동작: 1. 예약 리스트("matching:geo:reserve:{reserveId}")를 조회 2. 각 멤버를 GEO에 다시 추가 3. 예약 리스트 삭제
      */
     @Override
     public void rollbackReservation(String reserveId, MatchingCategory category, int count) {
@@ -162,7 +162,10 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
                             getLocation(category, count, memberId).ifPresent(loc ->
                                     basicRedisTemplate.opsForGeo().add(
                                             geoKey(category, count),
-                                            new Point(loc[1], loc[0]),
+                                            new Point(
+                                                    loc.getLongitude().doubleValue(),
+                                                    loc.getLatitude().doubleValue()
+                                            ),
                                             memberKey(memberId)
                                     )
                             )

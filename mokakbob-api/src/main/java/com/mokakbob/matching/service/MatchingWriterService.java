@@ -21,6 +21,6 @@ public class MatchingWriterService {
 
     @RedisRetryable
     public void saveGeo(MatchingParticipateEvent event) {
-        geoStore.addMemberLocation(event.category(), event.participantCount(), event.memberId(), event.lng(), event.lat());
+        geoStore.addMemberLocation(event.category(), event.participantCount(), event.memberId(), event.location());
     }
 }

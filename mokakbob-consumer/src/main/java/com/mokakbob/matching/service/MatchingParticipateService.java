@@ -2,6 +2,7 @@ package com.mokakbob.matching.service;
 
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.cache.ParticipantStore;
+import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
@@ -70,7 +71,6 @@ public class MatchingParticipateService {
         }
     }
 
-
     /**
      * 매칭 참여 이벤트를 처리한다.
      *
@@ -84,7 +84,7 @@ public class MatchingParticipateService {
         Long memberId = event.memberId();
 
         try {
-            double[] location = findMemberDelimiterPlace(category, participantCount, memberId);
+            Location location = findMemberDelimiterPlace(category, participantCount, memberId);
 
             boolean reservedMember = geoStore.reserveMember(category, participantCount, memberId, idempotencyKey, Duration.ofSeconds(10));
             if (!reservedMember) {
@@ -136,12 +136,11 @@ public class MatchingParticipateService {
      * @param reserveId 예약 식별자
      * @return 예약에 성공한 후보자 ID 리스트
      */
-    private List<Long> findAndReserveCandidates(MatchingParticipateEvent event, Long memberId, double[] location, String reserveId) {
+    private List<Long> findAndReserveCandidates(MatchingParticipateEvent event, Long memberId, Location location, String reserveId) {
         List<Long> nearby = geoStore.findNearbyMembers(
                 event.category(),
                 event.participantCount() - 1,
-                location[1], // lng
-                location[0], // lat
+                location,
                 RADIUS_METERS
         );
 
@@ -166,7 +165,7 @@ public class MatchingParticipateService {
         return reserved;
     }
 
-    private double[] findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
+    private Location findMemberDelimiterPlace(MatchingCategory category, int count, Long memberId) {
         return geoStore.getLocation(category, count, memberId)
                 .orElseThrow(() -> new ConsumerException(MatchingConsumerErrorCode.NOT_FOUND_LOCATION));
     }

@@ -1,8 +1,10 @@
 package com.mokakbob.admin.service;
 
+import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import com.mokakbob.topic.KafkaTopic;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,8 +18,10 @@ public class AdminKafkaService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void resendParticipateTopic(String key, Long memberId, double lat, double lng, MatchingCategory category, int participantCount) {
+        Location location = Location.of(BigDecimal.valueOf(lat), BigDecimal.valueOf(lng));
+
         MatchingParticipateEvent event = new MatchingParticipateEvent(
-              key, memberId, lat, lng, category, participantCount
+              key, memberId, location, category, participantCount
         );
 
         try {
@@ -28,8 +32,8 @@ public class AdminKafkaService {
                     event,
                     event.memberId(),
                     event.memberId(),
-                    event.lat(),
-                    event.lng(),
+                    event.location().getLatitude(),
+                    event.location().getLongitude(),
                     event.category(),
                     event.participantCount());
         }
