@@ -11,7 +11,6 @@
 ➋ **매칭 참여**
 - 2000P 사용해 매칭 참여  
 - 성향(조용/대화) + 위치 기반 실시간 매칭  
-- 거리 → 성향 → 그룹 인원 순으로 최적 매칭  
 
 ➍ **채팅**
 - 매칭 성사 시 전용 채팅방 자동 생성  
@@ -24,4 +23,27 @@
 ➏ **후기 & 신뢰도 시스템**
 - 모임 종료 후 별점 + 후기 작성 가능  
 - 긍정적 참여 시 신뢰 점수 상승, 노쇼 시 점수 하락  
+---
+## 🛠 기술 스택
+
+| 항목                       | 기술 스택                                                      |
+| ------------------------ | ---------------------------------------------------------- |
+| **Language & Framework** | Java 17, Spring Boot 3.3, Spring Data JPA, Spring Security |
+| **Architecture**         | Layered Architecture (멀티 모듈)                             |
+| **Database & Cache**     | MySQL 8.0, Redis                                           |
+| **Message Queue**        | Apache Kafka                                               |
+| **Build & CI/CD**        | Gradle, GitHub Actions                                     |
+| **Infra & Deployment**   | AWS EC2, RDS, S3, Docker  ++추가 예정                           |
+| **API & Docs**           | Swagger (OpenAPI 3)                                        |
+| **Testing**              | JUnit5, Mockito                                            |
+
+---
+## 🏗 아키텍처
+![architecture](./docs/architecture-diagram/architecture.png)
+
+---
+
+## 📂 ERD
+![erd](./docs/architecture-diagram/diagram.png)
+
 ---
