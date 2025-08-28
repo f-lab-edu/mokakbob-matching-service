@@ -1,16 +1,17 @@
 package com.mokakbob.domain.matching.domain;
 
 import com.mokakbob.common.domain.BaseEntity;
+import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.domain.vo.MatchingRequestStatus;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,11 +39,8 @@ public class MatchingRequest extends BaseEntity {
     @Column(nullable = false)
     private Integer groupSize;
 
-    @Column(precision = 10, scale = 7)
-    private BigDecimal latitude;
-
-    @Column(precision = 10, scale = 7)
-    private BigDecimal longitude;
+    @Embedded
+    private Location location;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

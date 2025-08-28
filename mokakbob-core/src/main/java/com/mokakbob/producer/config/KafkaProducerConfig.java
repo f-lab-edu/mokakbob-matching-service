@@ -1,7 +1,6 @@
-package com.mokakbob.matching.config;
+package com.mokakbob.producer.config;
 
-import com.mokakbob.matching.infrastructure.KafkaProducerLoggingListener;
-
+import com.mokakbob.producer.infrastructure.KafkaProducerLoggingListener;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

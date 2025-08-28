@@ -12,7 +12,7 @@ public class ConsumerExceptionHandler {
 
     @ExceptionHandler(ConsumerException.class)
     public ResponseEntity<CustomErrorResponse> handleException(ConsumerException e) {
-        ConsumerErrorCode baseErrorCode = e.apiErrorCode();
+        ConsumerErrorCode baseErrorCode = e.consumerErrorCode();
 
         CustomErrorResponse response = new CustomErrorResponse(
                 baseErrorCode.customCode(),

@@ -26,7 +26,7 @@ public class MatchingParticipateConsumer {
         final MatchingParticipateEvent event = record.value();
 
         try {
-            participateService.participateMatching(event);
+            participateService.lockParticipateMatching(event);
             ack.acknowledge();
             log.info("[OK] key={}, partition={}, offset={}", key, record.partition(), record.offset());
         } catch (Exception e) {

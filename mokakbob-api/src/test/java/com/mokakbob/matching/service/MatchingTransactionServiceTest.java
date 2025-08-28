@@ -5,15 +5,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.topic.KafkaTopic;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
-import com.mokakbob.cache.CategoryQueueStore;
 import com.mokakbob.cache.ParticipantGeoStore;
 import com.mokakbob.matching.ParticipantRedisStore;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,9 +42,6 @@ class MatchingTransactionServiceTest {
     private MatchingService matchingService;
 
     @Mock
-    private CategoryQueueStore categoryQueueStore;
-
-    @Mock
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Test
@@ -52,6 +50,7 @@ class MatchingTransactionServiceTest {
         Long memberId = 1L;
         double lat = 37.5;
         double lng = 127.0;
+        Location location = Location.of(BigDecimal.valueOf(lat), BigDecimal.valueOf(lng));
         MatchingCategory category = MatchingCategory.CHINESE;
         int participantCount = 2;
         Member fakeMember = Member.builder()
@@ -67,10 +66,9 @@ class MatchingTransactionServiceTest {
         // then
         verify(participantStore).isAlreadyParticipating(memberId);
         verify(memberService).findMember(memberId);
-        verify(matchingService).saveMatchingRequest(eq(memberId), eq(category), eq(participantCount), any(), any());
-        verify(geoStore).addMemberLocation(category, participantCount, memberId, lng, lat);
+        verify(matchingService).saveMatchingRequest(eq(memberId), eq(category), eq(participantCount), any());
+        verify(geoStore).addMemberLocation(category, participantCount, memberId, location);
         verify(participantStore).transitionToParticipating(memberId);
-        verify(categoryQueueStore).addToQueue(category, participantCount, memberId);
         verify(kafkaTemplate).send(eq(KafkaTopic.MATCHING_PARTICIPATE), any(MatchingParticipateEvent.class));
     }
 }

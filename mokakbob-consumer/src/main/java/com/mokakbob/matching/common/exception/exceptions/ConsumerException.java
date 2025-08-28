@@ -9,7 +9,7 @@ public class ConsumerException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
-    public ConsumerErrorCode apiErrorCode() {
+    public ConsumerErrorCode consumerErrorCode() {
         return errorCode;
     }
 }
