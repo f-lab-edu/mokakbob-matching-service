@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
  * <p>
  * 동작 시나리오:
  * <ol>
+ *   <li>category + participant 대기열 락 획득</>
  *   <li>기준 멤버(매칭 요청한 유저)를 예약 상태로 전환</li>
  *   <li>기준 멤버의 위치 정보를 기준으로 주변 후보자를 탐색</li>
  *   <li>후보자들을 순차적으로 예약 시도</li>
