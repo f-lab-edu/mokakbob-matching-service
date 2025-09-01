@@ -5,7 +5,6 @@ import com.mokakbob.domain.matching.domain.Notification;
 import com.mokakbob.global.resolver.annotation.MemberId;
 import com.mokakbob.notification.controller.response.NotificationResponse;
 import com.mokakbob.notification.service.NotificationService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +20,7 @@ public class NotificationController {
     public ResponseEntity<NotificationResponse> getMatchingNotification(
             @MemberId Long memberId
     ) {
-        List<Notification> notifications = notificationService.getNotifications(memberId);
-        return ResponseEntity.ok(new NotificationResponse(notifications));
+        Notification notification = notificationService.getNotifications(memberId);
+        return ResponseEntity.ok(new NotificationResponse(notification));
     }
 }
