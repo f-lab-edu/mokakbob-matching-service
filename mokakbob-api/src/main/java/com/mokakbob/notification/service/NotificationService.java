@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationService {
 
+    private static final long NOTIFICATION_TTL_SECONDS = 30;
+
     private final NotificationStore notificationStore;
     private final MatchingNotificationService matchingNotificationService;
 
@@ -28,5 +30,8 @@ public class NotificationService {
         }
 
         notification.updateResponse(isAccept);
+        notificationStore.save(notification, NOTIFICATION_TTL_SECONDS); // 알림 갱신 및 후처리를 위한 시간 설정
+
+        matchingNotificationService.handleResponse(notification);
     }
 }
