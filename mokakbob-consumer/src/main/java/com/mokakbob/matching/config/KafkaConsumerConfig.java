@@ -1,5 +1,6 @@
 package com.mokakbob.matching.config;
 
+import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,15 +24,10 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConsumerFactory<String, MatchingParticipateEvent> matchingParticipateConsumerFactory() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "matching-participate-consumers");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-                "org.apache.kafka.clients.consumer.CooperativeStickyAssignor");
+        Map<String, Object> props = commonProps("matching-participate-consumers");
 
-        JsonDeserializer<MatchingParticipateEvent> json = new JsonDeserializer<>(MatchingParticipateEvent.class, false);
+        JsonDeserializer<MatchingParticipateEvent> json =
+                new JsonDeserializer<>(MatchingParticipateEvent.class, false);
         json.addTrustedPackages("com.mokakbob.**");
 
         return new DefaultKafkaConsumerFactory<>(
@@ -39,5 +35,31 @@ public class KafkaConsumerConfig {
                 new StringDeserializer(),
                 new ErrorHandlingDeserializer<>(json)
         );
+    }
+
+    @Bean
+    public ConsumerFactory<String, MatchingFoundEvent> matchingFoundConsumerFactory() {
+        Map<String, Object> props = commonProps("matching-found-consumers");
+
+        JsonDeserializer<MatchingFoundEvent> json =
+                new JsonDeserializer<>(MatchingFoundEvent.class, false);
+        json.addTrustedPackages("com.mokakbob.**");
+
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                new ErrorHandlingDeserializer<>(json)
+        );
+    }
+
+    private Map<String, Object> commonProps(String groupId) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+                "org.apache.kafka.clients.consumer.CooperativeStickyAssignor");
+        return props;
     }
 }
