@@ -2,7 +2,6 @@ package com.mokakbob.matching.consumer;
 
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.matching.service.NotificationService;
-import com.mokakbob.matching.service.request.NotificationRequest;
 import com.mokakbob.topic.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +23,8 @@ public class MatchingFoundConsumer {
         log.info("[Kafka] MATCHING_FOUND 이벤트 수신: {}", event);
 
         event.matched()
-                .forEach(memberId -> {
-                    NotificationRequest request = new NotificationRequest(
-                            memberId,
-                            "MATCHING_FOUND",
-                            event.toString()
-                    );
-                    notificationService.send(request);
-                });
+                .forEach(memberId ->
+                        notificationService.send(event)
+                );
     }
 }
