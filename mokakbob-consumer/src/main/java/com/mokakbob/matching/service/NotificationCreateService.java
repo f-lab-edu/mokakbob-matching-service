@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-public class NotificationService {
+public class NotificationCreateService {
 
     public void createNotification(MatchingFoundEvent event) {
         // todo
