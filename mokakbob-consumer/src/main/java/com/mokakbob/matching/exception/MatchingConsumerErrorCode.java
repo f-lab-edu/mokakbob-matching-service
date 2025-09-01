@@ -8,6 +8,7 @@ public enum MatchingConsumerErrorCode implements ConsumerErrorCode {
     MATCHING_PARTICIPATE_CONSUMER_EXCEPTION(500, "C004", "매칭 참여 이벤트 처리 중 오류가 발생했습니다."),
     MATCHING_LOCK_ACQUIRE_FAILED(400, "C003", "이미 다른 매칭이 진행중입니다."),
     MATCHING_LOCK_INTERRUPTED(500, "C005", "매칭 락 대기 중 인터럽트가 발생했습니다."),
+    MATCHING_NOTIFICATION_SERIALIZE_FAILED(500, "C006", "매칭 이벤트 직렬화 실패.")
     ;
     private final int httpStatus;
     private final String customCode;
