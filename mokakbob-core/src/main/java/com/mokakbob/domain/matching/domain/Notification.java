@@ -14,8 +14,13 @@ public class Notification extends BaseEntity {
     private final String payload;
 
     @Builder.Default
-    private final boolean responded = false;
+    private boolean responded = false;
 
     @Builder.Default
-    private final Boolean accepted = null;
+    private Boolean accepted = null;
+
+    public void updateResponse(boolean isAccept) {
+        this.responded = true;
+        this.accepted = isAccept;
+    }
 }
