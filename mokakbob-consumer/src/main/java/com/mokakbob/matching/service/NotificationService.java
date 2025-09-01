@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationService {
 
-    public void send(MatchingFoundEvent event) {
+    public void createNotification(MatchingFoundEvent event) {
         // todo
     }
 }

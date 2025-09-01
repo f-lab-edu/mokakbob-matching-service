@@ -24,7 +24,7 @@ public class MatchingFoundConsumer {
 
         event.matched()
                 .forEach(memberId ->
-                        notificationService.send(event)
+                        notificationService.createNotification(event)
                 );
     }
 }
