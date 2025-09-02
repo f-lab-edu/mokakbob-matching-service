@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private static final long NOTIFICATION_TTL_SECONDS = 30;
-
     private final NotificationStore notificationStore;
     private final MatchingNotificationService matchingNotificationService;
 
@@ -23,14 +21,14 @@ public class NotificationService {
     }
 
     public void respondNotification(Long memberId, boolean isAccept) {
-        Notification notification = notificationStore.findById(memberId);
+        Notification notification = notificationStore.findByMemberId(memberId)
+                .orElseThrow(() -> new ApiException(NotificationErrorCode.NOT_FOUND_NOTIFICATION));
 
-        if(notification.isResponded()) {
+        if (notification.isResponded()) {
             throw new ApiException(NotificationErrorCode.ALREADY_RESPONDED);
         }
 
         notification.updateResponse(isAccept);
-        notificationStore.save(notification, NOTIFICATION_TTL_SECONDS); // 알림 갱신 및 후처리를 위한 시간 설정
 
         matchingNotificationService.handleResponse(notification);
     }
