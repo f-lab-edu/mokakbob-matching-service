@@ -8,8 +8,8 @@ import lombok.Getter;
 @Builder
 public class Notification extends BaseEntity {
 
-    private final Long id;
     private final Long memberId;
+    private final String key;
     private final String type;
     private final String payload;
 

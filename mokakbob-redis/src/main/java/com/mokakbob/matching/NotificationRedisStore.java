@@ -6,6 +6,7 @@ import com.mokakbob.common.exception.RedisException;
 import com.mokakbob.domain.matching.domain.Notification;
 import com.mokakbob.exception.NotificationErrorCode;
 import java.time.Duration;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -14,35 +15,75 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NotificationRedisStore implements NotificationStore {
 
-    private static final String NOTIFICATION_KEY = "notification:";
+    private static final String ROOM_KEY_PREFIX = "notification:room:";
+    private static final String MEMBER_KEY_PREFIX = "notification:member:";
 
     private final RedisTemplate<String, String> basicRedisTemplate;
     private final ObjectMapper objectMapper;
 
+    /**
+     * 매칭방 단위로 알림을 저장한다.
+     * <p>
+     * Redis 구조: - roomKey(Hash) (방 TTL 적용) - memberKey(String) (방 TTL과 동일)
+     *
+     * @param key           매칭방 식별자(멱등성 키)
+     * @param notifications 회원별 알림 리스트
+     * @param ttlSeconds    방 TTL(초)
+     */
     @Override
-    public void save(Notification notification, long ttlSeconds) {
+    public void save(String key, List<Notification> notifications, long ttlSeconds) {
+        String roomKey = ROOM_KEY_PREFIX + key;
+
         try {
-            String key = notificationKey(notification.getMemberId());
-            String notificationId = String.valueOf(notification.getId());
-            String value = objectMapper.writeValueAsString(notification);
+            for (Notification notification : notifications) {
+                String value = objectMapper.writeValueAsString(notification);
 
-            basicRedisTemplate.opsForHash()
-                    .put(key, notificationId, value);
+                basicRedisTemplate.opsForHash()
+                        .put(
+                                roomKey,
+                                String.valueOf(notification.getMemberId()),
+                                value
+                        );
 
-            basicRedisTemplate.expire(key, Duration.ofSeconds(ttlSeconds));
+                basicRedisTemplate.opsForValue()
+                        .set(
+                                MEMBER_KEY_PREFIX + notification.getMemberId(),
+                                roomKey,
+                                Duration.ofSeconds(ttlSeconds)
+                        );
+            }
+
+            basicRedisTemplate.expire(roomKey, Duration.ofSeconds(ttlSeconds));
         } catch (Exception e) {
             throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
         }
     }
 
+    /**
+     * memberId로 해당 회원의 알림을 조회한다.
+     * <p>
+     * - memberId → roomId 매핑 조회
+     * - roomId 해시에서 memberId 알림 JSON 조회
+     *
+     * @param memberId 회원 ID
+     * @return Notification 객체
+     * @throws RedisException 알림이 없거나 조회 실패 시
+     */
     @Override
-    public Notification findById(Long memberId, Long notificationId) {
+    public Notification findByMemberId(Long memberId) {
         try {
-            String key = notificationKey(memberId);
-            String value = (String) basicRedisTemplate.opsForHash()
-                    .get(key, String.valueOf(notificationId));
+            String roomId = basicRedisTemplate.opsForValue()
+                    .get(MEMBER_KEY_PREFIX + memberId);
 
-            if (value == null || value.isEmpty()) {
+            if (roomId == null) {
+                throw new RedisException(NotificationErrorCode.NOT_FOUND_NOTIFICATION);
+            }
+
+            String roomKey = ROOM_KEY_PREFIX + roomId;
+            String value = (String) basicRedisTemplate.opsForHash()
+                    .get(roomKey, String.valueOf(memberId));
+
+            if (value == null) {
                 throw new RedisException(NotificationErrorCode.NOT_FOUND_NOTIFICATION);
             }
 
@@ -50,15 +91,5 @@ public class NotificationRedisStore implements NotificationStore {
         } catch (Exception e) {
             throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
         }
-    }
-
-    @Override
-    public void delete(Long memberId, Long notificationId) {
-        basicRedisTemplate.opsForHash()
-                .delete(notificationKey(memberId), String.valueOf(notificationId));
-    }
-
-    private String notificationKey(Long memberId) {
-        return NOTIFICATION_KEY + memberId;
     }
 }
