@@ -22,9 +22,6 @@ public class MatchingFoundConsumer {
     public void consume(MatchingFoundEvent event) {
         log.info("[Kafka] MATCHING_FOUND 이벤트 수신: {}", event);
 
-        event.matched()
-                .forEach(memberId ->
-                        notificationCreateService.createNotification(event)
-                );
+        notificationCreateService.createNotification(event);
     }
 }
