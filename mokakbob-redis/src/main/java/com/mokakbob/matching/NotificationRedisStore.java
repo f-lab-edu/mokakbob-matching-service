@@ -8,6 +8,7 @@ import com.mokakbob.exception.NotificationErrorCode;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -70,23 +71,23 @@ public class NotificationRedisStore implements NotificationStore {
      * @throws RedisException 알림이 없거나 조회 실패 시
      */
     @Override
-    public Notification findByMemberId(Long memberId) {
+    public Optional<Notification> findByMemberId(Long memberId) {
         try {
             String roomId = basicRedisTemplate.opsForValue()
                     .get(MEMBER_KEY_PREFIX + memberId);
 
             if (roomId == null) {
-                throw new RedisException(NotificationErrorCode.NOT_FOUND_NOTIFICATION);
+                return Optional.empty();
             }
 
             String value = (String) basicRedisTemplate.opsForHash()
                     .get(roomId, String.valueOf(memberId));
 
             if (value == null) {
-                throw new RedisException(NotificationErrorCode.NOT_FOUND_NOTIFICATION);
+                return Optional.empty();
             }
 
-            return objectMapper.readValue(value, Notification.class);
+            return Optional.ofNullable(objectMapper.readValue(value, Notification.class));
         } catch (IOException e) {
             throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
         }
