@@ -20,8 +20,6 @@ public class MatchingFoundConsumer {
             containerFactory = "matchingFoundKafkaListenerContainerFactory"
     )
     public void consume(MatchingFoundEvent event) {
-        log.info("[Kafka] MATCHING_FOUND 이벤트 수신: {}", event);
-
         notificationCreateService.createNotification(event);
     }
 }
