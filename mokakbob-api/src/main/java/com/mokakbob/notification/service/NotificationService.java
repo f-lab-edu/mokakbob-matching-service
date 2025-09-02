@@ -12,6 +12,6 @@ public class NotificationService {
     private final NotificationStore notificationStore;
 
     public Notification getNotifications(Long memberId) {
-        return notificationStore.findById(memberId);
+        return notificationStore.findByMemberId(memberId);
     }
 }
