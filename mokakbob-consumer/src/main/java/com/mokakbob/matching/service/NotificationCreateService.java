@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationCreateService {
 
-    private static final long NOTIFICATION_TTL_SECONDS = 20L;
+    private static final long NOTIFICATION_TTL_SECONDS = 23L;
     private static final String MATCHING_TYPE = "MATCHING_FOUND";
 
     private final NotificationStore notificationStore;
