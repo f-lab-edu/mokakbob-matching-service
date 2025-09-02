@@ -48,8 +48,7 @@ public class NotificationRedisStore implements NotificationStore {
                 basicRedisTemplate.opsForValue()
                         .set(
                                 MEMBER_KEY_PREFIX + notification.getMemberId(),
-                                roomKey,
-                                Duration.ofSeconds(ttlSeconds)
+                                roomKey
                         );
             }
 
