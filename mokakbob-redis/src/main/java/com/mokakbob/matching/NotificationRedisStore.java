@@ -5,6 +5,7 @@ import com.mokakbob.cache.NotificationStore;
 import com.mokakbob.common.exception.RedisException;
 import com.mokakbob.domain.matching.domain.Notification;
 import com.mokakbob.exception.NotificationErrorCode;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,7 @@ public class NotificationRedisStore implements NotificationStore {
             }
 
             basicRedisTemplate.expire(roomKey, Duration.ofSeconds(ttlSeconds));
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
         }
     }
@@ -78,16 +79,15 @@ public class NotificationRedisStore implements NotificationStore {
                 throw new RedisException(NotificationErrorCode.NOT_FOUND_NOTIFICATION);
             }
 
-            String roomKey = ROOM_KEY_PREFIX + roomId;
             String value = (String) basicRedisTemplate.opsForHash()
-                    .get(roomKey, String.valueOf(memberId));
+                    .get(roomId, String.valueOf(memberId));
 
             if (value == null) {
                 throw new RedisException(NotificationErrorCode.NOT_FOUND_NOTIFICATION);
             }
 
             return objectMapper.readValue(value, Notification.class);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
         }
     }
