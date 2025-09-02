@@ -7,7 +7,7 @@ import com.mokakbob.domain.matching.domain.Notification;
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
-import java.util.UUID;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,24 +18,26 @@ import org.springframework.stereotype.Service;
 public class NotificationCreateService {
 
     private static final long NOTIFICATION_TTL_SECONDS = 20L;
+    private static final String MATCHING_TYPE = "MATCHING_FOUND";
 
     private final NotificationStore notificationStore;
     private final ObjectMapper objectMapper;
 
     public void createNotification(MatchingFoundEvent event) {
-        event.matched().forEach(memberId -> {
-            Notification notification = Notification.builder()
-                    .id(generateId())
-                    .memberId(memberId)
-                    .type("MATCHING_FOUND")
-                    .payload(buildPayload(event))
-                    .build();
+        List<Notification> notifications = event.matched().stream()
+                .map(memberId -> Notification.builder()
+                        .memberId(memberId)
+                        .key(event.key())
+                        .type(MATCHING_TYPE)
+                        .payload(buildPayload(event))
+                        .build())
+                .toList();
 
-            notificationStore.save(notification, NOTIFICATION_TTL_SECONDS);
+        notificationStore.save(event.key(), notifications, NOTIFICATION_TTL_SECONDS);
 
-            log.info("알림 생성 완료 - memberId: {}, notificationId: {}",
-                    memberId, notification.getId());
-        });
+        notifications.forEach(n ->
+                log.info("방 생성 및 알림 생성 완료 - roomId: {}, memberId: {}", n.getKey(), n.getMemberId())
+        );
     }
 
     private String buildPayload(MatchingFoundEvent event) {
@@ -44,10 +46,5 @@ public class NotificationCreateService {
         } catch (JsonProcessingException e) {
             throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_NOTIFICATION_SERIALIZE_FAILED);
         }
-    }
-
-
-    private long generateId() {
-        return UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
     }
 }
