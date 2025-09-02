@@ -5,9 +5,6 @@ import java.util.List;
 
 public interface NotificationStore {
 
-    void save(Notification notification, long ttlSeconds);
-    Notification findById(Long memberId, Long notificationId);
-    List<Notification> findAllByMemberId(Long memberId);
-    void delete(Long memberId, Long notificationId);
-    void updateResponse(Long memberId, Long notificationId, boolean accepted);
+    void save(String key, List<Notification> notifications, long ttlSeconds);
+    Notification findByMemberId(Long memberId);
 }

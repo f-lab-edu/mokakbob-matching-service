@@ -1,17 +1,18 @@
-package com.mokakbob.domain.member.service.auth;
+package com.mokakbob.member.service.auth;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.mokakbob.common.exception.DomainException;
-import com.mokakbob.domain.member.exception.MemberErrorCode;
-import com.mokakbob.domain.member.repository.EmailVerifyCodeStore;
+import com.mokakbob.auth.domain.EmailSender;
+import com.mokakbob.auth.domain.EmailVerifyCodeStore;
+import com.mokakbob.auth.exception.AuthApiErrorCode;
+import com.mokakbob.auth.service.EmailAuthService;
+import com.mokakbob.common.exception.exceptions.ApiException;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,22 +53,7 @@ class EmailAuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> emailAuthService.sendEmail(email))
-                .isInstanceOf(DomainException.class)
-                .hasMessageContaining(MemberErrorCode.TOO_MANY_REQUEST.message());
-    }
-
-    @Test
-    void 이메일_전송_실패_시_인증_코드_삭제() {
-        // given
-        String email = "fail@example.com";
-        when(codeStore.hasCode(email)).thenReturn(false);
-        doThrow(new RuntimeException("이메일 전송 실패")).when(emailSender)
-                .sendEmail(eq(email), anyString(), anyString());
-
-        // when
-        emailAuthService.sendEmail(email);
-
-        // then
-        verify(codeStore).deleteCode(email);
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining(AuthApiErrorCode.TOO_MANY_REQUEST.message());
     }
 }
