@@ -7,6 +7,8 @@ import com.mokakbob.domain.matching.domain.Notification;
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationCreateService {
 
-    private static final long NOTIFICATION_TTL_SECONDS = 23L;
     private static final String MATCHING_TYPE = "MATCHING_FOUND";
 
     private final NotificationStore notificationStore;
@@ -33,7 +34,10 @@ public class NotificationCreateService {
                         .build())
                 .toList();
 
-        notificationStore.save(event.key(), notifications, NOTIFICATION_TTL_SECONDS);
+        long ttlSeconds = Duration.between(Instant.now(), event.expiredAt())
+                .toSeconds();
+
+        notificationStore.save(event.key(), notifications, ttlSeconds);
 
         notifications.forEach(n ->
                 log.info("방 생성 및 알림 생성 완료 - roomId: {}, memberId: {}", n.getKey(), n.getMemberId())
