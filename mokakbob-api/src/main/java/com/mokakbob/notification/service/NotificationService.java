@@ -1,6 +1,8 @@
 package com.mokakbob.notification.service;
 
 import com.mokakbob.cache.NotificationStore;
+import com.mokakbob.domain.matching.domain.Notification;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,5 +12,7 @@ public class NotificationService {
 
     private final NotificationStore notificationStore;
 
-    //todo
+    public Optional<Notification> getNotification(Long memberId) {
+        return notificationStore.findByMemberId(memberId);
+    }
 }
