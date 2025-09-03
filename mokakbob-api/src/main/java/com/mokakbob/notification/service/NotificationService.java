@@ -30,6 +30,6 @@ public class NotificationService {
 
         notification.updateResponse(isAccept);
 
-        matchingNotificationService.handleResponse(notification);
+        matchingNotificationService.lockNotificationRequest(notification);
     }
 }
