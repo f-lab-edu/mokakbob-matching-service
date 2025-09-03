@@ -12,7 +12,7 @@ public class NotificationService {
 
     private final NotificationStore notificationStore;
 
-    public Optional<Notification> getNotifications(Long memberId) {
+    public Optional<Notification> getNotification(Long memberId) {
         return notificationStore.findByMemberId(memberId);
     }
 }

@@ -15,11 +15,11 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    @GetMapping(NotificationPath.POLL)
+    @GetMapping(NotificationPath.POLL_NOTIFICATION)
     public ResponseEntity<NotificationResponse> getMatchingNotification(
             @MemberId Long memberId
     ) {
-        return notificationService.getNotifications(memberId)
+        return notificationService.getNotification(memberId)
                 .map(NotificationResponse::of)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.ok(NotificationResponse.empty()));
