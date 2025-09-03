@@ -10,7 +10,6 @@ import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
 import com.mokakbob.matching.event.MatchFoundEventPublisher;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +39,6 @@ import org.springframework.stereotype.Service;
 public class MatchingParticipateService {
 
     private static final double RADIUS_METERS = 1500.0;
-    private static final int MATCHING_ACCEPT_EXPIRE_TIME_SECONDS = 23;
     private static final int LIMIT_LOCK_CATCH_TIME = 3;
     private static final int LOCK_DURATION_TIME = 10;
 
@@ -106,8 +104,7 @@ public class MatchingParticipateService {
                     idempotencyKey,
                     category,
                     participantCount,
-                    matched,
-                    Instant.now().plusSeconds(MATCHING_ACCEPT_EXPIRE_TIME_SECONDS)
+                    matched
             );
             publisher.publishFound(matchingFoundEvent);
 
