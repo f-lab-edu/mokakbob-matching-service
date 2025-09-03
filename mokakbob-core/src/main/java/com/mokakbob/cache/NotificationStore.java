@@ -8,4 +8,5 @@ public interface NotificationStore {
 
     void save(String key, List<Notification> notifications, long ttlSeconds);
     Optional<Notification> findByMemberId(Long memberId);
+    void updateNotification(String key, Long memberId, Notification notification);
 }

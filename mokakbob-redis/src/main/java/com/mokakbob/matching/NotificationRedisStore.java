@@ -92,4 +92,26 @@ public class NotificationRedisStore implements NotificationStore {
             throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
         }
     }
+
+    /**
+     * 특정 회원의 알림 응답 상태를 업데이트한다.
+     *
+     * @param key          식별자
+     * @param memberId     회원 ID
+     * @param notification 갱신된 알림 객체
+     */
+    @Override
+    public void updateNotification(String key, Long memberId, Notification notification) {
+        String roomKey = ROOM_KEY_PREFIX + key;
+
+        try {
+            String value = objectMapper.writeValueAsString(notification);
+
+            basicRedisTemplate.opsForHash()
+                    .put(roomKey, String.valueOf(memberId), value);
+
+        } catch (IOException e) {
+            throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
+        }
+    }
 }

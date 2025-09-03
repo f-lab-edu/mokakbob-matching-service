@@ -29,6 +29,7 @@ public class NotificationService {
         }
 
         notification.updateResponse(isAccept);
+        notificationStore.updateNotification(notification.getKey(), memberId, notification);
 
         matchingNotificationService.lockNotificationRequest(notification);
     }
