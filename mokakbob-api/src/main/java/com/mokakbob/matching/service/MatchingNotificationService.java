@@ -1,8 +1,10 @@
 package com.mokakbob.matching.service;
 
+import com.mokakbob.cache.NotificationStore;
 import com.mokakbob.common.exception.exceptions.ApiException;
 import com.mokakbob.domain.matching.domain.Notification;
 import com.mokakbob.matching.exception.MatchingErrorCode;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
@@ -17,6 +19,7 @@ public class MatchingNotificationService {
     private static final int LOCK_DURATION_TIME_SECONDS = 5;
 
     private final RedissonClient redissonClient;
+    private final NotificationStore notificationStore;
 
     public void lockNotificationRequest(Notification notification) {
         String idempotencyKey = notification.getKey();
@@ -41,6 +44,24 @@ public class MatchingNotificationService {
     }
 
     public void handleNotification(Notification notification) {
-        // todo
+        List<Notification> roomNotifications = notificationStore.findAllByKey(notification.getKey());
+
+        if (roomNotifications.stream().anyMatch(n -> !n.isResponded())) {
+            return;
+        }
+
+        if (roomNotifications.stream().allMatch(n -> Boolean.TRUE.equals(n.getAccepted()))) {
+            publishSuccessEvent(notification);
+        } else {
+           publishRejectEvent(notification);
+        }
+    }
+
+    public void publishSuccessEvent(Notification notification) {
+
+    }
+
+    public void publishRejectEvent(Notification notification) {
+        // todo: matching.reject 토픽 발급 이벤트 publisher 구현
     }
 }

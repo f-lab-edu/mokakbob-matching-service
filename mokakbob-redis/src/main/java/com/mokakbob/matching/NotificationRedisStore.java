@@ -114,4 +114,35 @@ public class NotificationRedisStore implements NotificationStore {
             throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
         }
     }
+
+    /**
+     * 특정 멱등성 키로, 모든 알림을 가져온다.
+     *
+     * @param key          식별자
+     */
+    @Override
+    public List<Notification> findAllByKey(String key) {
+        String roomKey = ROOM_KEY_PREFIX + key;
+
+        try {
+            List<Object> values = basicRedisTemplate.opsForHash().values(roomKey);
+
+            if (values.isEmpty()) {
+                return List.of();
+            }
+
+            return values.stream()
+                    .map(value -> {
+                        try {
+                            return objectMapper.readValue(value.toString(), Notification.class);
+                        } catch (IOException e) {
+                            throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
+                        }
+                    })
+                    .toList();
+
+        } catch (Exception e) {
+            throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
+        }
+    }
 }

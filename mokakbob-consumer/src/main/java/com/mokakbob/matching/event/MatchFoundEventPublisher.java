@@ -17,22 +17,20 @@ public class MatchFoundEventPublisher {
     public void publishFound(MatchingFoundEvent event) {
         try {
             kafkaTemplate.send(KafkaTopic.MATCHING_FOUND, event.key(), event);
-            log.info("카프카 토픽 발급 성공: topic={}, key={}, matched={}, category={}, participantCount={}, expiredAt={}",
+            log.info("카프카 토픽 발급 성공: topic={}, key={}, matched={}, category={}, participantCount={}",
                     KafkaTopic.MATCHING_FOUND,
                     event.key(),
                     event.matched(),
                     event.category(),
-                    event.participantCount(),
-                    event.expiredAt());
+                    event.participantCount());
         } catch (Exception e) {
-            log.error("카프카 토픽 발급 실패: {}\n실패한 이벤트: {}\n재처리 필요 정보 - key: {}, category: {}, participantCount: {}, matched: {}, expiredAt={}",
+            log.error("카프카 토픽 발급 실패: {}\n실패한 이벤트: {}\n재처리 필요 정보 - key: {}, category: {}, participantCount: {}, matched: {}",
                     e.getMessage(),
                     event,
                     event.key(),
                     event.category(),
                     event.participantCount(),
-                    event.matched(),
-                    event.expiredAt());
+                    event.matched());
         }
     }
 }
