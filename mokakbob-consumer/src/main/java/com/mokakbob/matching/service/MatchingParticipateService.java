@@ -100,8 +100,10 @@ public class MatchingParticipateService {
             List<Long> matched = buildMatchedGroup(memberId, candidates, event.participantCount());
             matched.forEach(participantStore::transitionToFound);
 
+            String matchKey = category.name() + "_" + participantCount + "_" + System.currentTimeMillis();
+
             MatchingFoundEvent matchingFoundEvent = new MatchingFoundEvent(
-                    idempotencyKey,
+                    matchKey,
                     category,
                     participantCount,
                     matched
