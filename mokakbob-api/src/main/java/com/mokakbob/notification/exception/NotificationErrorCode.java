@@ -4,8 +4,6 @@ import com.mokakbob.common.exception.exceptions.ApiErrorCode;
 
 public enum NotificationErrorCode implements ApiErrorCode {
 
-    ALREADY_RESPONDED(400, "N001", "이미 응답한 알림입니다."),
-    NOT_FOUND_NOTIFICATION(404, "N002", "알림을 찾을 수 없습니다."),
     ;
     private final int httpStatus;
     private final String customCode;
