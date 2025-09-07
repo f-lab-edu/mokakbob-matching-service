@@ -1,7 +1,7 @@
 package com.mokakbob.matching.consumer;
 
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
-import com.mokakbob.matching.service.NotificationCreateService;
+import com.mokakbob.matching.service.MatchingFoundService;
 import com.mokakbob.topic.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MatchingFoundConsumer {
 
-    private final NotificationCreateService notificationCreateService;
+    private final MatchingFoundService matchingFoundService;
 
     @KafkaListener(
             topics = KafkaTopic.MATCHING_FOUND,
             containerFactory = "matchingFoundKafkaListenerContainerFactory"
     )
     public void consume(MatchingFoundEvent event) {
-        notificationCreateService.createNotification(event);
+        matchingFoundService.handleMatchingFound(event);
     }
 }

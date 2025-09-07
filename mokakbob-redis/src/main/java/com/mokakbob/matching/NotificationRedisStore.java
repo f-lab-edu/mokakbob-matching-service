@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokakbob.cache.NotificationStore;
 import com.mokakbob.common.exception.RedisException;
 import com.mokakbob.domain.matching.domain.Notification;
-import com.mokakbob.exception.NotificationErrorCode;
+import com.mokakbob.exception.RedisStoreErrorCode;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
@@ -56,7 +56,7 @@ public class NotificationRedisStore implements NotificationStore {
 
             basicRedisTemplate.expire(roomKey, Duration.ofSeconds(ttlSeconds));
         } catch (IOException e) {
-            throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
+            throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
         }
     }
 
@@ -89,7 +89,7 @@ public class NotificationRedisStore implements NotificationStore {
 
             return Optional.ofNullable(objectMapper.readValue(value, Notification.class));
         } catch (IOException e) {
-            throw new RedisException(NotificationErrorCode.FAIL_REDIS_OPERATION);
+            throw new RedisException(RedisStoreErrorCode.FAIL_REDIS_OPERATION);
         }
     }
 }

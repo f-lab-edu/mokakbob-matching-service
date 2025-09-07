@@ -2,7 +2,7 @@ package com.mokakbob.exception;
 
 import com.mokakbob.common.exception.RedisErrorCode;
 
-public enum NotificationErrorCode implements RedisErrorCode {
+public enum RedisStoreErrorCode implements RedisErrorCode {
 
     FAIL_REDIS_OPERATION(500, "R001", "Redis 조회 및 저장 오류가 발생했습니다."),
     NOT_FOUND_NOTIFICATION(500, "R002", "저장된 알림이 없습니다."),
@@ -12,7 +12,7 @@ public enum NotificationErrorCode implements RedisErrorCode {
     private final String customCode;
     private final String message;
 
-    NotificationErrorCode(int httpStatus, String customCode, String message) {
+    RedisStoreErrorCode(int httpStatus, String customCode, String message) {
         this.httpStatus = httpStatus;
         this.customCode = customCode;
         this.message = message;

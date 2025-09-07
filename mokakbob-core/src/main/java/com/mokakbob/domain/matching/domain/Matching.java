@@ -1,6 +1,7 @@
 package com.mokakbob.domain.matching.domain;
 
 import com.mokakbob.common.domain.BaseEntity;
+import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.domain.vo.MatchingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,12 +11,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Matching extends BaseEntity {
 
     @Id
@@ -23,7 +28,7 @@ public class Matching extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String menuCategory;
+    private MatchingCategory category;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

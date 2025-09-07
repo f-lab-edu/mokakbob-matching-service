@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationCreateService {
 
-    private static final long NOTIFICATION_TTL_SECONDS = 20L;
     private static final String MATCHING_TYPE = "MATCHING_FOUND";
+    private static final int NOTIFICATION_EXPIRE_TIME_SECONDS = 300;
 
     private final NotificationStore notificationStore;
     private final ObjectMapper objectMapper;
@@ -33,11 +33,7 @@ public class NotificationCreateService {
                         .build())
                 .toList();
 
-        notificationStore.save(event.key(), notifications, NOTIFICATION_TTL_SECONDS);
-
-        notifications.forEach(n ->
-                log.info("방 생성 및 알림 생성 완료 - roomId: {}, memberId: {}", n.getKey(), n.getMemberId())
-        );
+        notificationStore.save(event.key(), notifications, NOTIFICATION_EXPIRE_TIME_SECONDS);
     }
 
     private String buildPayload(MatchingFoundEvent event) {
