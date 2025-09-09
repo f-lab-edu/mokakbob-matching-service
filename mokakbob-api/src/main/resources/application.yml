@@ -1,19 +1,46 @@
 spring:
   profiles:
-    active: local
+    active: local   # 기본 실행 환경(local), 배포 시 prod로 변경
 
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
 
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
-  data:
-    redis:
-      sentinel:
-        master: mymaster
-        nodes:
-          - localhost:26379
-          - localhost:26380
-          - localhost:26381
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: read:user,user:email
+            client-name: GitHub
+        provider:
+          github:
+            user-name-attribute: id
+
+jwt:
+  access:
+    expiration-period: 3600000     # 1시간
+  refresh:
+    expiration-period: 604800000   # 7일
+
+cloud:
+  aws:
+    s3:
+      bucket: SSS
+    region:
+      static: ap-northeast-2
