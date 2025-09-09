@@ -37,6 +37,9 @@ subprojects {
 		//H2 DB
 		runtimeOnly 'com.h2database:h2'
 
+		// mysql
+		implementation 'com.mysql:mysql-connector-j:8.0.33'
+
 		// Lombok 공통
 		compileOnly 'org.projectlombok:lombok:1.18.32'
 		annotationProcessor 'org.projectlombok:lombok:1.18.32'
