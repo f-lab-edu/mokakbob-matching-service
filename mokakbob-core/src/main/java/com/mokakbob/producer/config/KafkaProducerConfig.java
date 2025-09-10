@@ -21,7 +21,7 @@ public class KafkaProducerConfig {
 
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
-        Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties(null));
+        Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties());
 
         // 필요 시 덮어씌울 옵션만 추가
         props.put(ProducerConfig.ACKS_CONFIG, "all");
