@@ -22,6 +22,10 @@ RUN apt-get update && apt-get install -y tzdata \
 
 COPY --from=builder /app/mokakbob-api/build/libs/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "app.jar"]
+# JVM 옵션 환경변수 (컨테이너 실행 시 오버라이드 가능)
+ENV JAVA_OPTS="-Xms512m -Xmx1024m"
+
+# JVM 옵션을 java 실행 시 적용
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.jar"]
 
 EXPOSE 8080
