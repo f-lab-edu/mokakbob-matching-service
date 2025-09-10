@@ -7,59 +7,37 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Configuration
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
-    private String bootstrapServers;
+    private final KafkaProperties kafkaProperties;
 
     @Bean
     public ConsumerFactory<String, MatchingParticipateEvent> matchingParticipateConsumerFactory() {
-        Map<String, Object> props = commonProps("matching-participate-consumers");
-
-        JsonDeserializer<MatchingParticipateEvent> json =
-                new JsonDeserializer<>(MatchingParticipateEvent.class, false);
-        json.addTrustedPackages("com.mokakbob.**");
-
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(json)
-        );
+        return buildConsumerFactory(MatchingParticipateEvent.class, "matching-participate-consumers");
     }
 
     @Bean
     public ConsumerFactory<String, MatchingFoundEvent> matchingFoundConsumerFactory() {
-        Map<String, Object> props = commonProps("matching-found-consumers");
+        return buildConsumerFactory(MatchingFoundEvent.class, "matching-found-consumers");
+    }
 
-        JsonDeserializer<MatchingFoundEvent> json =
-                new JsonDeserializer<>(MatchingFoundEvent.class, false);
-        json.addTrustedPackages("com.mokakbob.**");
+    private <T> ConsumerFactory<String, T> buildConsumerFactory(Class<T> targetType, String groupId) {
+        Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
         return new DefaultKafkaConsumerFactory<>(
                 props,
                 new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(json)
+                new JsonDeserializer<>(targetType)
         );
-    }
-
-    private Map<String, Object> commonProps(String groupId) {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
-                "org.apache.kafka.clients.consumer.CooperativeStickyAssignor");
-        return props;
     }
 }
