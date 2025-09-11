@@ -55,7 +55,8 @@ public class SecurityConfig {
                                 PermitPath.ADMIN_BASE + WILD_CARD_PATH,        // admin
                                 "/login/oauth2/**",                         // Oauth 콜백 URI
                                 "/favicon.ico",
-                                "/error"
+                                "/error",
+                                "/actuator/health"              // 헬스 체크 경로 추가
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
