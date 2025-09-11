@@ -61,4 +61,29 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:latest
             docker stop mokakbob || true
             docker rm mokakbob || true
-            docker run -d --name mokakbob -p 8080:8080 -e SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }} -e SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }} -e SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }} -e REDIS_HOST=${{ secrets.REDIS_HOST }} -e REDIS_PORT=${{ secrets.REDIS_PORT }} -e MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} -e MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} -e OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }} -e OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }} -e KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }} -e JWT_SECRET=${{ secrets.JWT_SECRET }} ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:latest
+            
+            export SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+            export SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            export SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            export REDIS_HOST=${{ secrets.REDIS_HOST }}
+            export REDIS_PORT=${{ secrets.REDIS_PORT }}
+            export MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            export MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+            export OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }}
+            export OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
+            export KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
+            
+            docker run -d --name mokakbob -p 8080:8080 \
+              --env SPRING_DATASOURCE_URL \
+              --env SPRING_DATASOURCE_USERNAME \
+              --env SPRING_DATASOURCE_PASSWORD \
+              --env REDIS_HOST \
+              --env REDIS_PORT \
+              --env MAIL_USERNAME \
+              --env MAIL_PASSWORD \
+              --env OAUTH_GITHUB_CLIENT_ID \
+              --env OAUTH_GITHUB_CLIENT_SECRET \
+              --env KAFKA_BOOTSTRAP_SERVERS \
+              --env JWT_SECRET \
+              ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:latest
