@@ -96,7 +96,7 @@ jobs:
             $DOCKER_IMAGE
             
             echo "▶ Waiting 15s for health check..."
-            sleep 15
+            sleep 60
             HEALTH_URL="http://localhost:$NEW_PORT/actuator/health"
             CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
 
