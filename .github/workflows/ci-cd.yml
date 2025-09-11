@@ -108,8 +108,9 @@ jobs:
               fi
             else
               echo "▶ Health check failed ($CODE). Rolling back..."
-              docker stop $NEW
-              docker rm $NEW
+              docker logs $NEW
+              # docker stop $NEW   
+              # docker rm $NEW   
               exit 1
             fi
 
