@@ -56,7 +56,7 @@ public class SecurityConfig {
                                 "/login/oauth2/**",                         // Oauth 콜백 URI
                                 "/favicon.ico",
                                 "/error",
-                                "/actuator/health"              // 헬스 체크 경로 추가
+                                "/actuator/**"              // 헬스 체크 경로 추가
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
