@@ -62,6 +62,12 @@ jobs:
             BLUE="mokakbob-blue"
             GREEN="mokakbob-green"
             
+            if docker ps -a --format '{{.Names}}' | grep -q '^mokakbob$'; then
+              echo "▶ Removing old single-container (mokakbob)"
+              docker stop mokakbob || true
+              docker rm mokakbob || true
+            fi
+            
             if docker ps | grep -q $BLUE; then
               NEW=$GREEN
               OLD=$BLUE
