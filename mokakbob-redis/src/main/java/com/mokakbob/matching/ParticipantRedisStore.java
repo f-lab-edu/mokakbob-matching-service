@@ -3,7 +3,6 @@ package com.mokakbob.matching;
 import com.mokakbob.domain.matching.domain.vo.MatchingRequestStatus;
 import com.mokakbob.cache.ParticipantStore;
 import java.time.Duration;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -12,8 +11,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ParticipantRedisStore implements ParticipantStore {
 
-    private static final String PARTICIPATE_KEY = "member:%d:matching:participate";
-    private static final String FOUND_KEY = "member:%d:matching:found";
+    private static final String PARTICIPATE_KEY = "member:{%d}:matching:participate";
+    private static final String FOUND_KEY       = "member:{%d}:matching:found";
     private static final Duration DEFAULT_TTL = Duration.ofHours(1);
     private static final String SHOW_EXIST = "1";
 
@@ -58,10 +57,8 @@ public class ParticipantRedisStore implements ParticipantStore {
     }
 
     private void deleteAllStates(Long memberId) {
-        basicRedisTemplate.delete(List.of(
-                participateKey(memberId),
-                foundKey(memberId)
-        ));
+        basicRedisTemplate.delete(participateKey(memberId));
+        basicRedisTemplate.delete(foundKey(memberId));
     }
 
     private String participateKey(Long memberId) {
