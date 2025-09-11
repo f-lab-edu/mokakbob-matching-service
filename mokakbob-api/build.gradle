@@ -37,8 +37,7 @@ dependencies {
 
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
-
-    implementation "software.amazon.msk:aws-msk-iam-auth:1.1.7"
+    implementation 'software.amazon.msk:aws-msk-iam-auth:1.1.9'
 }
 
 springBoot {
