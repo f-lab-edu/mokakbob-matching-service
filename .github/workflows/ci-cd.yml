@@ -46,7 +46,7 @@ jobs:
       # 6. Docker 이미지 빌드 & 푸시 (Git 태그 버전 사용)
       - name: Build and Push Docker image
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${{ github.ref_name }}
           echo "▶ Building Docker image with tag: $VERSION"
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION
@@ -59,7 +59,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            VERSION=${GITHUB_REF#refs/tags/}
+            VERSION=${{ github.ref_name }}
             DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION"
             APP_NAME="mokakbob"
             PORT=8080
