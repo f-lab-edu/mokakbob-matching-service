@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.geo.Circle;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResults;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ParticipantGeoRedisStore implements ParticipantGeoStore {
 
     private static final String GEO_KEY = "matching:geo:%s:%d";
@@ -125,17 +127,25 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
         String geoKey = geoKey(category, count);
         String memberKey = memberKey(memberId);
 
+        List<Point> positions = basicRedisTemplate.opsForGeo()
+                .position(geoKey, memberKey);
+
+        if (positions == null || positions.isEmpty() || positions.get(0) == null) {
+            return false;
+        }
+        Point p = positions.get(0);
+
+        String reserveValue = memberKey + ":" + p.getX() + ":" + p.getY();
+
         Long removed = basicRedisTemplate.opsForGeo()
                 .remove(geoKey, memberKey);
-
         if (removed == null || removed == 0) {
             return false;
         }
 
         String reserveKey = RESERVE_KEY.formatted(reserveId);
         basicRedisTemplate.opsForList()
-                .rightPush(reserveKey, memberKey);
-
+                .rightPush(reserveKey, reserveValue);
         basicRedisTemplate.expire(reserveKey, ttl);
 
         return true;
@@ -153,24 +163,29 @@ public class ParticipantGeoRedisStore implements ParticipantGeoStore {
     @Override
     public void rollbackReservation(String reserveId, MatchingCategory category, int count) {
         String reserveKey = RESERVE_KEY.formatted(reserveId);
-        List<String> reserved = basicRedisTemplate.opsForList()
-                .range(reserveKey, 0, -1);
+        List<String> reserved = basicRedisTemplate.opsForList().range(reserveKey, 0, -1);
 
         if (reserved != null) {
-            reserved.forEach(value ->
-                    extractUserId(value).ifPresent(memberId ->
-                            getLocation(category, count, memberId).ifPresent(loc ->
-                                    basicRedisTemplate.opsForGeo().add(
-                                            geoKey(category, count),
-                                            new Point(
-                                                    loc.getLongitude().doubleValue(),
-                                                    loc.getLatitude().doubleValue()
-                                            ),
-                                            memberKey(memberId)
-                                    )
-                            )
-                    )
-            );
+            reserved.forEach(value -> {
+                String[] parts = value.split(":");
+                if (parts.length == 4) {
+                    String memberKey = parts[0] + ":" + parts[1];
+                    double lng = Double.parseDouble(parts[2]);
+                    double lat = Double.parseDouble(parts[3]);
+
+                    try {
+                        basicRedisTemplate.opsForGeo().add(
+                                geoKey(category, count),
+                                new Point(lng, lat),
+                                memberKey
+                        );
+                    } catch (Exception e) {
+                        log.error("Rollback GEO 추가 실패: key={}, lng={}, lat={}", memberKey, lng, lat, e);
+                    }
+                } else {
+                    log.warn("Rollback reservation format 오류: {}", value);
+                }
+            });
         }
 
         basicRedisTemplate.delete(reserveKey);
