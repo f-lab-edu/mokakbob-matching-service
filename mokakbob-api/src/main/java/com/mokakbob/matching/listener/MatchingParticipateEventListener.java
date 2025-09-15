@@ -20,10 +20,10 @@ public class MatchingParticipateEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMatchingParticipateEvent(MatchingParticipateEvent event) {
-        sendKafkaTopic(event);
-
         matchingWriterService.saveParticipantInfo(event);
         matchingWriterService.saveGeo(event);
+
+        sendKafkaTopic(event);
     }
 
     private void sendKafkaTopic(MatchingParticipateEvent event) {

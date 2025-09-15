@@ -119,7 +119,7 @@ public class MatchingParticipateService {
     private List<Long> buildMatchedGroup(Long delimiterMemberId, List<Long> candidates, int participantCount) {
         List<Long> matched = new ArrayList<>();
         matched.add(delimiterMemberId);
-        matched.addAll(candidates.subList(0, participantCount - 1));
+        matched.addAll(candidates.subList(0, Math.min(participantCount - 1, candidates.size())));
         return matched;
     }
 
@@ -139,17 +139,23 @@ public class MatchingParticipateService {
     private List<Long> findAndReserveCandidates(MatchingParticipateEvent event, Long memberId, Location location, String reserveId) {
         List<Long> nearby = geoStore.findNearbyMembers(
                 event.category(),
-                event.participantCount() - 1,
+                event.participantCount(),
                 location,
                 RADIUS_METERS
         );
 
         List<Long> reserved = new ArrayList<>();
+        int requiredCount = event.participantCount() - 1;
 
         for (Long candidateId : nearby) {
             if (candidateId.equals(memberId)) {
                 continue;
             }
+
+            if (reserved.size() >= requiredCount) {
+                break;
+            }
+
             boolean success = geoStore.reserveMember(
                     event.category(),
                     event.participantCount(),
