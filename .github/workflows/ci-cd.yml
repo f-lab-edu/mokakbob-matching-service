@@ -1,10 +1,9 @@
-name: CI/CD Deploy to EC2 (Blue/Green)
+name: CI/CD Deploy to EC2 (Blue/Green with Tag + Rollback)
 
-# develop 브랜치에 push 될 때마다 실행
 on:
   push:
-    branches:
-      - develop
+    tags:
+      - 'v*'   # v로 시작하는 태그가 push될 때 실행 (예: v1.0.0)
 
 jobs:
   build-test-deploy:
@@ -22,7 +21,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Gradle 캐시 (빌드 속도 향상을 위해 캐시 사용)
+      # 3. Gradle 캐시
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -44,44 +43,36 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 6. Docker 이미지 빌드 & 푸시
+      # 6. Docker 이미지 빌드 & 푸시 (Git 태그 버전 사용)
       - name: Build and Push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:latest
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "▶ Building Docker image with tag: $VERSION"
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION
 
-      # 7. Blue/Green 배포
-      - name: Deploy to EC2 (Blue/Green)
+      # 7. EC2에 배포 (헬스체크 + 실패 시 롤백)
+      - name: Deploy to EC2 (Tag + Rollback)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:latest"
-            BLUE="mokakbob-blue"
-            GREEN="mokakbob-green"
-            
-            if docker ps -a --format '{{.Names}}' | grep -q '^mokakbob$'; then
-              echo "▶ Removing old single-container (mokakbob)"
-              docker stop mokakbob || true
-              docker rm mokakbob || true
-            fi
-            
-            if docker ps | grep -q $BLUE; then
-              NEW=$GREEN
-              OLD=$BLUE
-              NEW_PORT=8081
-            else
-              NEW=$BLUE
-              OLD=$GREEN
-              NEW_PORT=8080
-            fi
+            VERSION=${GITHUB_REF#refs/tags/}
+            DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION"
+            APP_NAME="mokakbob"
+            PORT=8080
 
-            echo "▶ Deploying new container: $NEW on port $NEW_PORT"
-            
+            echo "▶ Stopping old container..."
+            docker stop $APP_NAME || true
+            docker rm $APP_NAME || true
+
+            echo "▶ Pulling new Docker image: $DOCKER_IMAGE"
             docker pull $DOCKER_IMAGE
-            docker run -d --name $NEW -p $NEW_PORT:8080 \
+
+            echo "▶ Running new container: $APP_NAME ($VERSION)"
+            docker run -d --name $APP_NAME -p $PORT:8080 \
             -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" \
             -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
             -e "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
@@ -94,23 +85,49 @@ jobs:
             -e "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" \
             -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
             $DOCKER_IMAGE
-            
-            echo "▶ Waiting 15s for health check..."
-            sleep 60
-            HEALTH_URL="http://localhost:$NEW_PORT/actuator/health"
+
+            echo "▶ Waiting for health check..."
+            sleep 50
+            HEALTH_URL="http://localhost:$PORT/actuator/health"
             CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
 
             if [ "$CODE" -eq 200 ]; then
-              echo "▶ Health check passed. Switching to $NEW."
-              if docker ps | grep -q $OLD; then
-                docker stop $OLD
-                docker rm $OLD
-              fi
+              echo "Health check passed for $VERSION"
             else
-              echo "▶ Health check failed ($CODE). Rolling back..."
-              docker logs $NEW
-              docker stop $NEW   
-              docker rm $NEW   
+              echo "Health check failed (code: $CODE). Rolling back..."
+
+              # 이전 태그 찾기 (현재 태그 제외, 최신 2번째)
+              PREV_VERSION=$(docker images --format "{{.Tag}}" ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob \
+                | grep -v latest \
+                | grep -v "$VERSION" \
+                | sort -V \
+                | tail -n 1)
+
+              if [ -z "$PREV_VERSION" ]; then
+                echo "⚠ No previous version found. Rollback not possible."
+                exit 1
+              fi
+
+              echo "▶ Rolling back to version: $PREV_VERSION"
+              PREV_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$PREV_VERSION"
+
+              docker stop $APP_NAME || true
+              docker rm $APP_NAME || true
+              docker run -d --name $APP_NAME -p $PORT:8080 \
+              -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" \
+              -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
+              -e "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
+              -e "REDIS_HOST=${{ secrets.REDIS_HOST }}" \
+              -e "REDIS_PORT=${{ secrets.REDIS_PORT }}" \
+              -e "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" \
+              -e "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" \
+              -e "OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }}" \
+              -e "OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}" \
+              -e "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" \
+              -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+                $PREV_IMAGE
+
+              echo "Rolled back to $PREV_VERSION"
               exit 1
             fi
 
