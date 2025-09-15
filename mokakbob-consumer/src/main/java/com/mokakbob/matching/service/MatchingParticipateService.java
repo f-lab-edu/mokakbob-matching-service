@@ -145,11 +145,17 @@ public class MatchingParticipateService {
         );
 
         List<Long> reserved = new ArrayList<>();
+        int requiredCount = event.participantCount() - 1;
 
         for (Long candidateId : nearby) {
             if (candidateId.equals(memberId)) {
                 continue;
             }
+
+            if (reserved.size() >= requiredCount) {
+                break;
+            }
+
             boolean success = geoStore.reserveMember(
                     event.category(),
                     event.participantCount(),
