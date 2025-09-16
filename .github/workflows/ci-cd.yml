@@ -65,11 +65,11 @@ jobs:
             # 현재 돌고 있는 게 blue인지 green인지 확인
             if docker ps --format '{{.Names}}' | grep -q mokakbob-blue; then
               NEW_NAME="mokakbob-green"
-              NEW_PORT=8082
+              NEW_PORT=8081
               OLD_NAME="mokakbob-blue"
             else
               NEW_NAME="mokakbob-blue"
-              NEW_PORT=8081
+              NEW_PORT=8082
               OLD_NAME="mokakbob-green"
             fi
 
