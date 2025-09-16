@@ -12,6 +12,8 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      ssl:
+        enabled: false
 
   mail:
     username: ${MAIL_USERNAME}
