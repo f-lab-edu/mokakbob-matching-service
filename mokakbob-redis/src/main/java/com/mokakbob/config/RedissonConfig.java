@@ -18,7 +18,7 @@ public class RedissonConfig {
 
         Config config = new Config();
         config.useSingleServer()
-                .setAddress("rediss://" + host + ":" + port)
+                .setAddress("redis://" + host + ":" + port)
                 .setConnectionMinimumIdleSize(10)
                 .setConnectionPoolSize(64)
                 .setIdleConnectionTimeout(10000)
