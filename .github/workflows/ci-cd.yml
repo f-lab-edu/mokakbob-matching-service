@@ -51,8 +51,8 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION
 
-      # 7. EC2에 배포 (헬스체크 + 실패 시 롤백)
-      - name: Deploy to EC2 (Tag + Rollback)
+      # 7. EC2에 배포 (헬스체크 + 실패 시 롤백, Blue/Green)
+      - name: Deploy to EC2 (Blue/Green with Tag + Rollback)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -61,18 +61,23 @@ jobs:
           script: |
             VERSION=${{ github.ref_name }}
             DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$VERSION"
-            APP_NAME="mokakbob"
-            PORT=8080
 
-            echo "▶ Stopping old container..."
-            docker stop $APP_NAME || true
-            docker rm $APP_NAME || true
+            # 현재 돌고 있는 게 blue인지 green인지 확인
+            if docker ps --format '{{.Names}}' | grep -q mokakbob-blue; then
+              NEW_NAME="mokakbob-green"
+              NEW_PORT=8082
+              OLD_NAME="mokakbob-blue"
+            else
+              NEW_NAME="mokakbob-blue"
+              NEW_PORT=8081
+              OLD_NAME="mokakbob-green"
+            fi
 
-            echo "▶ Pulling new Docker image: $DOCKER_IMAGE"
+            echo "▶ Deploying $NEW_NAME on port $NEW_PORT with image $DOCKER_IMAGE"
+
             docker pull $DOCKER_IMAGE
 
-            echo "▶ Running new container: $APP_NAME ($VERSION)"
-            docker run -d --name $APP_NAME -p $PORT:8080 \
+            docker run -d --name $NEW_NAME -p $NEW_PORT:8080 \
             -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" \
             -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
             -e "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
@@ -86,53 +91,27 @@ jobs:
             -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
             $DOCKER_IMAGE
 
-            echo "▶ Waiting for health check..."
-            HEALTH_URL="http://localhost:$PORT/actuator/health"
-            
+            echo "▶ Waiting for health check on $NEW_NAME ($NEW_PORT)..."
+            HEALTH_URL="http://localhost:$NEW_PORT/actuator/health"
             for i in {1..18}; do   # 10초씩, 최대 180초
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
-            if [ "$CODE" -eq 200 ]; then
-              echo "Health check passed at attempt $i"
-              break
-            fi
-            echo "Attempt $i failed, retrying in 10s..."
-            sleep 10
+              CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
+              if [ "$CODE" -eq 200 ]; then
+                echo "Health check passed at attempt $i"
+                break
+              fi
+              echo "Attempt $i failed, retrying in 10s..."
+              sleep 10
             done
-            
+
             if [ "$CODE" -ne 200 ]; then
-            echo "⚠ Health check failed after 180s, rolling back..."
-            
-            # 이전 태그 찾기 (현재 태그 제외, 최신 2번째)
-            PREV_VERSION=$(docker images --format "{{.Tag}}" ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob \
-              | grep -v latest \
-              | grep -v "$VERSION" \
-              | sort -V \
-              | tail -n 1)
-            
-            if [ -z "$PREV_VERSION" ]; then
-              echo "⚠ No previous version found. Rollback not possible."
+              echo "⚠ Health check failed after 180s, rolling back..."
+              docker stop $NEW_NAME || true
+              docker rm $NEW_NAME || true
               exit 1
             fi
-            
-            echo "▶ Rolling back to version: $PREV_VERSION"
-            PREV_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$PREV_VERSION"
-            
-            docker stop $APP_NAME || true
-            docker rm $APP_NAME || true
-            docker run -d --name $APP_NAME -p $PORT:8080 \
-            -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" \
-            -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
-            -e "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
-            -e "REDIS_HOST=${{ secrets.REDIS_HOST }}" \
-            -e "REDIS_PORT=${{ secrets.REDIS_PORT }}" \
-            -e "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" \
-            -e "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" \
-            -e "OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }}" \
-            -e "OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}" \
-            -e "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" \
-            -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
-              $PREV_IMAGE
-            
-            echo "Rolled back to $PREV_VERSION"
-            exit 1
-            fi
+
+            echo "▶ Switching traffic to $NEW_NAME"
+            docker stop $OLD_NAME || true
+            docker rm $OLD_NAME || true
+
+            docker image prune -f
