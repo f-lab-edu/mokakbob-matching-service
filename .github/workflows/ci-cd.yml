@@ -87,48 +87,52 @@ jobs:
             $DOCKER_IMAGE
 
             echo "▶ Waiting for health check..."
-            sleep 50
             HEALTH_URL="http://localhost:$PORT/actuator/health"
+            
+            for i in {1..18}; do   # 10초씩, 최대 180초
             CODE=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL)
-
             if [ "$CODE" -eq 200 ]; then
-              echo "Health check passed for $VERSION"
-            else
-              echo "Health check failed (code: $CODE). Rolling back..."
-
-              # 이전 태그 찾기 (현재 태그 제외, 최신 2번째)
-              PREV_VERSION=$(docker images --format "{{.Tag}}" ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob \
-                | grep -v latest \
-                | grep -v "$VERSION" \
-                | sort -V \
-                | tail -n 1)
-
-              if [ -z "$PREV_VERSION" ]; then
-                echo "⚠ No previous version found. Rollback not possible."
-                exit 1
-              fi
-
-              echo "▶ Rolling back to version: $PREV_VERSION"
-              PREV_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$PREV_VERSION"
-
-              docker stop $APP_NAME || true
-              docker rm $APP_NAME || true
-              docker run -d --name $APP_NAME -p $PORT:8080 \
-              -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" \
-              -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
-              -e "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
-              -e "REDIS_HOST=${{ secrets.REDIS_HOST }}" \
-              -e "REDIS_PORT=${{ secrets.REDIS_PORT }}" \
-              -e "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" \
-              -e "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" \
-              -e "OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }}" \
-              -e "OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}" \
-              -e "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" \
-              -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
-                $PREV_IMAGE
-
-              echo "Rolled back to $PREV_VERSION"
+              echo "Health check passed at attempt $i"
+              break
+            fi
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+            done
+            
+            if [ "$CODE" -ne 200 ]; then
+            echo "⚠ Health check failed after 180s, rolling back..."
+            
+            # 이전 태그 찾기 (현재 태그 제외, 최신 2번째)
+            PREV_VERSION=$(docker images --format "{{.Tag}}" ${{ secrets.DOCKERHUB_USERNAME }}/mokakbob \
+              | grep -v latest \
+              | grep -v "$VERSION" \
+              | sort -V \
+              | tail -n 1)
+            
+            if [ -z "$PREV_VERSION" ]; then
+              echo "⚠ No previous version found. Rollback not possible."
               exit 1
             fi
-
-            docker image prune -f
+            
+            echo "▶ Rolling back to version: $PREV_VERSION"
+            PREV_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/mokakbob:$PREV_VERSION"
+            
+            docker stop $APP_NAME || true
+            docker rm $APP_NAME || true
+            docker run -d --name $APP_NAME -p $PORT:8080 \
+            -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" \
+            -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
+            -e "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" \
+            -e "REDIS_HOST=${{ secrets.REDIS_HOST }}" \
+            -e "REDIS_PORT=${{ secrets.REDIS_PORT }}" \
+            -e "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" \
+            -e "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" \
+            -e "OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }}" \
+            -e "OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}" \
+            -e "KAFKA_BOOTSTRAP_SERVERS=${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}" \
+            -e "JWT_SECRET=${{ secrets.JWT_SECRET }}" \
+              $PREV_IMAGE
+            
+            echo "Rolled back to $PREV_VERSION"
+            exit 1
+            fi
