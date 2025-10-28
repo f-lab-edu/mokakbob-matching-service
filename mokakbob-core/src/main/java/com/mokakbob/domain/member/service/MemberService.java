@@ -20,6 +20,12 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
+    public Member findMemberByNickName(String nickName) {
+        return memberRepository.findByNickname(nickName)
+                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
+    }
+
+    @Transactional(readOnly = true)
     public Optional<Member> findByNickName(String nickName) {
         return memberRepository.findByNickname(nickName);
     }
@@ -31,7 +37,8 @@ public class MemberService {
     }
 
     @Transactional
-    public Member createMember(String email, String passwordEnc, String nickName, String defaultImagePath, MemberPreference preference) {
+    public Member createMember(String email, String passwordEnc, String nickName, String defaultImagePath,
+                               MemberPreference preference) {
         validateDuplicateEmail(email);
         validateDuplicateNickName(nickName);
 
@@ -51,7 +58,7 @@ public class MemberService {
     @Transactional(readOnly = true)
     public Member findMember(Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(()-> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
 
     @Transactional
