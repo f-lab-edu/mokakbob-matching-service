@@ -8,6 +8,7 @@ import com.mokakbob.auth.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -39,7 +40,7 @@ public class SecurityConfig {
         http
                 // 기본 보안 설정 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
@@ -56,7 +57,8 @@ public class SecurityConfig {
                                 "/login/oauth2/**",                         // Oauth 콜백 URI
                                 "/favicon.ico",
                                 "/error",
-                                "/actuator/**"              // 헬스 체크 경로 추가
+                                "/actuator/**",              // 헬스 체크 경로 추가
+                                "/ws-connect/**"             // 웹소켓 경로 추가
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

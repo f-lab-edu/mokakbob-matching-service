@@ -43,7 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return uri.startsWith(PermitPath.AUTH_BASE) ||
                 uri.startsWith(PermitPath.EMAIL_BASE) ||
                 uri.startsWith(PermitPath.ADMIN_BASE) ||
-                uri.startsWith("/actuator") // 헬스체크 bypass
+                uri.startsWith("/actuator") || // 헬스체크 bypass
+                uri.startsWith("/ws-connect")  // 웹소켓
                 ;
     }
 }
