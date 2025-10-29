@@ -9,6 +9,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,11 @@ public class StompHandler implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+        if (accessor == null) {
+            return message;
+        }
 
         // connect 프레임일 경우, 인증 처리
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
@@ -32,6 +37,7 @@ public class StompHandler implements ChannelInterceptor {
 
             Authentication auth = validateToken(token);
             accessor.setUser(auth);
+            System.out.println(auth);
         }
 
         return message;

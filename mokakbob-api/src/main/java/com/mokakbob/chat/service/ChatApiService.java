@@ -2,8 +2,6 @@ package com.mokakbob.chat.service;
 
 import com.mokakbob.chat.controller.response.ChatMessageResponse;
 import com.mokakbob.domain.chat.service.ChatMessageService;
-import com.mokakbob.domain.member.domain.Member;
-import com.mokakbob.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -17,12 +15,10 @@ public class ChatApiService {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageService messageService;
-    private final MemberService memberService;
 
     @Transactional
-    public void handleMessage(Long roomId, String nickName, String content) {
-        Member member = memberService.findMemberByNickName(nickName);
-        messageService.saveChatMessage(roomId, member.getId(), content);
+    public void handleMessage(Long roomId, String memberId, String content) {
+        messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
     }
 
     public void broadCastMessage(Long roomId, ChatMessageResponse response) {

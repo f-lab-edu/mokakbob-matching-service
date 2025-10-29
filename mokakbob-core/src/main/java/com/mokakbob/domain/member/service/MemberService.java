@@ -20,12 +20,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
-    public Member findMemberByNickName(String nickName) {
-        return memberRepository.findByNickname(nickName)
-                .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
-    }
-
-    @Transactional(readOnly = true)
     public Optional<Member> findByNickName(String nickName) {
         return memberRepository.findByNickname(nickName);
     }
