@@ -1,7 +1,7 @@
 package com.mokakbob.chat.controller;
 
-import com.mokakbob.chat.controller.request.ChatMessageRequest;
-import com.mokakbob.chat.controller.response.ChatMessageResponse;
+import com.mokakbob.domain.chat.pubsub.request.ChatMessageRequest;
+import com.mokakbob.domain.chat.pubsub.response.ChatMessageResponse;
 import com.mokakbob.chat.service.ChatApiService;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
