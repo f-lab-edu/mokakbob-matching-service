@@ -1,17 +1,17 @@
+version: "3.9"
+
 services:
   redis:
     image: redis:7.2
     container_name: redis
     ports:
       - "6379:6379"
-    volumes:
-      - redis-data:/data
     command: ["redis-server", "--bind", "0.0.0.0", "--appendonly", "yes", "--protected-mode", "no"]
     restart: always
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 2s
-      timeout: 1s
+      timeout: 2s
       retries: 20
 
   zookeeper:
@@ -34,10 +34,75 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    restart: always
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/kafka/9092"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  app1:
+    image: eclipse-temurin:17-jdk
+    container_name: app-8080
+    volumes:
+      - ./mokakbob-api/build/libs:/app
+    working_dir: /app
+    command: ["java", "-jar", "mokakbob-api-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=local"]
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SERVER_PORT=8080
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: always
+
+  app2:
+    image: eclipse-temurin:17-jdk
+    container_name: app-8081
+    volumes:
+      - ./mokakbob-api/build/libs:/app
+    working_dir: /app
+    command: ["java", "-jar", "mokakbob-api-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=local", "--server.port=8081"]
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SERVER_PORT=8081
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: always
+
+  app3:
+    image: eclipse-temurin:17-jdk
+    container_name: app-8082
+    volumes:
+      - ./mokakbob-api/build/libs:/app
+    working_dir: /app
+    command: ["java", "-jar", "mokakbob-api-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=local", "--server.port=8082"]
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SERVER_PORT=8082
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     restart: always
 
 volumes:
