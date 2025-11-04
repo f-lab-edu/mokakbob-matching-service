@@ -12,7 +12,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 @RequiredArgsConstructor
 public class RedisPubSubConfig {
 
-    private static final String CHAT_CHANNEL_PATTERN = "chat/*";
+    private static final String CHAT_CHANNEL_PATTERN = "chat.*";
 
     private final RedisConnectionFactory connectionFactory;
     private final RedisChatSubscriber redisChatSubscriber;

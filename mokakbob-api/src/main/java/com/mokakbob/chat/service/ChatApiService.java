@@ -17,9 +17,6 @@ public class ChatApiService {
     @Transactional
     public void handleMessage(Long roomId, String memberId, String content) {
         messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
-    }
-
-    public void broadCastMessage(Long roomId, ChatMessageResponse response) {
-        chatPublisher.publish(roomId, response);
+        chatPublisher.publish(roomId, new ChatMessageResponse(roomId, memberId, content));
     }
 }

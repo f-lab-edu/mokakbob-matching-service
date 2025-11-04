@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisChatPublisher implements ChatPublisher {
 
-    private static final String CHANNEL_PREFIX = "chat/";
+    private static final String CHANNEL_PREFIX = "chat.";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
