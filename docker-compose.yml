@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # Redis
   redis:
     image: redis:7.2
     container_name: redis
@@ -14,6 +15,7 @@ services:
       timeout: 2s
       retries: 20
 
+  # Zookeeper (Kafka 의존)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -24,6 +26,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     restart: always
 
+  # Kafka
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
@@ -45,6 +48,7 @@ services:
       timeout: 2s
       retries: 10
 
+  # Spring Boot Application 1
   app1:
     image: eclipse-temurin:17-jdk
     container_name: app-8080
@@ -65,6 +69,7 @@ services:
         condition: service_healthy
     restart: always
 
+  # Spring Boot Application 2
   app2:
     image: eclipse-temurin:17-jdk
     container_name: app-8081
@@ -85,6 +90,7 @@ services:
         condition: service_healthy
     restart: always
 
+  # Spring Boot Application 3
   app3:
     image: eclipse-temurin:17-jdk
     container_name: app-8082
@@ -105,5 +111,39 @@ services:
         condition: service_healthy
     restart: always
 
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    depends_on:
+      - app1
+      - app2
+      - app3
+    restart: always
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    restart: always
+
 volumes:
   redis-data:
+
+networks:
+  default:
+    name: monitoring-network
+    driver: bridge

@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'mokakbob-apps'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'app-8080:8080'
+          - 'app-8081:8081'
+          - 'app-8082:8082'
