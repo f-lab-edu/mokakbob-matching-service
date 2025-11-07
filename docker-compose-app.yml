@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.8'
 
 services:
   redis:
@@ -13,6 +13,8 @@ services:
       interval: 2s
       timeout: 2s
       retries: 20
+    networks:
+      - monitoring-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -23,6 +25,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     restart: always
+    networks:
+      - monitoring-network
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -44,6 +48,8 @@ services:
       interval: 3s
       timeout: 2s
       retries: 10
+    networks:
+      - monitoring-network
 
   app1:
     image: eclipse-temurin:17-jdk
@@ -64,6 +70,8 @@ services:
       kafka:
         condition: service_healthy
     restart: always
+    networks:
+      - monitoring-network
 
   app2:
     image: eclipse-temurin:17-jdk
@@ -84,6 +92,8 @@ services:
       kafka:
         condition: service_healthy
     restart: always
+    networks:
+      - monitoring-network
 
   app3:
     image: eclipse-temurin:17-jdk
@@ -104,6 +114,12 @@ services:
       kafka:
         condition: service_healthy
     restart: always
+    networks:
+      - monitoring-network
 
 volumes:
   redis-data:
+
+networks:
+  monitoring-network:
+    external: true

@@ -3,6 +3,7 @@ package com.mokakbob.chat.handler;
 import com.mokakbob.auth.infrastructure.JwtTokenProvider;
 import com.mokakbob.chat.exception.ChatErrorCode;
 import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.metrix.ChatMetrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -22,6 +23,7 @@ public class StompHandler implements ChannelInterceptor {
     private static final int BEARER_PREFIX_LENGTH = "Bearer ".length();
 
     private final JwtTokenProvider tokenProvider;
+    private final ChatMetrics chatMetrics;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -37,7 +39,9 @@ public class StompHandler implements ChannelInterceptor {
 
             Authentication auth = validateToken(token);
             accessor.setUser(auth);
-            System.out.println(auth);
+            chatMetrics.incrementSession();
+        } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            chatMetrics.decrementSession();
         }
 
         return message;

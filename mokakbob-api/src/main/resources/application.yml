@@ -44,3 +44,20 @@ cloud:
       bucket: SSS
     region:
       static: ap-northeast-2
+
+# Prometheus + Actuator 설정 추가
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus  # prometheus endpoint 노출
+  endpoint:
+    prometheus:
+      access: unrestricted
+  metrics:
+    tags:
+      application: mokakbob  # 서비스 식별용 태그
+  prometheus:
+    metrics:
+      export:
+        enabled: true
