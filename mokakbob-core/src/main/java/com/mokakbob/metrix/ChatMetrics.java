@@ -11,38 +11,71 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatMetrics implements MetricsRecorder {
 
+    // metric name
+    private static final String TAG_MODE_KEY = "mode";
+    private static final String TAG_MODE_VALUE = "pubsub";
+    private static final String PREFIX_SEND = "chat_send_message";
+    private static final String PREFIX_RECEIVE = "chat_receive_message";
     private static final String METRIC_ACTIVE_SESSIONS = "chat_active_sessions";
-    private static final String METRIC_MESSAGES_SENT_TOTAL = "chat_send_messages_sent_total";
-    private static final String METRIC_ERRORS_TOTAL = "chat_send_errors_total";
-    private static final String METRIC_LATENCY_SECONDS = "chat_send_message_latency_seconds";
+    private static final String SUFFIX_MESSAGES_TOTAL = "_sent_total";
+    private static final String SUFFIX_ERRORS_TOTAL = "_errors_total";
+    private static final String SUFFIX_LATENCY_SECONDS = "_latency_seconds";
+
+    // metric description
+    private static final String DESC_ACTIVE_SESSIONS = "Number of active chat sessions";
+    private static final String DESC_SEND_TOTAL = "Total number of chat messages sent";
+    private static final String DESC_SEND_ERRORS = "Number of errors occurred during sending chat messages";
+    private static final String DESC_SEND_LATENCY = "Latency for sending chat messages";
+    private static final String DESC_RECEIVE_ERRORS = "Number of errors occurred during receiving chat messages";
+    private static final String DESC_RECEIVE_LATENCY = "Latency for receiving chat messages";
+
+    // timer
     private static final boolean ENABLE_HISTOGRAM = true;
     private static final double[] PERCENTILES = {0.95, 0.99};
 
-    private final Counter messageSentCounter;
-    private final Counter errorCounter;
-    private final Timer latencyTimer;
-
+    // metric object
     private final AtomicInteger activeSessions = new AtomicInteger(0);
 
+    private final Counter sendCounter;
+    private final Counter sendErrorCounter;
+    private final Timer sendLatencyTimer;
+
+    private final Counter receiveErrorCounter;
+    private final Timer receiveLatencyTimer;
+
     public ChatMetrics(MeterRegistry registry) {
+        // Active sessions
         Gauge.builder(METRIC_ACTIVE_SESSIONS, activeSessions, AtomicInteger::get)
-                .description("Number of active chat sessions")
-                .tag("mode", "pubsub")
+                .description(DESC_ACTIVE_SESSIONS)
+                .tag(TAG_MODE_KEY, TAG_MODE_VALUE)
                 .register(registry);
 
-        this.messageSentCounter = Counter.builder(METRIC_MESSAGES_SENT_TOTAL)
-                .description("Messages sent in chat event")
-                .tag("mode", "pubsub")
-                .register(registry);
+        // Send metrics
+        this.sendCounter = buildCounter(registry,
+                PREFIX_SEND + SUFFIX_MESSAGES_TOTAL, DESC_SEND_TOTAL);
+        this.sendErrorCounter = buildCounter(registry,
+                PREFIX_SEND + SUFFIX_ERRORS_TOTAL, DESC_SEND_ERRORS);
+        this.sendLatencyTimer = buildTimer(registry,
+                PREFIX_SEND + SUFFIX_LATENCY_SECONDS, DESC_SEND_LATENCY);
 
-        this.errorCounter = Counter.builder(METRIC_ERRORS_TOTAL)
-                .description("Errors in chat event")
-                .tag("mode", "pubsub")
-                .register(registry);
+        // Receive metrics
+        this.receiveErrorCounter = buildCounter(registry,
+                PREFIX_RECEIVE + SUFFIX_ERRORS_TOTAL, DESC_RECEIVE_ERRORS);
+        this.receiveLatencyTimer = buildTimer(registry,
+                PREFIX_RECEIVE + SUFFIX_LATENCY_SECONDS, DESC_RECEIVE_LATENCY);
+    }
 
-        this.latencyTimer = Timer.builder(METRIC_LATENCY_SECONDS)
-                .description("Chat message latency")
-                .tag("mode", "pubsub")
+    private Counter buildCounter(MeterRegistry registry, String name, String description) {
+        return Counter.builder(name)
+                .description(description)
+                .tag(TAG_MODE_KEY, TAG_MODE_VALUE)
+                .register(registry);
+    }
+
+    private Timer buildTimer(MeterRegistry registry, String name, String description) {
+        return Timer.builder(name)
+                .description(description)
+                .tag(TAG_MODE_KEY, TAG_MODE_VALUE)
                 .publishPercentileHistogram(ENABLE_HISTOGRAM)
                 .publishPercentiles(PERCENTILES)
                 .register(registry);
@@ -50,17 +83,27 @@ public class ChatMetrics implements MetricsRecorder {
 
     @Override
     public void countRequest(String eventName) {
-        messageSentCounter.increment();
+        if (PREFIX_SEND.equals(eventName)) {
+            sendCounter.increment();
+        }
     }
 
     @Override
     public void countError(String eventName) {
-        errorCounter.increment();
+        if (PREFIX_SEND.equals(eventName)) {
+            sendErrorCounter.increment();
+        } else if (PREFIX_RECEIVE.equals(eventName)) {
+            receiveErrorCounter.increment();
+        }
     }
 
     @Override
     public void recordLatency(String eventName, long millis) {
-        latencyTimer.record(millis, TimeUnit.MILLISECONDS);
+        if (PREFIX_SEND.equals(eventName)) {
+            sendLatencyTimer.record(millis, TimeUnit.MILLISECONDS);
+        } else if (PREFIX_RECEIVE.equals(eventName)) {
+            receiveLatencyTimer.record(millis, TimeUnit.MILLISECONDS);
+        }
     }
 
     public void incrementSession() {

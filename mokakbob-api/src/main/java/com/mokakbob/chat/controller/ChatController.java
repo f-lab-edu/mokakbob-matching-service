@@ -15,7 +15,7 @@ import org.springframework.stereotype.Controller;
 @Slf4j
 public class ChatController {
 
-    private static final String METRICS_EVENT = "chat_send";
+    private static final String METRICS_EVENT = "chat_send_message";
 
     private final ChatApiService chatApiService;
     private final ChatMetrics chatMetrics;
