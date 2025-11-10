@@ -4,4 +4,8 @@ dependencies {
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'software.amazon.msk:aws-msk-iam-auth:1.1.9'
+
+    // metrics
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }

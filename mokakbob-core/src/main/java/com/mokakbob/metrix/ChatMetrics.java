@@ -27,18 +27,22 @@ public class ChatMetrics implements MetricsRecorder {
     public ChatMetrics(MeterRegistry registry) {
         Gauge.builder(METRIC_ACTIVE_SESSIONS, activeSessions, AtomicInteger::get)
                 .description("Number of active chat sessions")
+                .tag("mode", "pubsub")
                 .register(registry);
 
         this.messageSentCounter = Counter.builder(METRIC_MESSAGES_SENT_TOTAL)
                 .description("Messages sent in chat event")
+                .tag("mode", "pubsub")
                 .register(registry);
 
         this.errorCounter = Counter.builder(METRIC_ERRORS_TOTAL)
                 .description("Errors in chat event")
+                .tag("mode", "pubsub")
                 .register(registry);
 
         this.latencyTimer = Timer.builder(METRIC_LATENCY_SECONDS)
                 .description("Chat message latency")
+                .tag("mode", "pubsub")
                 .publishPercentileHistogram(ENABLE_HISTOGRAM)
                 .publishPercentiles(PERCENTILES)
                 .register(registry);
