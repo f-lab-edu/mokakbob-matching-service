@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisChatSubscriber implements MessageListener {
 
-    private static final String METRICS_EVENT = "chat_receive";
+    private static final String METRICS_EVENT = "chat_receive_message";
 
     private final ObjectMapper objectMapper;
     private final ChatSubscriber chatSubscriber;

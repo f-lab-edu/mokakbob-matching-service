@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   redis:
     image: redis:7.2
@@ -9,10 +7,27 @@ services:
     command: ["redis-server", "--bind", "0.0.0.0", "--appendonly", "yes", "--protected-mode", "no"]
     restart: always
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 2s
-      timeout: 2s
-      retries: 20
+      test: [ "CMD", "bash", "-c", "redis-cli -h 127.0.0.1 ping | grep PONG" ]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - monitoring-network
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      - REDIS_EXPORTER_CHECK_SINGLE_TARGET=true
+      - REDIS_EXPORTER_DEBUG=true
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: always
     networks:
       - monitoring-network
 
