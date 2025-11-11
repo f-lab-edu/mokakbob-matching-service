@@ -40,8 +40,11 @@ public class ChatMetrics implements MetricsRecorder {
     private final Counter sendErrorCounter;
     private final Timer sendLatencyTimer;
 
+    private final Counter receiveCounter;
     private final Counter receiveErrorCounter;
     private final Timer receiveLatencyTimer;
+
+    private final Timer endToEndLatencyTimer;
 
     public ChatMetrics(MeterRegistry registry) {
         // Active sessions
@@ -59,10 +62,16 @@ public class ChatMetrics implements MetricsRecorder {
                 PREFIX_SEND + SUFFIX_LATENCY_SECONDS, DESC_SEND_LATENCY);
 
         // Receive metrics
+        this.receiveCounter = buildCounter(registry,
+                PREFIX_RECEIVE + SUFFIX_MESSAGES_TOTAL, "Total number of chat messages received");
         this.receiveErrorCounter = buildCounter(registry,
                 PREFIX_RECEIVE + SUFFIX_ERRORS_TOTAL, DESC_RECEIVE_ERRORS);
         this.receiveLatencyTimer = buildTimer(registry,
                 PREFIX_RECEIVE + SUFFIX_LATENCY_SECONDS, DESC_RECEIVE_LATENCY);
+
+        this.endToEndLatencyTimer = buildTimer(registry,
+                "chat_end_to_end_latency_seconds",
+                "End-to-end latency from sender to receiver");
     }
 
     private Counter buildCounter(MeterRegistry registry, String name, String description) {
@@ -106,11 +115,21 @@ public class ChatMetrics implements MetricsRecorder {
         }
     }
 
+    public void countReceive(String eventName) {
+        if (PREFIX_RECEIVE.equals(eventName)) {
+            receiveCounter.increment();
+        }
+    }
+
+    public void recordEndToEnd(long millis) {
+        endToEndLatencyTimer.record(millis, TimeUnit.MILLISECONDS);
+    }
+
     public void incrementSession() {
         activeSessions.incrementAndGet();
     }
 
     public void decrementSession() {
-        activeSessions.decrementAndGet();
+        activeSessions.updateAndGet(v -> (v > 0) ? v - 1 : 0);
     }
 }
