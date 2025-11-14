@@ -9,7 +9,7 @@ const connectionError = new Counter('chat_connection_error');
 
 const payload = "x".repeat(1024);
 
-const DEFAULT_MESSAGE_INTERVAL = 2;
+const DEFAULT_MESSAGE_INTERVAL = 1;
 const MESSAGE_INTERVAL = Number(__ENV.MESSAGE_INTERVAL || DEFAULT_MESSAGE_INTERVAL);
 
 export const options = {
