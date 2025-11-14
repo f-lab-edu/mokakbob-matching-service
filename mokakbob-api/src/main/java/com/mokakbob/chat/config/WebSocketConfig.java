@@ -29,6 +29,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws-connect")
                 .setAllowedOriginPatterns("*") // CORS 허용
                 .withSockJS(); // SockJS fallback 지원
+
+        // test
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
     }
 
     @Override

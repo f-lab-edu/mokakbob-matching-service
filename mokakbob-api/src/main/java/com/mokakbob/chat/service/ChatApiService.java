@@ -15,8 +15,8 @@ public class ChatApiService {
     private final ChatMessageService messageService;
 
     @Transactional
-    public void handleMessage(Long roomId, String memberId, String content) {
+    public void handleMessage(Long roomId, String memberId, String content, long sendAt) {
         messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
-        chatPublisher.publish(roomId, new ChatMessageResponse(roomId, memberId, content));
+        chatPublisher.publish(roomId, new ChatMessageResponse(roomId, memberId, content, sendAt));
     }
 }

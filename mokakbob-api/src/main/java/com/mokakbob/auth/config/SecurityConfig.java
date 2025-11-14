@@ -58,7 +58,8 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/error",
                                 "/actuator/**",              // 헬스 체크 경로 추가
-                                "/ws-connect/**"             // 웹소켓 경로 추가
+                                "/ws-connect/**",             // 웹소켓 경로 추가
+                                "/ws/**"                       // k6 test
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

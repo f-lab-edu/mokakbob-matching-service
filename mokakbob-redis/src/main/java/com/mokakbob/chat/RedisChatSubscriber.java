@@ -27,6 +27,11 @@ public class RedisChatSubscriber implements MessageListener {
         try {
             String channel = new String(message.getChannel(), StandardCharsets.UTF_8);
             ChatMessageResponse payload = objectMapper.readValue(message.getBody(), ChatMessageResponse.class);
+
+            long e2e = System.currentTimeMillis() - payload.sentAt();
+            chatMetrics.countReceive(METRICS_EVENT);
+            chatMetrics.recordEndToEnd(e2e);
+
             chatSubscriber.handleMessage(channel, payload);
         } catch (Exception e) {
             chatMetrics.countError(METRICS_EVENT);
