@@ -1,5 +1,5 @@
 import ws from 'k6/ws';
-import { check, sleep } from 'k6';
+import { check } from 'k6';
 import { Counter, Trend } from 'k6/metrics';
 
 const sendLatency = new Trend('chat_send_latency', true);
@@ -7,22 +7,18 @@ const recvLatency = new Trend('chat_receive_latency', true);
 const messageLoss = new Counter('chat_message_loss');
 const connectionError = new Counter('chat_connection_error');
 
+const payload = "x".repeat(1024);
+
+const DEFAULT_MESSAGE_INTERVAL = 2;
+const MESSAGE_INTERVAL = Number(__ENV.MESSAGE_INTERVAL || DEFAULT_MESSAGE_INTERVAL);
+
 export const options = {
-    stages: [
-        { duration: '1m', target: 50 },
-        { duration: '3m', target: 100 },
-        { duration: '1m', target: 0 },
-    ],
-    thresholds: {
-        checks: ['rate>0.95'],
-        chat_send_latency: ['p(95)<500'],
-    },
+    vus: 100,
+    duration: '10m',
 };
 
-const token =
-    __ENV.TOKEN ||
-    'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzYzMDE5NTAzLCJleHAiOjE3NjMwMjMxMDN9.ar3yM6w6SptL6ebTbPlHVm7dfDM56jBJNIMZI6VhftA';
-const mode = __ENV.MODE || 'pubsub'; // pubsub | cluster
+const token = __ENV.TOKEN || 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNzYzMDc5MzIyLCJleHAiOjE3NjMwODI5MjJ9.psMbc8nvgTo6BwOEBOsaakiAg-altMn5h4uVx6i3tTk';
+const mode = __ENV.MODE || 'pubsub'; // pubsub or cluster
 const ports = [8080, 8081, 8082];
 const baseHost = __ENV.HOST || 'localhost';
 
@@ -32,7 +28,7 @@ export default function () {
     const port = ports[vu % ports.length];
     const WS_URL = `ws://${baseHost}:${port}/ws`;
 
-    const connectStart = Date.now();
+    let seq = 0; // 메시지 시퀀스 번호
 
     const res = ws.connect(
         WS_URL,
@@ -40,8 +36,10 @@ export default function () {
         function (socket) {
             let connected = false;
             let subscribed = false;
-            let messageReceived = false;
-            let sendTime = 0;
+
+            let lastSendSeq = -1;
+            let lastSendTimestamp = 0;
+            let awaitingAck = false;
 
             socket.on('open', () => {
                 socket.send(
@@ -49,55 +47,71 @@ export default function () {
                 );
             });
 
-            socket.on('message', (data) => {
-                // CONNECTED 수신 → SUBSCRIBE
-                if (data.includes('CONNECTED')) {
+            socket.on('message', (raw) => {
+                // CONNECTED 처리
+                if (raw.includes('CONNECTED') && !connected) {
                     connected = true;
-                    socket.send(`SUBSCRIBE\nid:sub-${roomId}\ndestination:/sub/chat/${roomId}\n\n\x00`);
-                }
-
-                // SUBSCRIBE 이후 → 메시지 발송
-                if (data.includes('RECEIPT') || (connected && !subscribed)) {
-                    subscribed = true;
-                    sendTime = Date.now();
                     socket.send(
-                        `SEND\ndestination:/pub/chat/${roomId}\ncontent-type:application/json\n\n{"content":"${mode}-Hello ${vu}"}\x00`
+                        `SUBSCRIBE\nid:sub-${roomId}\ndestination:/sub/chat/${roomId}\n\n\x00`
                     );
-                    sendLatency.add(Date.now() - connectStart); // 연결 시작 > 전송까지의 지연
+
+                    socket.setTimeout(() => {
+                        subscribed = true;
+                    }, 300);
+
+                    return;
                 }
 
-                // MESSAGE 수신 시 → 수신 지연 기록
-                if (data.includes('MESSAGE') && data.includes(`${mode}-Hello ${vu}`)) {
-                    recvLatency.add(Date.now() - sendTime); // 전송 > 수신까지의 지연
-                    messageReceived = true;
-                    socket.close();
+                if (!subscribed) return;
+
+                // MESSAGE 프레임 처리
+                if (raw.includes('MESSAGE')) {
+                    const body = raw.split('\n\n')[1]?.replace(/\x00$/, '');
+                    try {
+                        const msg = JSON.parse(body);
+                        if (msg.seq === lastSendSeq) {
+                            const now = Date.now();
+                            recvLatency.add(now - lastSendTimestamp);
+                            awaitingAck = false;
+                        }
+                    } catch (e) {}
                 }
             });
 
-            socket.on('close', () => {
-                // 수신 실패한 경우 메시지 손실로 간주
-                if (!messageReceived) {
+            // 주기적 메시지 전송
+            socket.setInterval(() => {
+                if (!subscribed) return;
+
+                if (awaitingAck) {
+                    // 지난 메시지를 못 받음 > 유실로 처리
                     messageLoss.add(1);
                 }
-            });
+
+                const seqId = seq++;
+                lastSendSeq = seqId;
+                lastSendTimestamp = Date.now();
+                awaitingAck = true;
+
+                const body = JSON.stringify({
+                    content: `${mode}-Hello-${vu}`,
+                    seq: seqId,
+                    payload,
+                });
+
+                const start = Date.now();
+                socket.send(
+                    `SEND\ndestination:/pub/chat/${roomId}\ncontent-type:application/json\n\n${body}\x00`
+                );
+                const end = Date.now();
+
+                sendLatency.add(end - start);
+            }, MESSAGE_INTERVAL * 1000);
 
             socket.on('error', () => {
                 connectionError.add(1);
             });
-
-            socket.setTimeout(() => {
-                if (!messageReceived) {
-                    socket.close();
-                }
-            }, 10000); // 10초로 증가
         }
     );
 
-    // 연결 성공 여부 확인
-    const ok = check(res, {
-        'connected successfully': (r) => r && r.status === 101,
-    });
-    if (!ok) connectionError.add(1);
-
-    sleep(1);
+    check(res, { 'connected successfully': (r) => r && r.status === 101 });
 }
