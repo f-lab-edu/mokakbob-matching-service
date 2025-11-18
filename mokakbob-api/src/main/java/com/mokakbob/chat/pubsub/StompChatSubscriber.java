@@ -16,7 +16,7 @@ public class StompChatSubscriber implements ChatSubscriber {
 
     @Override
     public void handleMessage(String topic, ChatMessageResponse response) {
-        long roomId = Long.parseLong(topic.split("\\.")[1]);
+        long roomId = response.chatRoomId();
         messagingTemplate.convertAndSend(CHAT_SUB_ADDRESS + roomId, response);
     }
 }
