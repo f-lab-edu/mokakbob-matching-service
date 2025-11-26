@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MatchingParticipantRepository extends JpaRepository<MatchingParticipant, Long> {
+
+    boolean existsByMatchingIdAndMemberIdAndIsAcceptedTrue(Long matchingId, Long memberId);
 }
