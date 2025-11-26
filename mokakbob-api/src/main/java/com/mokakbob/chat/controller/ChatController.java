@@ -1,39 +1,30 @@
 package com.mokakbob.chat.controller;
 
-import com.mokakbob.domain.chat.pubsub.request.ChatMessageRequest;
-import com.mokakbob.chat.service.ChatApiService;
-import com.mokakbob.metrix.ChatMetrics;
-import java.security.Principal;
+import com.mokakbob.chat.controller.request.ChatRoomEnterRequest;
+import com.mokakbob.chat.controller.response.ChatRoomEnterResponse;
+import com.mokakbob.common.path.chat.ChatPath;
+import com.mokakbob.global.resolver.annotation.MemberId;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class ChatController {
 
-    private static final String METRICS_EVENT = "chat_send_message";
-
-    private final ChatApiService chatApiService;
-    private final ChatMetrics chatMetrics;
-
-    @MessageMapping("/chat/{roomId}")
-    public void sendMessage(
-            @DestinationVariable Long roomId,
-            ChatMessageRequest request,
-            Principal principal
+    @GetMapping(ChatPath.ENTER)
+    public ResponseEntity<ChatRoomEnterResponse> enterRoom(
+            @RequestBody ChatRoomEnterRequest request,
+            @MemberId Long memberId
     ) {
-        long sentAt = System.currentTimeMillis();
 
-        try {
-            chatMetrics.countRequest(METRICS_EVENT);
-            chatApiService.handleMessage(roomId, principal.getName(), request.content(), sentAt);
-        } catch (Exception e) {
-            chatMetrics.countError(METRICS_EVENT);
-            throw e;
-        } finally {
-            chatMetrics.recordLatency(METRICS_EVENT, System.currentTimeMillis() - sentAt);
-        }
+        return ResponseEntity.ok(new ChatRoomEnterResponse(
+                request.roomId(),
+                ChatPath.WS,
+                ChatPath.PUB,
+                ChatPath.SUB
+        ));
     }
 }
