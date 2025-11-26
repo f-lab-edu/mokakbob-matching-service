@@ -3,6 +3,9 @@ package com.mokakbob.domain.matching.exception;
 import com.mokakbob.common.exception.DomainErrorCode;
 
 public enum MatchingErrorCode implements DomainErrorCode {
+
+    // matchingParticipant
+    NOT_MATCHING_PARTICIPANT(401, "P001", "해당 매칭에 속하는 참여자가 아닙니다."),
     ;
 
     private final int httpStatus;

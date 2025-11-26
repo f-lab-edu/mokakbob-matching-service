@@ -1,6 +1,8 @@
 package com.mokakbob.domain.chat.service;
 
+import com.mokakbob.common.exception.DomainException;
 import com.mokakbob.domain.chat.domain.ChatRoom;
+import com.mokakbob.domain.chat.exception.ChatErrorCode;
 import com.mokakbob.domain.chat.repository.ChatRoomRepository;
 import com.mokakbob.domain.matching.domain.Matching;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +22,11 @@ public class ChatService {
                 .build();
 
         return chatRoomRepository.save(chatRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public ChatRoom findChatRoom(Long roomId) {
+        return chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new DomainException(ChatErrorCode.NOT_FOUND_CHAT_ROOM));
     }
 }
