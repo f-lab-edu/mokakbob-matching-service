@@ -32,4 +32,12 @@ public class ChatController {
                 ChatPath.SUB
         ));
     }
+
+    @GetMapping(ChatPath.ROOMS)
+    public ResponseEntity<Void> searchRooms(@MemberId Long memberId) {
+
+
+        return ResponseEntity.ok()
+                .build();
+    }
 }
