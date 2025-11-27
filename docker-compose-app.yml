@@ -253,6 +253,17 @@ services:
     networks:
       - monitoring-network
 
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: mokakbob
+    ports:
+      - "3306:3306"
+    networks:
+      - monitoring-network
 
 networks:
   monitoring-network:
