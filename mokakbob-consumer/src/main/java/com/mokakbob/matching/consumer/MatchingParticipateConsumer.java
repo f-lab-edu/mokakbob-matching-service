@@ -1,7 +1,7 @@
 package com.mokakbob.matching.consumer;
 
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
-import com.mokakbob.matching.service.MatchingParticipateService;
+import com.mokakbob.matching.service.MatchingParticipateApiService;
 import com.mokakbob.topic.KafkaTopic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MatchingParticipateConsumer {
 
-    private final MatchingParticipateService participateService;
+    private final MatchingParticipateApiService participateService;
 
     @KafkaListener(
             topics = KafkaTopic.MATCHING_PARTICIPATE,

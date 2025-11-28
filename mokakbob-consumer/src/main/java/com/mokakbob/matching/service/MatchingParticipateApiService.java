@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class MatchingParticipateService {
+public class MatchingParticipateApiService {
 
     private static final double RADIUS_METERS = 1500.0;
     private static final int LIMIT_LOCK_CATCH_TIME = 3;
