@@ -6,6 +6,8 @@ import com.mokakbob.domain.matching.exception.MatchingErrorCode;
 import com.mokakbob.domain.matching.repository.MatchingParticipantRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +28,8 @@ public class MatchingParticipateService {
     }
 
     @Transactional(readOnly = true)
-    public List<MatchingParticipant> findMatchingParticipantsByMemberId(Long memberId) {
-        return participantRepository.findByMemberId(memberId);
+    public Page<MatchingParticipant> findMatchingParticipantsByMemberId(Long memberId, Pageable pageable) {
+        return participantRepository.findByMemberId(memberId, pageable);
     }
 
     @Transactional(readOnly = true)
