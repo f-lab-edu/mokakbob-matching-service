@@ -2,17 +2,16 @@ package com.mokakbob.chat.controller;
 
 import com.mokakbob.chat.controller.request.ChatRoomEnterRequest;
 import com.mokakbob.chat.controller.response.ChatRoomEnterResponse;
-import com.mokakbob.chat.controller.response.ChatRoomResponse;
 import com.mokakbob.chat.controller.response.ChatRoomResponses;
 import com.mokakbob.chat.service.ChatApiService;
 import com.mokakbob.common.path.chat.ChatPath;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.global.resolver.annotation.MemberId;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,9 +36,11 @@ public class ChatController {
     }
 
     @GetMapping(ChatPath.ROOMS)
-    public ResponseEntity<ChatRoomResponses> searchRooms(@MemberId Long memberId) {
-        List<ChatRoomResponse> chatRoomResponses = chatApiService.findChatRooms(memberId);
-
-        return ResponseEntity.ok(new ChatRoomResponses(memberId, chatRoomResponses));
+    public ResponseEntity<ChatRoomResponses> searchRooms(
+            @MemberId Long memberId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok(chatApiService.findChatRooms(memberId, page, size));
     }
 }
