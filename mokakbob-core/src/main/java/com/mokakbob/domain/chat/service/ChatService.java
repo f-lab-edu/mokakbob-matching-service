@@ -32,7 +32,7 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatRoom> findChatRooms(List<Long> matchingIds) {
-        return chatRoomRepository.findAllByMatchingIdIn(matchingIds);
+    public List<ChatRoom> findMatchingChatRooms(List<Long> matchingIds) {
+        return chatRoomRepository.findAllWithMatchingByMatchingIdIn(matchingIds);
     }
 }

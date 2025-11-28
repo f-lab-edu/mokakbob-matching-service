@@ -31,7 +31,7 @@ public class MatchingParticipateService {
     }
 
     @Transactional(readOnly = true)
-    public List<MatchingParticipant> findMatchingParticipantsByMatchingId(Long matchingId) {
-        return participantRepository.findByMatchingId(matchingId);
+    public List<MatchingParticipant> findMatchingParticipantByMatchingIds(List<Long> matchingId) {
+        return participantRepository.findByMatchingIdIn(matchingId);
     }
 }

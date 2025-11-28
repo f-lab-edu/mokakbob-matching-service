@@ -5,6 +5,7 @@ import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.domain.vo.MemberPreference;
 import com.mokakbob.domain.member.exception.MemberErrorCode;
 import com.mokakbob.domain.member.repository.MemberRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,11 @@ public class MemberService {
     public Member findMemberForUpdate(Long memberId) {
         return memberRepository.findByIdForUpdate(memberId)
                 .orElseThrow(() -> new DomainException(MemberErrorCode.NOT_FOUND_MEMBER));
+    }
+
+    @Transactional
+    public List<Member> findMembers(List<Long> memberIds) {
+        return memberRepository.findByIdIn(memberIds);
     }
 
     private void validateDuplicateEmail(String email) {

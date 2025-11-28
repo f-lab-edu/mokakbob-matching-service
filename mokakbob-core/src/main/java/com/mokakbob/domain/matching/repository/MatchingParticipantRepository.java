@@ -10,5 +10,5 @@ public interface MatchingParticipantRepository extends JpaRepository<MatchingPar
 
     boolean existsByMatchingIdAndMemberIdAndIsAcceptedTrue(Long matchingId, Long memberId);
     List<MatchingParticipant> findByMemberId(Long memberId);
-    List<MatchingParticipant> findByMatchingId(Long matchingId);
+    List<MatchingParticipant> findByMatchingIdIn(List<Long> matchingIds);
 }

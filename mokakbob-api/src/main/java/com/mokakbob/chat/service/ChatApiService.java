@@ -13,6 +13,8 @@ import com.mokakbob.domain.matching.service.MatchingParticipateService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,27 +50,57 @@ public class ChatApiService {
         List<Long> matchingIds = participants.stream()
                 .map(MatchingParticipant::getMatchingId)
                 .toList();
-        List<ChatRoom> rooms = chatService.findChatRooms(matchingIds);
+
+        if (matchingIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<ChatRoom> rooms = chatService.findMatchingChatRooms(matchingIds);
+
+        List<MatchingParticipant> allParticipants = participateService.findMatchingParticipantByMatchingIds(
+                matchingIds);
+        Map<Long, List<MatchingParticipant>> groupedParticipants = loadParticipantsGroupedByMatchingId(allParticipants);
+        Map<Long, Member> members = loadMembersAsMap(allParticipants);
 
         return rooms.stream()
                 .map(room -> {
-                    Matching matching = room.getMatching();
-                    List<MatchingParticipant> matchingParticipants = participateService
-                            .findMatchingParticipantsByMatchingId(matching.getId());
+                    Long matchingId = room.getMatching().getId();
+
+                    List<MatchingParticipant> matchingParticipants = groupedParticipants.getOrDefault(matchingId,
+                            List.of());
+
                     List<ChatParticipantResponse> participantResponses =
                             matchingParticipants.stream()
-                                    .map(p -> {
-                                        Member member = memberService.findMember(p.getMemberId());
-                                        return ChatParticipantResponse.of(p, member);
-                                    })
+                                    .map(p -> ChatParticipantResponse.of(
+                                            p,
+                                            members.get(p.getMemberId())
+                                    ))
                                     .toList();
 
                     return ChatRoomResponse.of(
                             room,
-                            matching,
+                            room.getMatching(),
                             participantResponses
                     );
                 })
                 .toList();
+    }
+
+    private Map<Long, List<MatchingParticipant>> loadParticipantsGroupedByMatchingId(
+            List<MatchingParticipant> allParticipants) {
+        return allParticipants.stream()
+                .collect(Collectors.groupingBy(MatchingParticipant::getMatchingId));
+    }
+
+    private Map<Long, Member> loadMembersAsMap(List<MatchingParticipant> allParticipants) {
+        List<Long> memberIds = allParticipants.stream()
+                .map(MatchingParticipant::getMemberId)
+                .distinct()
+                .toList();
+
+        List<Member> members = memberService.findMembers(memberIds);
+
+        return members.stream()
+                .collect(Collectors.toMap(Member::getId, m -> m));
     }
 }
