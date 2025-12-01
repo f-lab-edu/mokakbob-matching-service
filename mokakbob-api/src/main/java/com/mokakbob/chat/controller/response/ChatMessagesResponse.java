@@ -35,8 +35,7 @@ public record ChatMessagesResponse(
 
         if (!slice.isEmpty()) {
             ChatMessage oldest = slice.get(slice.size() - LAST_MESSAGE_DELIMITER);
-            nextCursor = oldest.getCreatedAt()
-                    .toString();
+            nextCursor = encodeCursor(oldest);
         }
 
         return new ChatMessagesResponse(
@@ -46,5 +45,12 @@ public record ChatMessagesResponse(
                 nextCursor,
                 hasNext
         );
+    }
+
+    /**
+     * 복합 커서 인코딩: createdAt|id
+     */
+    private static String encodeCursor(ChatMessage message) {
+        return message.getCreatedAt().toString() + "|" + message.getId();
     }
 }
