@@ -4,6 +4,7 @@ import com.mokakbob.chat.controller.response.ChatRoomResponse;
 import com.mokakbob.chat.controller.response.ChatRoomResponses;
 import com.mokakbob.chat.service.support.ParticipantContext;
 import com.mokakbob.chat.util.ChatRoomMapper;
+import com.mokakbob.domain.chat.domain.ChatMessage;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.domain.chat.pubsub.ChatPublisher;
 import com.mokakbob.domain.chat.pubsub.response.ChatMessageResponse;
@@ -14,6 +15,7 @@ import com.mokakbob.domain.matching.domain.MatchingParticipant;
 import com.mokakbob.domain.matching.service.MatchingParticipateService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatApiService {
 
+    private static final int DEFAULT_MESSAGE_SIZE = 30;
+    private static final int MAX_MESSAGE_SIZE = 100;
+    private static final int ZERO_MESSAGE_SIZE = 0;
     private static final String PAGING_SORT_DELIMITER = "id";
 
     private final ChatPublisher chatPublisher;
@@ -50,6 +55,21 @@ public class ChatApiService {
         participateService.validateMatchingParticipant(matching.getId(), memberId);
 
         return room;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessage> findChatMessages(Long memberId, Long roomId, LocalDateTime cursor, Integer size) {
+        ChatRoom room = findChatRoom(roomId, memberId);
+        int finalSize = normalizeSize(size);
+
+        return messageService.findMessages(room.getId(), cursor, finalSize);
+    }
+
+    private int normalizeSize(Integer size) {
+        if (size == null || size <= ZERO_MESSAGE_SIZE) {
+            return DEFAULT_MESSAGE_SIZE;
+        }
+        return Math.min(size, MAX_MESSAGE_SIZE);
     }
 
     /**
