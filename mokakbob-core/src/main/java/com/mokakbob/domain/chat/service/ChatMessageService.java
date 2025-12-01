@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatMessageService {
 
+    private static final int DEFAULT_PAGE_OFFSET = 0;
+
     private final ChatMessageRepository messageRepository;
 
     @Transactional
@@ -28,8 +30,8 @@ public class ChatMessageService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessage> findMessages(Long roomId, LocalDateTime cursor, int size) {
-        Pageable pageable = PageRequest.of(0, size);
+    public List<ChatMessage> findMessages(Long roomId, LocalDateTime cursor, int sizePlusOne) {
+        Pageable pageable = PageRequest.of(DEFAULT_PAGE_OFFSET, sizePlusOne);
 
         if (cursor == null) {
             return messageRepository.findLatestMessages(roomId, pageable);

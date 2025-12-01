@@ -34,6 +34,7 @@ public class ChatApiService {
     private static final int DEFAULT_MESSAGE_SIZE = 30;
     private static final int MAX_MESSAGE_SIZE = 100;
     private static final int ZERO_MESSAGE_SIZE = 0;
+    private static final int HAS_NEXT_DELIMITER = 1;
     private static final String PAGING_SORT_DELIMITER = "id";
 
     private final ChatPublisher chatPublisher;
@@ -62,13 +63,14 @@ public class ChatApiService {
         ChatRoom room = findChatRoom(roomId, memberId);
         int finalSize = normalizeSize(size);
 
-        return messageService.findMessages(room.getId(), cursor, finalSize);
+        return messageService.findMessages(room.getId(), cursor, finalSize + HAS_NEXT_DELIMITER);
     }
 
     private int normalizeSize(Integer size) {
         if (size == null || size <= ZERO_MESSAGE_SIZE) {
             return DEFAULT_MESSAGE_SIZE;
         }
+
         return Math.min(size, MAX_MESSAGE_SIZE);
     }
 

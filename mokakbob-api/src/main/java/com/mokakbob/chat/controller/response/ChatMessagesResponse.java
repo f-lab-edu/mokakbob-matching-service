@@ -1,7 +1,6 @@
 package com.mokakbob.chat.controller.response;
 
 import com.mokakbob.domain.chat.domain.ChatMessage;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChatMessagesResponse(
@@ -12,24 +11,32 @@ public record ChatMessagesResponse(
         boolean hasNext
 ) {
 
-    private static final int CHAT_LAST_MESSAGE_MAKER = 1;
+    private static final int LAST_MESSAGE_DELIMITER = 1;
+    private static final int START_MESSAGE_DELIMITER = 0;
 
     public static ChatMessagesResponse of(
             Long memberId,
             Long chatRoomId,
-            List<ChatMessage> messages
+            List<ChatMessage> messages,
+            int pageSize
     ) {
-        List<ChatMessageHistoryResponse> messageResponses = messages.stream()
+        boolean hasNext = false;
+        List<ChatMessage> slice = messages;
+
+        if (messages.size() > pageSize) {
+            hasNext = true;
+            slice = messages.subList(START_MESSAGE_DELIMITER, pageSize);
+        }
+
+        List<ChatMessageHistoryResponse> messageResponses = slice.stream()
                 .map(ChatMessageHistoryResponse::from)
                 .toList();
         String nextCursor = null;
-        boolean hasNext = false;
 
-        if (!messages.isEmpty()) {
-            ChatMessage oldest = messages.get(messages.size() - CHAT_LAST_MESSAGE_MAKER);
-            LocalDateTime cursor = oldest.getCreatedAt();
-            nextCursor = cursor.toString();
-            hasNext = true;
+        if (!slice.isEmpty()) {
+            ChatMessage oldest = slice.get(slice.size() - LAST_MESSAGE_DELIMITER);
+            nextCursor = oldest.getCreatedAt()
+                    .toString();
         }
 
         return new ChatMessagesResponse(
