@@ -3,7 +3,7 @@ package com.mokakbob.chat.service;
 import com.mokakbob.chat.controller.response.ChatRoomResponse;
 import com.mokakbob.chat.controller.response.ChatRoomResponses;
 import com.mokakbob.chat.exception.ChatErrorCode;
-import com.mokakbob.chat.service.support.CursorToken;
+import com.mokakbob.domain.chat.cursor.CursorToken;
 import com.mokakbob.chat.service.support.ParticipantContext;
 import com.mokakbob.chat.util.ChatRoomMapper;
 import com.mokakbob.common.exception.exceptions.ApiException;

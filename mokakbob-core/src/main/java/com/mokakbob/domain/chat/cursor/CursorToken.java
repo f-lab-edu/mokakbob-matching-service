@@ -1,4 +1,4 @@
-package com.mokakbob.chat.service.support;
+package com.mokakbob.domain.chat.cursor;
 
 import java.time.LocalDateTime;
 
