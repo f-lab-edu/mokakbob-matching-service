@@ -61,6 +61,6 @@ public class ChatController {
     ) {
         List<ChatMessage> messages = chatApiService.findChatMessages(memberId, roomId, cursor, size);
 
-        return ResponseEntity.ok(ChatMessagesResponse.of(memberId, roomId, messages));
+        return ResponseEntity.ok(ChatMessagesResponse.of(memberId, roomId, messages, size));
     }
 }
