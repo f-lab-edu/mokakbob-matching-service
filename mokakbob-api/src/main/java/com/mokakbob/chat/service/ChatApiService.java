@@ -2,8 +2,11 @@ package com.mokakbob.chat.service;
 
 import com.mokakbob.chat.controller.response.ChatRoomResponse;
 import com.mokakbob.chat.controller.response.ChatRoomResponses;
+import com.mokakbob.chat.exception.ChatErrorCode;
+import com.mokakbob.chat.service.support.CursorToken;
 import com.mokakbob.chat.service.support.ParticipantContext;
 import com.mokakbob.chat.util.ChatRoomMapper;
+import com.mokakbob.common.exception.exceptions.ApiException;
 import com.mokakbob.domain.chat.domain.ChatMessage;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.domain.chat.pubsub.ChatPublisher;
@@ -59,11 +62,15 @@ public class ChatApiService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessage> findChatMessages(Long memberId, Long roomId, LocalDateTime cursor, Integer size) {
+    public List<ChatMessage> findChatMessages(Long memberId, Long roomId, String rawCursor, Integer size) {
         ChatRoom room = findChatRoom(roomId, memberId);
-        int finalSize = normalizeSize(size);
 
-        return messageService.findMessages(room.getId(), cursor, finalSize + HAS_NEXT_DELIMITER);
+        int pageSize = normalizeSize(size);
+        int sizePlusOne = pageSize + HAS_NEXT_DELIMITER;
+
+        CursorToken cursorToken = parseCursor(rawCursor);
+
+        return messageService.findMessages(room.getId(), cursorToken.createdAt(), cursorToken.id(), sizePlusOne);
     }
 
     private int normalizeSize(Integer size) {
@@ -72,6 +79,25 @@ public class ChatApiService {
         }
 
         return Math.min(size, MAX_MESSAGE_SIZE);
+    }
+
+    /**
+     * "createdAt|id" 형태의 커서 문자열을 파싱한다. - null 또는 빈 문자열이면 비어 있는 CursorToken 반환
+     */
+    private CursorToken parseCursor(String rawCursor) {
+        if (rawCursor == null || rawCursor.isBlank()) {
+            return new CursorToken(null, null);
+        }
+
+        String[] parts = rawCursor.split("\\|");
+        if (parts.length != 2) {
+            throw new ApiException(ChatErrorCode.NOT_SUPPORT_CURSOR_FORMAT);
+        }
+
+        LocalDateTime createdAt = LocalDateTime.parse(parts[0]);
+        Long id = Long.parseLong(parts[1]);
+
+        return new CursorToken(createdAt, id);
     }
 
     /**

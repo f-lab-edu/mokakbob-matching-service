@@ -17,7 +17,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
         SELECT m
         FROM ChatMessage m
         WHERE m.chatRoomId = :roomId
-        ORDER BY m.createdAt DESC
+        ORDER BY m.createdAt DESC, m.id DESC
     """)
     List<ChatMessage> findLatestMessages(
             @Param("roomId") Long roomId,
@@ -29,12 +29,16 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
         SELECT m
         FROM ChatMessage m
         WHERE m.chatRoomId = :roomId
-          AND m.createdAt < :cursor
-        ORDER BY m.createdAt DESC
+          AND (
+                m.createdAt < :cursorCreatedAt
+                OR (m.createdAt = :cursorCreatedAt AND m.id < :cursorId)
+          )
+        ORDER BY m.createdAt DESC, m.id DESC
     """)
     List<ChatMessage> findMessagesByCursor(
             @Param("roomId") Long roomId,
-            @Param("cursor") LocalDateTime cursor,
+            @Param("cursorCreatedAt") LocalDateTime cursorCreatedAt,
+            @Param("cursorId") Long cursorId,
             Pageable pageable
     );
 }

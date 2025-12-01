@@ -29,14 +29,17 @@ public class ChatMessageService {
         messageRepository.save(chatMessage);
     }
 
+    /**
+     * 복합 커서 기반 메시지 조회 (size+1 전략 포함)
+     */
     @Transactional(readOnly = true)
-    public List<ChatMessage> findMessages(Long roomId, LocalDateTime cursor, int sizePlusOne) {
+    public List<ChatMessage> findMessages(Long roomId, LocalDateTime cursorCreatedAt, Long cursorId, int sizePlusOne) {
         Pageable pageable = PageRequest.of(DEFAULT_PAGE_OFFSET, sizePlusOne);
 
-        if (cursor == null) {
+        if (cursorCreatedAt == null || cursorId == null) {
             return messageRepository.findLatestMessages(roomId, pageable);
         }
 
-        return messageRepository.findMessagesByCursor(roomId, cursor, pageable);
+        return messageRepository.findMessagesByCursor(roomId, cursorCreatedAt, cursorId, pageable);
     }
 }

@@ -9,10 +9,8 @@ import com.mokakbob.common.path.chat.ChatPath;
 import com.mokakbob.domain.chat.domain.ChatMessage;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.global.resolver.annotation.MemberId;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,9 +52,7 @@ public class ChatController {
     public ResponseEntity<ChatMessagesResponse> getMessages(
             @PathVariable Long roomId,
             @MemberId Long memberId,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime cursor,
+            @RequestParam(required = false) String cursor,
             @RequestParam(required = false) Integer size
     ) {
         List<ChatMessage> messages = chatApiService.findChatMessages(memberId, roomId, cursor, size);
