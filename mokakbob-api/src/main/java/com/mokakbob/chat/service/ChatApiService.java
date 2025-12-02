@@ -53,7 +53,8 @@ public class ChatApiService {
 
     @Transactional
     public void handleMessage(Long roomId, String memberId, String content, long sendAt) {
-        messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
+        ChatMessage chatMessage = messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
+        chatMessageStore.cacheMessage(chatMessage);
         chatPublisher.publish(roomId, new ChatMessageResponse(roomId, memberId, content, sendAt));
     }
 

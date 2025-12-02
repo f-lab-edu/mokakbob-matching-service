@@ -19,14 +19,14 @@ public class ChatMessageService {
     private final ChatMessageRepository messageRepository;
 
     @Transactional
-    public void saveChatMessage(Long roomId, Long senderId, String message) {
+    public ChatMessage saveChatMessage(Long roomId, Long senderId, String message) {
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoomId(roomId)
                 .senderId(senderId)
                 .message(message)
                 .build();
 
-        messageRepository.save(chatMessage);
+        return messageRepository.save(chatMessage);
     }
 
     /**
