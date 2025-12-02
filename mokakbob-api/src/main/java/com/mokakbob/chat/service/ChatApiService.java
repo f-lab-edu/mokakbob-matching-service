@@ -1,9 +1,17 @@
 package com.mokakbob.chat.service;
 
+import static com.mokakbob.chat.util.ChatMessageMapper.toChatMessages;
+
+import com.mokakbob.cache.ChatMessageStore;
 import com.mokakbob.chat.controller.response.ChatRoomResponse;
 import com.mokakbob.chat.controller.response.ChatRoomResponses;
+import com.mokakbob.chat.exception.ChatErrorCode;
+import com.mokakbob.domain.chat.cache.CachedChatMessage;
+import com.mokakbob.domain.chat.cursor.CursorToken;
 import com.mokakbob.chat.service.support.ParticipantContext;
 import com.mokakbob.chat.util.ChatRoomMapper;
+import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.domain.chat.domain.ChatMessage;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.domain.chat.pubsub.ChatPublisher;
 import com.mokakbob.domain.chat.pubsub.response.ChatMessageResponse;
@@ -14,6 +22,7 @@ import com.mokakbob.domain.matching.domain.MatchingParticipant;
 import com.mokakbob.domain.matching.service.MatchingParticipateService;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatApiService {
 
+    private static final int DEFAULT_MESSAGE_SIZE = 30;
+    private static final int MAX_MESSAGE_SIZE = 100;
+    private static final int ZERO_MESSAGE_SIZE = 0;
+    private static final int HAS_NEXT_DELIMITER = 1;
     private static final String PAGING_SORT_DELIMITER = "id";
 
     private final ChatPublisher chatPublisher;
@@ -36,10 +49,12 @@ public class ChatApiService {
     private final ChatService chatService;
     private final MatchingParticipateService participateService;
     private final MemberService memberService;
+    private final ChatMessageStore chatMessageStore;
 
     @Transactional
     public void handleMessage(Long roomId, String memberId, String content, long sendAt) {
-        messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
+        ChatMessage chatMessage = messageService.saveChatMessage(roomId, Long.valueOf(memberId), content);
+        chatMessageStore.cacheMessage(chatMessage);
         chatPublisher.publish(roomId, new ChatMessageResponse(roomId, memberId, content, sendAt));
     }
 
@@ -50,6 +65,53 @@ public class ChatApiService {
         participateService.validateMatchingParticipant(matching.getId(), memberId);
 
         return room;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessage> findChatMessages(Long memberId, Long roomId, String rawCursor, Integer size) {
+        ChatRoom room = findChatRoom(roomId, memberId);
+
+        int pageSize = normalizeSize(size);
+        int sizePlusOne = pageSize + HAS_NEXT_DELIMITER;
+
+        // redis 조회
+        List<CachedChatMessage> cachedMessages = chatMessageStore.loadMessages(room.getId(), rawCursor, sizePlusOne);
+
+        if (!cachedMessages.isEmpty() && cachedMessages.size() >= sizePlusOne) {
+            return toChatMessages(cachedMessages);
+        }
+
+        // db 조회
+        CursorToken cursorToken = parseCursor(rawCursor);
+
+        return messageService.findMessages(room.getId(), cursorToken.createdAt(), cursorToken.id(), sizePlusOne);
+    }
+
+    private int normalizeSize(Integer size) {
+        if (size == null || size <= ZERO_MESSAGE_SIZE) {
+            return DEFAULT_MESSAGE_SIZE;
+        }
+
+        return Math.min(size, MAX_MESSAGE_SIZE);
+    }
+
+    /**
+     * "createdAt_id" 형태의 커서 문자열을 파싱한다. - null 또는 빈 문자열이면 비어 있는 CursorToken 반환
+     */
+    private CursorToken parseCursor(String rawCursor) {
+        if (rawCursor == null || rawCursor.isBlank()) {
+            return new CursorToken(null, null);
+        }
+
+        String[] parts = rawCursor.split("_");
+        if (parts.length != 2) {
+            throw new ApiException(ChatErrorCode.NOT_SUPPORT_CURSOR_FORMAT);
+        }
+
+        LocalDateTime createdAt = LocalDateTime.parse(parts[0]);
+        Long id = Long.parseLong(parts[1]);
+
+        return new CursorToken(createdAt, id);
     }
 
     /**
