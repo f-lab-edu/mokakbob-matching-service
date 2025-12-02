@@ -17,7 +17,7 @@ public class RedisMessageStore implements ChatMessageStore {
 
     private static final String CHAT_ROOM_MESSAGES_KEY = "chat:room:%d:messages";
     private static final int CACHE_LIMIT = 200;
-    private static final String DELIMITER = "\\|";
+    private static final String DELIMITER = "_";
     private static final String SERIALIZE_DELIMITER = "|";
     private static final int REDIS_SCAN_END = CACHE_LIMIT - 1;
     private static final int SERIALIZE_PARTS = 5;

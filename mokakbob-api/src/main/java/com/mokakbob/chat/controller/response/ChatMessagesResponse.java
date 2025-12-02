@@ -13,6 +13,7 @@ public record ChatMessagesResponse(
 
     private static final int LAST_MESSAGE_DELIMITER = 1;
     private static final int START_MESSAGE_DELIMITER = 0;
+    private static final String CURSOR_DELIMITER = "_";
 
     public static ChatMessagesResponse of(
             Long memberId,
@@ -48,9 +49,9 @@ public record ChatMessagesResponse(
     }
 
     /**
-     * 복합 커서 인코딩: createdAt|id
+     * 복합 커서 인코딩: createdAt_id
      */
     private static String encodeCursor(ChatMessage message) {
-        return message.getCreatedAt().toString() + "|" + message.getId();
+        return message.getCreatedAt().toString() + CURSOR_DELIMITER + message.getId();
     }
 }

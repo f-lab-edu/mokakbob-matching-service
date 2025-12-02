@@ -75,8 +75,7 @@ public class ChatApiService {
         int sizePlusOne = pageSize + HAS_NEXT_DELIMITER;
 
         // redis 조회
-        List<CachedChatMessage> cachedMessages =
-                chatMessageStore.loadMessages(room.getId(), rawCursor, sizePlusOne);
+        List<CachedChatMessage> cachedMessages = chatMessageStore.loadMessages(room.getId(), rawCursor, sizePlusOne);
 
         if (!cachedMessages.isEmpty() && cachedMessages.size() >= sizePlusOne) {
             return toChatMessages(cachedMessages);
@@ -97,14 +96,14 @@ public class ChatApiService {
     }
 
     /**
-     * "createdAt|id" 형태의 커서 문자열을 파싱한다. - null 또는 빈 문자열이면 비어 있는 CursorToken 반환
+     * "createdAt_id" 형태의 커서 문자열을 파싱한다. - null 또는 빈 문자열이면 비어 있는 CursorToken 반환
      */
     private CursorToken parseCursor(String rawCursor) {
         if (rawCursor == null || rawCursor.isBlank()) {
             return new CursorToken(null, null);
         }
 
-        String[] parts = rawCursor.split("\\|");
+        String[] parts = rawCursor.split("_");
         if (parts.length != 2) {
             throw new ApiException(ChatErrorCode.NOT_SUPPORT_CURSOR_FORMAT);
         }
