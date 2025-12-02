@@ -1,8 +1,12 @@
 package com.mokakbob.chat.service;
 
+import static com.mokakbob.chat.util.ChatMessageMapper.toChatMessages;
+
+import com.mokakbob.cache.ChatMessageStore;
 import com.mokakbob.chat.controller.response.ChatRoomResponse;
 import com.mokakbob.chat.controller.response.ChatRoomResponses;
 import com.mokakbob.chat.exception.ChatErrorCode;
+import com.mokakbob.domain.chat.cache.CachedChatMessage;
 import com.mokakbob.domain.chat.cursor.CursorToken;
 import com.mokakbob.chat.service.support.ParticipantContext;
 import com.mokakbob.chat.util.ChatRoomMapper;
@@ -45,6 +49,7 @@ public class ChatApiService {
     private final ChatService chatService;
     private final MatchingParticipateService participateService;
     private final MemberService memberService;
+    private final ChatMessageStore chatMessageStore;
 
     @Transactional
     public void handleMessage(Long roomId, String memberId, String content, long sendAt) {
@@ -68,6 +73,15 @@ public class ChatApiService {
         int pageSize = normalizeSize(size);
         int sizePlusOne = pageSize + HAS_NEXT_DELIMITER;
 
+        // redis 조회
+        List<CachedChatMessage> cachedMessages =
+                chatMessageStore.loadMessages(room.getId(), rawCursor, sizePlusOne);
+
+        if (!cachedMessages.isEmpty() && cachedMessages.size() >= sizePlusOne) {
+            return toChatMessages(cachedMessages);
+        }
+
+        // db 조회
         CursorToken cursorToken = parseCursor(rawCursor);
 
         return messageService.findMessages(room.getId(), cursorToken.createdAt(), cursorToken.id(), sizePlusOne);
