@@ -57,4 +57,8 @@ public class Member extends BaseEntity {
     public void deductPoint(int point) {
         this.depositPoint -= point;
     }
+
+    public void addPoint(int point) {
+        this.depositPoint += point;
+    }
 }

@@ -28,7 +28,7 @@ public class Payment extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Long userId;
+    private Long memberId;
 
     @Column(nullable = false)
     private Integer amount;
@@ -46,4 +46,18 @@ public class Payment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PayStatus status;
+
+    public static Payment paid(Long memberId, int amount, String impUid,
+                               String merchantUid, PayType payType) {
+
+        return new Payment(
+                null,
+                memberId,
+                amount,
+                payType,
+                impUid,
+                merchantUid,
+                PayStatus.PAID
+        );
+    }
 }
