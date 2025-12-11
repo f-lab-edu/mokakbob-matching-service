@@ -28,7 +28,7 @@ public class Payment extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Long userId;
+    private Long memberId;
 
     @Column(nullable = false)
     private Integer amount;

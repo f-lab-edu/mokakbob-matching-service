@@ -2,9 +2,8 @@ package com.mokakbob.domain.point.domain.vo;
 
 public enum PointTransactionType {
 
-    INITIAL,
-    LOCKED,
+    RECHARGE,
+    USE,
     REFUND,
-    FORFEIT,
-    RECHARGE
+    FORFEIT
 }
