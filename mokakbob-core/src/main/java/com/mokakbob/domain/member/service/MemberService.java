@@ -69,7 +69,7 @@ public class MemberService {
 
     @Transactional
     public void addPoint(Long memberId, int point) {
-        Member member = findMember(memberId);
+        Member member = findMemberForUpdate(memberId);
         member.addPoint(point);
     }
 
