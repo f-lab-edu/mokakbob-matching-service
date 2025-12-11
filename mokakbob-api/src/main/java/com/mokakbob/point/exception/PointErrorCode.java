@@ -7,7 +7,6 @@ public enum PointErrorCode implements ApiErrorCode {
     PAYMENT_GATEWAY_ERROR(500, "P001", "결제 승인 서버와의 통신 중 오류가 발생했습니다."),
     INVALID_PAYMENT(400, "P002", "유효하지 않은 결제입니다."),
     PAYMENT_AMOUNT_MISMATCH(400, "P003", "결제 금액이 요청 금액과 일치하지 않습니다."),
-    DUPLICATE_PAYMENT(409, "P004", "이미 처리된 결제입니다.")
     ;
 
     private final int httpStatus;

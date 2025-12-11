@@ -3,6 +3,7 @@ package com.mokakbob.domain.point.exception;
 import com.mokakbob.common.exception.DomainErrorCode;
 
 public enum PointErrorCode implements DomainErrorCode {
+    DUPLICATE_PAYMENT(409, "CP004", "이미 처리된 결제입니다.")
     ;
 
     private final int httpStatus;

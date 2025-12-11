@@ -67,6 +67,12 @@ public class MemberService {
         return memberRepository.findByIdIn(memberIds);
     }
 
+    @Transactional
+    public void addPoint(Long memberId, int point) {
+        Member member = findMember(memberId);
+        member.addPoint(point);
+    }
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new DomainException(MemberErrorCode.DUPLICATE_EMAIL);

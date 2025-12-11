@@ -10,12 +10,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PointTransaction extends BaseEntity {
 
     @Id
@@ -31,4 +33,8 @@ public class PointTransaction extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PointTransactionType type;
+
+    public static PointTransaction recharge(Long memberId, int amount) {
+        return new PointTransaction(null, memberId, amount, PointTransactionType.RECHARGE);
+    }
 }
