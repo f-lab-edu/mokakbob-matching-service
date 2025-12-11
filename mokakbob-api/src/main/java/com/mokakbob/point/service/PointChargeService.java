@@ -5,6 +5,7 @@ import com.mokakbob.domain.point.domain.Payment;
 import com.mokakbob.domain.point.domain.vo.PayType;
 import com.mokakbob.domain.point.service.PaymentService;
 import com.mokakbob.domain.point.service.PointTransactionService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PointChargeService {
 
     private final MemberService memberService;
-    private final PaymentService payService;
+    private final PaymentService paymentService;
     private final PointTransactionService pointTransactionService;
 
     /**
@@ -22,8 +23,13 @@ public class PointChargeService {
      */
     @Transactional
     public Payment charge(Long memberId, int amount, String impUid, String merchantUid, PayType payType) {
-        payService.validateDuplicateImpUid(impUid);
-        Payment payment = payService.savePaidStatus(memberId, amount, payType, impUid, merchantUid);
+        Optional<Payment> existing = paymentService.findPaymentByImpUid(impUid);
+
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        Payment payment = paymentService.savePaidStatus(memberId, amount, payType, impUid, merchantUid);
         memberService.addPoint(memberId, amount);
         pointTransactionService.rechargePoint(memberId, amount);
 
