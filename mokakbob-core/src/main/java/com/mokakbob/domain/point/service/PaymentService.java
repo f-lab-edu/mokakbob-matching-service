@@ -6,6 +6,7 @@ import com.mokakbob.domain.point.domain.vo.PayType;
 import com.mokakbob.domain.point.exception.PointErrorCode;
 import com.mokakbob.domain.point.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,10 @@ public class PaymentService {
     public Payment savePaidStatus(Long memberId, int amount, PayType payType, String impUid, String merchantUid) {
         Payment payment = Payment.paid(memberId, amount, impUid, merchantUid, payType);
 
-        return paymentRepository.save(payment);
+        try {
+            return paymentRepository.save(payment);
+        } catch (DataIntegrityViolationException e) {
+            throw new DomainException(PointErrorCode.DUPLICATE_PAYMENT);
+        }
     }
 }
