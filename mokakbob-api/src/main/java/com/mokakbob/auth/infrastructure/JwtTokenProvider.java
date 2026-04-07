@@ -95,6 +95,13 @@ public class JwtTokenProvider implements TokenProvider {
         );
     }
 
+    @Override
+    public long getRemainingExpirationMillis(String token) {
+        Date expiration = parseToken(token).getExpiration();
+        Date now = new Date();
+        return Math.max(0, expiration.getTime() - now.getTime());
+    }
+
     private Claims parseToken(String token) {
         try {
             return Jwts.parserBuilder()

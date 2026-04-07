@@ -1,5 +1,6 @@
 package com.mokakbob.auth.service;
 
+import com.mokakbob.auth.domain.BlacklistTokenStore;
 import com.mokakbob.auth.domain.RefreshTokenStore;
 import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.auth.exception.AuthApiErrorCode;
@@ -22,6 +23,7 @@ public class TokenService {
 
     private final TokenProvider tokenProvider;
     private final RefreshTokenStore refreshTokenStore;
+    private final BlacklistTokenStore blacklistTokenStore;
     private final TokenExtractor extractor;
 
     public String createAccessToken(Long memberId) {
@@ -41,6 +43,22 @@ public class TokenService {
         cookie.setPath(REISSUE_API_PATH);
         cookie.setMaxAge((int) REFRESH_TTL.getSeconds());
         response.addCookie(cookie);
+    }
+
+    public void logout(HttpServletRequest request) {
+        String accessToken = extractor.extractAccessToken(request);
+        Long memberId = tokenProvider.extractMemberId(accessToken);
+
+        // 리프레시 토큰 삭제
+        refreshTokenStore.delete(memberId);
+
+        // 액세스 토큰 블랙리스트 등록
+        long remainingExpirationMillis = tokenProvider.getRemainingExpirationMillis(accessToken);
+        blacklistTokenStore.save(accessToken, Duration.ofMillis(remainingExpirationMillis));
+    }
+
+    public boolean isBlacklisted(String accessToken) {
+        return blacklistTokenStore.exists(accessToken);
     }
 
     public String reissue(HttpServletResponse response, HttpServletRequest request) {

@@ -8,4 +8,5 @@ public interface TokenProvider {
     Long extractMemberId(String token);
     boolean isAccessTokenExpired(String token);
     Authentication getAuthentication(Long memberId);
+    long getRemainingExpirationMillis(String token);
 }
