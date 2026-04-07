@@ -3,7 +3,6 @@ package com.mokakbob.auth.filter;
 import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.common.path.permit.PermitPath;
 import com.mokakbob.common.util.TokenExtractor;
-import com.mokakbob.global.support.AuthConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext()
                 .setAuthentication(authentication);
 
-        request.setAttribute(AuthConstants.TOKEN_ATTRIBUTE, memberId);
         filterChain.doFilter(request, response);
     }
 

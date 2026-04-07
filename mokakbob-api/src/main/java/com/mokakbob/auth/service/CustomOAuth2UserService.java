@@ -1,8 +1,9 @@
 package com.mokakbob.auth.service;
 
+import com.mokakbob.auth.service.oauth2.info.OAuth2UserInfo;
+import com.mokakbob.auth.service.oauth2.info.OAuth2UserInfoFactory;
 import com.mokakbob.auth.service.response.MemberExistResponse;
 import com.mokakbob.domain.member.service.MemberService;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -19,14 +20,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
         OAuth2User user = super.loadUser(request);
-        Map<String, Object> attr = user.getAttributes();
+        String registrationId = request.getClientRegistration().getRegistrationId();
 
-        String email = (String) attr.get("email");
-        String login = (String) attr.get("login");
-        String avatar = (String) attr.get("avatar_url");
+        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, user.getAttributes());
 
-        return memberService.findByNickName(login)
+        return memberService.findByNickName(userInfo.getName())
                 .map(m -> MemberExistResponse.fromMember(m.getId(), m.getEmail(), m.getNickname(), m.getProfileImage()))
-                .orElseGet(() -> MemberExistResponse.fromOauthUser(email, login, avatar));
+                .orElseGet(() -> MemberExistResponse.fromOauthUser(userInfo.getEmail(), userInfo.getName(), userInfo.getImageUrl()));
     }
 }

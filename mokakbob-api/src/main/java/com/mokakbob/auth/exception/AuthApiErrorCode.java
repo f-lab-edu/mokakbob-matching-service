@@ -17,9 +17,11 @@ public enum AuthApiErrorCode implements ApiErrorCode {
 
     // auth login exception
     NOT_MATCH_PASSWORD(401, "L001", "비밀번호가 일치하지 않습니다."),
+    INVALID_CREDENTIALS(401, "L002", "이메일 또는 비밀번호가 일치하지 않습니다."),
 
     // oauth security
-    FORBIDDEN(403, "OAUTH001", "권한이 없습니다.")
+    FORBIDDEN(403, "OAUTH001", "권한이 없습니다."),
+    LOGOUT_ACCESS_TOKEN(401, "OAUTH002", "로그아웃된 토큰입니다.")
     ;
 
     private final int httpStatus;

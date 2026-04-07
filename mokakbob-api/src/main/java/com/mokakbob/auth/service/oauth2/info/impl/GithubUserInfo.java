@@ -1,6 +1,6 @@
-package com.mokakbob.auth.strategy.impl;
+package com.mokakbob.auth.service.oauth2.info.impl;
 
-import com.mokakbob.auth.strategy.OAuth2UserInfo;
+import com.mokakbob.auth.service.oauth2.info.OAuth2UserInfo;
 import java.util.Map;
 
 /**

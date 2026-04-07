@@ -24,7 +24,7 @@ public class AuthService {
         Member member = memberService.findMemberByEmail(email);
 
         if (!passwordEncoder.matches(password, member.getPasswordEnc())) {
-            throw new ApiException(AuthApiErrorCode.NOT_MATCH_PASSWORD);
+            throw new ApiException(AuthApiErrorCode.INVALID_CREDENTIALS);
         }
 
         return member;

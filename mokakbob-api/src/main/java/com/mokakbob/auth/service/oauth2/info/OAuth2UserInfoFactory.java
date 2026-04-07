@@ -1,7 +1,7 @@
-package com.mokakbob.auth.strategy;
+package com.mokakbob.auth.service.oauth2.info;
 
 import com.mokakbob.auth.exception.AuthApiErrorCode;
-import com.mokakbob.auth.strategy.impl.GithubUserInfo;
+import com.mokakbob.auth.service.oauth2.info.impl.GithubUserInfo;
 import com.mokakbob.common.exception.exceptions.ApiException;
 import java.util.Map;
 
