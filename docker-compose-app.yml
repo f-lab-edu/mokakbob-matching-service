@@ -13,7 +13,7 @@ services:
       - SERVER_PORT=8080
     restart: always
     networks:
-      - monitoring-network
+      - mokakbob-network
 
   mokakbob-consumer:
     build:
@@ -29,7 +29,7 @@ services:
       - SERVER_PORT=8081
     restart: always
     networks:
-      - monitoring-network
+      - mokakbob-network
 
   mokakbob-batch:
     build:
@@ -45,8 +45,8 @@ services:
       - SERVER_PORT=8082
     restart: always
     networks:
-      - monitoring-network
+      - mokakbob-network
 
 networks:
-  monitoring-network:
+  mokakbob-network:
     external: true
