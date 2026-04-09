@@ -1,51 +1,68 @@
+x-app-common: &app-common
+  env_file:
+    - .env
+  environment:
+    - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+    - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+    - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    - REDIS_HOST=${REDIS_HOST}
+    - REDIS_PORT=${REDIS_PORT}
+    - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+    - MAIL_USERNAME=${MAIL_USERNAME}
+    - MAIL_PASSWORD=${MAIL_PASSWORD}
+    - JWT_SECRET=${JWT_SECRET}
+    - OAUTH_GITHUB_CLIENT_ID=${OAUTH_GITHUB_CLIENT_ID}
+    - OAUTH_GITHUB_CLIENT_SECRET=${OAUTH_GITHUB_CLIENT_SECRET}
+    - IAMPORT_API_KEY=${IAMPORT_API_KEY}
+    - IAMPORT_API_SECRET=${IAMPORT_API_SECRET}
+    - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+    - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+    - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+    - AWS_REGION=${AWS_REGION}
+    - JAVA_OPTS=-Xmx384m -Xms384m
+  deploy:
+    resources:
+      limits:
+        memory: 512M
+  networks:
+    - mokakbob-network
+  restart: always
+
 services:
   mokakbob-api:
+    <<: *app-common
     build:
       context: .
+      dockerfile: Dockerfile
       args:
         MODULE_NAME: mokakbob-api
     container_name: mokakbob-api
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SERVER_PORT=8080
-    restart: always
-    networks:
-      - mokakbob-network
+      - SPRING_PROFILES_ACTIVE=api
 
   mokakbob-consumer:
+    <<: *app-common
     build:
       context: .
+      dockerfile: Dockerfile
       args:
         MODULE_NAME: mokakbob-consumer
     container_name: mokakbob-consumer
-    ports:
-      - "8081:8081"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SERVER_PORT=8081
-    restart: always
-    networks:
-      - mokakbob-network
+      - SPRING_PROFILES_ACTIVE=consumer
 
   mokakbob-batch:
+    <<: *app-common
     build:
       context: .
+      dockerfile: Dockerfile
       args:
         MODULE_NAME: mokakbob-batch
     container_name: mokakbob-batch
-    ports:
-      - "8082:8082"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SERVER_PORT=8082
-    restart: always
-    networks:
-      - mokakbob-network
+      - SPRING_PROFILES_ACTIVE=batch
 
 networks:
   mokakbob-network:

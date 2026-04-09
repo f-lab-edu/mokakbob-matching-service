@@ -1,8 +1,8 @@
 package com.mokakbob.auth.infrastructure;
 
 import com.mokakbob.auth.domain.TokenProvider;
-import com.mokakbob.auth.exception.AuthApiErrorCode;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.auth.exception.AuthErrorCode;
+import com.mokakbob.common.exception.ApiException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -111,11 +111,11 @@ public class JwtTokenProvider implements TokenProvider {
                     .getBody();
 
         } catch (ExpiredJwtException e) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_EXPIRED);
+            throw new ApiException(AuthErrorCode.TOKEN_EXPIRED);
         } catch (SignatureException e) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_INVALID_SIGNATURE);
+            throw new ApiException(AuthErrorCode.TOKEN_INVALID_SIGNATURE);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_INVALID);
+            throw new ApiException(AuthErrorCode.TOKEN_INVALID);
         }
     }
 }

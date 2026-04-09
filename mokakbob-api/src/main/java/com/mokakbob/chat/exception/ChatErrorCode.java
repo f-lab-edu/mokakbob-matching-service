@@ -1,8 +1,8 @@
 package com.mokakbob.chat.exception;
 
-import com.mokakbob.common.exception.exceptions.ApiErrorCode;
+import com.mokakbob.common.exception.BaseErrorCode;
 
-public enum ChatErrorCode implements ApiErrorCode {
+public enum ChatErrorCode implements BaseErrorCode {
 
     // STOMP
     STOMP_JWT_MISSING(401, "CHAT_001", "Authorization 헤더가 없습니다."),

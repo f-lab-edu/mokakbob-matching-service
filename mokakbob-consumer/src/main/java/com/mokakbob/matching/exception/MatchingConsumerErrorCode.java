@@ -1,6 +1,6 @@
 package com.mokakbob.matching.exception;
 
-import com.mokakbob.matching.common.exception.exceptions.ConsumerErrorCode;
+import com.mokakbob.matching.common.exception.ConsumerErrorCode;
 
 public enum MatchingConsumerErrorCode implements ConsumerErrorCode {
 

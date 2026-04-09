@@ -1,6 +1,6 @@
 package com.mokakbob.point.facade;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.point.domain.Payment;
 import com.mokakbob.domain.point.domain.vo.PayType;
 import com.mokakbob.domain.point.port.dto.VerifiedPayment;

@@ -1,0 +1,13 @@
+spring:
+  config:
+    import: optional:classpath:application-common.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Batch 모듈 역시 운영 상의 안전을 위해 validate 모드를 유지합니다.
+
+  batch:
+    jdbc:
+      initialize-schema: never
+    job:
+      enabled: false

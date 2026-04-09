@@ -1,6 +1,6 @@
 package com.mokakbob.domain.member.exception;
 
-import com.mokakbob.common.exception.DomainErrorCode;
+import com.mokakbob.domain.exception.DomainErrorCode;
 
 public enum MemberErrorCode implements DomainErrorCode {
     DUPLICATE_EMAIL(409, "M001", "중복되는 이메일입니다."),

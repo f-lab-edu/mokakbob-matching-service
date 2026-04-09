@@ -19,7 +19,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        AuthApiErrorCode errorCode = AuthApiErrorCode.TOKEN_INVALID;
+        AuthErrorCode errorCode = AuthErrorCode.TOKEN_INVALID;
 
         response.setStatus(errorCode.httpStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

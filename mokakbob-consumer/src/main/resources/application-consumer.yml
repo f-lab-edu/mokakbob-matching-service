@@ -1,0 +1,11 @@
+spring:
+  config:
+    import: optional:classpath:application-common.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: validate # Consumer는 스키마를 변경하지 않고 검증만 합니다.
+
+  kafka:
+    consumer:
+      group-id: mokakbob-consumer-group

@@ -1,8 +1,8 @@
 package com.mokakbob.auth.exception;
 
-import com.mokakbob.common.exception.exceptions.ApiErrorCode;
+import com.mokakbob.common.exception.BaseErrorCode;
 
-public enum AuthApiErrorCode implements ApiErrorCode {
+public enum AuthErrorCode implements BaseErrorCode {
     // auth mail exception
     NOT_MATCH_MAIL_CODE(400, "E001", "인증 코드가 일치하지 않습니다."),
     TOO_MANY_REQUEST(400, "E002", "잠시 후 요청해주세요."),
@@ -28,7 +28,7 @@ public enum AuthApiErrorCode implements ApiErrorCode {
     private final String customCode;
     private final String message;
 
-    AuthApiErrorCode(int httpStatus, String customCode, String message) {
+    AuthErrorCode(int httpStatus, String customCode, String message) {
         this.httpStatus = httpStatus;
         this.customCode = customCode;
         this.message = message;

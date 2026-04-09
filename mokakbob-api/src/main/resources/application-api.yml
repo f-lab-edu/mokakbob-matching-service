@@ -1,0 +1,20 @@
+spring:
+  config:
+    import: optional:classpath:application-common.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: update # API 모듈에서만 스키마 자동 생성을 허용합니다.
+
+local:
+  upload:
+    profile:
+      directory: /tmp/mokakbob/profiles
+
+profile:
+  default:
+    image:
+      url: https://${AWS_S3_BUCKET}.s3.amazonaws.com/default/profile.png
+
+server:
+  port: 8080

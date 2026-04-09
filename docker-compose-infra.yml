@@ -6,8 +6,15 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: mokakbob
+      MYSQL_USER: mokakbob_user
+      MYSQL_PASSWORD: 1234
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - mokakbob-network
 
@@ -19,153 +26,26 @@ services:
     command: ["redis-server", "--bind", "0.0.0.0", "--appendonly", "yes", "--protected-mode", "no"]
     restart: always
     healthcheck:
-      test: [ "CMD", "bash", "-c", "redis-cli -h 127.0.0.1 ping | grep PONG" ]
-      interval: 3s
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
       timeout: 3s
-      retries: 10
-      start_period: 5s
+      retries: 5
     networks:
       - mokakbob-network
-
-  redis-cluster-1:
-    image: redis:7.2
-    container_name: redis-cluster-1
-    ports:
-      - "17000:17000"
-    command: ["redis-server", "--port", "17000", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17000.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - mokakbob-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17000", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-2:
-    image: redis:7.2
-    container_name: redis-cluster-2
-    ports:
-      - "17001:17001"
-    command: ["redis-server", "--port", "17001", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17001.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - mokakbob-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17001", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-3:
-    image: redis:7.2
-    container_name: redis-cluster-3
-    ports:
-      - "17002:17002"
-    command: ["redis-server", "--port", "17002", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17002.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - mokakbob-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17002", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-4:
-    image: redis:7.2
-    container_name: redis-cluster-4
-    ports:
-      - "17003:17003"
-    command: ["redis-server", "--port", "17003", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17003.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - mokakbob-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17003", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-5:
-    image: redis:7.2
-    container_name: redis-cluster-5
-    ports:
-      - "17004:17004"
-    command: ["redis-server", "--port", "17004", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17004.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - mokakbob-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17004", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-6:
-    image: redis:7.2
-    container_name: redis-cluster-6
-    ports:
-      - "17005:17005"
-    command: ["redis-server", "--port", "17005", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17005.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - mokakbob-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17005", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-init:
-    image: redis:7.2
-    container_name: redis-cluster-init
-    depends_on:
-      redis-cluster-1:
-        condition: service_healthy
-      redis-cluster-2:
-        condition: service_healthy
-      redis-cluster-3:
-        condition: service_healthy
-      redis-cluster-4:
-        condition: service_healthy
-      redis-cluster-5:
-        condition: service_healthy
-      redis-cluster-6:
-        condition: service_healthy
-    networks:
-      - mokakbob-network
-    entrypoint: /bin/sh
-    command: -c "
-      echo '⏳ Redis cluster nodes ready. Sleeping 10s for handshake...';
-      sleep 10;
-      echo 'yes' | redis-cli --cluster create \
-      redis-cluster-1:17000 \
-      redis-cluster-2:17001 \
-      redis-cluster-3:17002 \
-      redis-cluster-4:17003 \
-      redis-cluster-5:17004 \
-      redis-cluster-6:17005 \
-      --cluster-replicas 1;
-      echo 'Redis Cluster created successfully!';
-      "
-    restart: "no"
 
   redis-exporter:
     image: oliver006/redis_exporter:latest
     container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis:6379
     ports:
       - "9121:9121"
-    environment:
-      - REDIS_ADDR=redis://redis-cluster-1:17000
-      - REDIS_EXPORTER_CHECK_SINGLE_TARGET=false
-      - REDIS_EXPORTER_DEBUG=true
     depends_on:
-      redis-cluster-init:
-        condition: service_completed_successfully
-    restart: always
+      redis:
+        condition: service_healthy
     networks:
       - mokakbob-network
+    restart: always
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -196,13 +76,12 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/kafka/9092"]
-      interval: 3s
-      timeout: 2s
-      retries: 10
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - mokakbob-network
 
 networks:
   mokakbob-network:
-    name: mokakbob-network
-    driver: bridge
+    external: true

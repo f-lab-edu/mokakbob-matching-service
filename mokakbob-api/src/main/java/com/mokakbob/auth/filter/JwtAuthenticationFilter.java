@@ -2,8 +2,8 @@ package com.mokakbob.auth.filter;
 
 import com.mokakbob.auth.domain.TokenProvider;
 import com.mokakbob.auth.service.TokenService;
-import com.mokakbob.common.exception.exceptions.ApiException;
-import com.mokakbob.auth.exception.AuthApiErrorCode;
+import com.mokakbob.common.exception.ApiException;
+import com.mokakbob.auth.exception.AuthErrorCode;
 import com.mokakbob.common.path.permit.PermitPath;
 import com.mokakbob.common.util.TokenExtractor;
 import jakarta.servlet.FilterChain;
@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String rawToken = extractor.extractAccessToken(request);
 
         if (tokenService.isBlacklisted(rawToken)) {
-            throw new ApiException(AuthApiErrorCode.LOGOUT_ACCESS_TOKEN);
+            throw new ApiException(AuthErrorCode.LOGOUT_ACCESS_TOKEN);
         }
 
         Long memberId = tokenProvider.extractMemberId(rawToken);

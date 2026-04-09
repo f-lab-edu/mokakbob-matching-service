@@ -1,6 +1,6 @@
 package com.mokakbob.domain.review.exception;
 
-import com.mokakbob.common.exception.DomainErrorCode;
+import com.mokakbob.domain.exception.DomainErrorCode;
 
 public enum ReviewErrorCode implements DomainErrorCode {
     ;

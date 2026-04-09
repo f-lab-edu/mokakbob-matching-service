@@ -1,6 +1,6 @@
 package com.mokakbob.matching.service;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.matching.exception.MatchingErrorCode;
 import java.util.concurrent.TimeUnit;

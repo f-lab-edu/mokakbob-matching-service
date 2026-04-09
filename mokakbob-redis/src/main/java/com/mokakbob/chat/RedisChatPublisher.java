@@ -2,12 +2,13 @@ package com.mokakbob.chat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokakbob.common.exception.RedisException;
+import com.mokakbob.config.RedisConstants;
 import com.mokakbob.domain.chat.pubsub.ChatPublisher;
 import com.mokakbob.domain.chat.pubsub.response.ChatMessageResponse;
-import com.mokakbob.exception.RedisPubSubErrorCode;
+import com.mokakbob.common.exception.RedisPubSubErrorCode;
 import io.lettuce.core.cluster.RedisClusterClient;
-import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
-import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
+import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
+import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +18,22 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisChatPublisher implements ChatPublisher {
 
-    private static final String CHANNEL_PREFIX = "chat.";
-
-    private final RedisClusterClient redisClusterClient;
+    private final io.lettuce.core.AbstractRedisClient redisClient;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Sharded Pub/Sub용 Cluster connection.
-     */
-    private StatefulRedisClusterConnection<String, String> publishConnection;
-    private RedisAdvancedClusterAsyncCommands<String, String> asyncCommands;
+    private StatefulRedisPubSubConnection<String, String> publishConnection;
+    private RedisPubSubAsyncCommands<String, String> asyncCommands;
+    private boolean isClusterMode;
 
     @PostConstruct
     public void init() {
-        this.publishConnection = redisClusterClient.connect();
+        this.isClusterMode = redisClient instanceof RedisClusterClient;
+        
+        if (isClusterMode) {
+            this.publishConnection = ((RedisClusterClient) redisClient).connectPubSub();
+        } else {
+            this.publishConnection = ((io.lettuce.core.RedisClient) redisClient).connectPubSub();
+        }
         this.asyncCommands = publishConnection.async();
     }
 
@@ -45,13 +48,15 @@ public class RedisChatPublisher implements ChatPublisher {
     public void publish(Long roomId, ChatMessageResponse response) {
         try {
             String payload = objectMapper.writeValueAsString(response);
-            String channel = CHANNEL_PREFIX + roomId;
+            String channel = RedisConstants.CHAT_CHANNEL_PREFIX + roomId;
 
-            asyncCommands.spublish(channel, payload)
-                    .toCompletableFuture()
-                    .join();
+            if (isClusterMode) {
+                asyncCommands.spublish(channel, payload);
+            } else {
+                asyncCommands.publish(channel, payload);
+            }
         } catch (Exception e) {
-            throw new RedisException(RedisPubSubErrorCode.FAIL_REDIS_PUBLISH);
+            throw new RedisException(RedisPubSubErrorCode.REDIS_PUBLISH_ERROR);
         }
     }
 }

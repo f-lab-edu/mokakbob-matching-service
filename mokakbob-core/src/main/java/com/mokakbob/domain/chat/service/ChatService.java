@@ -1,6 +1,6 @@
 package com.mokakbob.domain.chat.service;
 
-import com.mokakbob.common.exception.DomainException;
+import com.mokakbob.domain.exception.DomainException;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.domain.chat.exception.ChatErrorCode;
 import com.mokakbob.domain.chat.repository.ChatRoomRepository;

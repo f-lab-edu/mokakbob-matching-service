@@ -12,7 +12,7 @@ import com.mokakbob.auth.domain.EmailSender;
 import com.mokakbob.auth.domain.EmailVerifyCodeStore;
 import com.mokakbob.auth.exception.AuthApiErrorCode;
 import com.mokakbob.auth.service.EmailAuthService;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

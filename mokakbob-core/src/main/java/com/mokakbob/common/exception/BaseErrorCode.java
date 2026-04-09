@@ -1,6 +1,6 @@
 package com.mokakbob.common.exception;
 
-public interface DomainErrorCode {
+public interface BaseErrorCode {
 
     int httpStatus();
 

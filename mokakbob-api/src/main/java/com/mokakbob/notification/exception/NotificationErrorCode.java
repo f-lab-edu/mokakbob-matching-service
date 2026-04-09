@@ -1,8 +1,8 @@
 package com.mokakbob.notification.exception;
 
-import com.mokakbob.common.exception.exceptions.ApiErrorCode;
+import com.mokakbob.common.exception.BaseErrorCode;
 
-public enum NotificationErrorCode implements ApiErrorCode {
+public enum NotificationErrorCode implements BaseErrorCode {
 
     ;
     private final int httpStatus;

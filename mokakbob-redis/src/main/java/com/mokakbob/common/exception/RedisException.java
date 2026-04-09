@@ -1,15 +1,13 @@
 package com.mokakbob.common.exception;
 
-public class RedisException extends RuntimeException{
-
-    private final RedisErrorCode errorCode;
+public class RedisException extends BaseException {
 
     public RedisException(RedisErrorCode errorCode) {
-        super(errorCode.customCode() + ": " + errorCode.message());
-        this.errorCode = errorCode;
+        super(errorCode);
     }
 
-    public RedisErrorCode redisErrorCode() {
-        return errorCode;
+    @Override
+    public RedisErrorCode getErrorCode() {
+        return (RedisErrorCode) super.getErrorCode();
     }
 }

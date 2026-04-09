@@ -1,7 +1,7 @@
 package com.mokakbob.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.common.exception.handler.response.CustomErrorResponse;
 import com.mokakbob.global.exception.GlobalErrorCode;
 import jakarta.servlet.FilterChain;
@@ -27,9 +27,9 @@ public class ExceptionHandlingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (ApiException e) {
             setErrorResponse(response,
-                    e.apiErrorCode().httpStatus(),
-                    e.apiErrorCode().message(),
-                    e.apiErrorCode().customCode());
+                    e.getErrorCode().httpStatus(),
+                    e.getErrorCode().message(),
+                    e.getErrorCode().customCode());
         } catch (Exception e) {
             setErrorResponse(response,
                     GlobalErrorCode.INTERNAL_SERVER_ERROR.httpStatus(),

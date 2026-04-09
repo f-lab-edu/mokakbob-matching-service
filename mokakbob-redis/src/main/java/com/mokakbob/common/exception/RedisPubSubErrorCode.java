@@ -1,18 +1,16 @@
-package com.mokakbob.exception;
+package com.mokakbob.common.exception;
 
-import com.mokakbob.common.exception.RedisErrorCode;
+public enum RedisPubSubErrorCode implements RedisErrorCode {
 
-public enum RedisStoreErrorCode implements RedisErrorCode {
-
-    FAIL_REDIS_OPERATION(500, "R001", "Redis 조회 및 저장 오류가 발생했습니다."),
-    NOT_FOUND_NOTIFICATION(500, "R002", "저장된 알림이 없습니다."),
+    REDIS_PUBLISH_ERROR(500, "R003", "레디스 메시지 발행 중 오류가 발생했습니다."),
+    REDIS_SUBSCRIBE_ERROR(500, "R004", "레디스 메시지 구독 중 오류가 발생했습니다."),
     ;
 
     private final int httpStatus;
     private final String customCode;
     private final String message;
 
-    RedisStoreErrorCode(int httpStatus, String customCode, String message) {
+    RedisPubSubErrorCode(int httpStatus, String customCode, String message) {
         this.httpStatus = httpStatus;
         this.customCode = customCode;
         this.message = message;

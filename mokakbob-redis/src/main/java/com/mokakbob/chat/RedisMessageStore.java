@@ -4,6 +4,7 @@ import com.mokakbob.cache.ChatMessageStore;
 import com.mokakbob.domain.chat.cache.CachedChatMessage;
 import com.mokakbob.domain.chat.cursor.CursorToken;
 import com.mokakbob.domain.chat.domain.ChatMessage;
+import com.mokakbob.config.RedisConstants;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Pattern;
+
 @Component
 @RequiredArgsConstructor
 public class RedisMessageStore implements ChatMessageStore {
 
-    private static final String CHAT_ROOM_MESSAGES_KEY = "chat:room:%d:messages";
     private static final int CACHE_LIMIT = 200;
-    private static final String DELIMITER = "_";
-    private static final String SERIALIZE_DELIMITER = "|";
     private static final int REDIS_SCAN_END = CACHE_LIMIT - 1;
     private static final int SERIALIZE_PARTS = 5;
 
@@ -87,19 +87,19 @@ public class RedisMessageStore implements ChatMessageStore {
     }
 
     private String key(Long roomId) {
-        return String.format(CHAT_ROOM_MESSAGES_KEY, roomId);
+        return String.format(RedisConstants.CHAT_ROOM_MESSAGES_KEY, roomId);
     }
 
     private String serialize(ChatMessage m) {
-        return m.getCreatedAt() + SERIALIZE_DELIMITER
-                + m.getId() + SERIALIZE_DELIMITER
-                + m.getChatRoomId() + SERIALIZE_DELIMITER
-                + m.getSenderId() + SERIALIZE_DELIMITER
+        return m.getCreatedAt() + RedisConstants.CHAT_DELIMITER
+                + m.getId() + RedisConstants.CHAT_DELIMITER
+                + m.getChatRoomId() + RedisConstants.CHAT_DELIMITER
+                + m.getSenderId() + RedisConstants.CHAT_DELIMITER
                 + m.getMessage();
     }
 
     private CachedChatMessage deserialize(String raw) {
-        String[] p = raw.split(DELIMITER, SERIALIZE_PARTS);
+        String[] p = raw.split(Pattern.quote(RedisConstants.CHAT_DELIMITER), SERIALIZE_PARTS);
 
         return new CachedChatMessage(
                 Long.parseLong(p[1]),
@@ -111,7 +111,7 @@ public class RedisMessageStore implements ChatMessageStore {
     }
 
     private CursorToken parseCursor(String cursor) {
-        String[] p = cursor.split(DELIMITER);
+        String[] p = cursor.split(Pattern.quote(RedisConstants.CHAT_DELIMITER));
 
         return new CursorToken(LocalDateTime.parse(p[0]), Long.parseLong(p[1]));
     }

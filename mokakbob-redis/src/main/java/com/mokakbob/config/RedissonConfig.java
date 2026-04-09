@@ -1,6 +1,6 @@
 package com.mokakbob.config;
 
-
+import java.util.List;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -13,18 +13,31 @@ public class RedissonConfig {
 
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redissonClient(
-            @Value("${spring.data.redis.host}") String host,
-            @Value("${spring.data.redis.port}") int port) {
+            @Value("${spring.data.redis.cluster.nodes}") List<String> clusterNodes) {
 
         Config config = new Config();
-        config.useSingleServer()
-                .setAddress("redis://" + host + ":" + port)
-                .setConnectionMinimumIdleSize(10)
-                .setConnectionPoolSize(64)
-                .setIdleConnectionTimeout(10000)
-                .setTimeout(3000)
-                .setRetryAttempts(3)
-                .setRetryInterval(1500);
+
+        if (clusterNodes.size() == 1) {
+            config.useSingleServer()
+                    .setAddress(RedisConstants.REDIS_PROTOCOL_PREFIX + clusterNodes.get(0))
+                    .setIdleConnectionTimeout(10000)
+                    .setConnectTimeout(10000)
+                    .setTimeout(3000)
+                    .setRetryAttempts(3)
+                    .setRetryInterval(1500);
+        } else {
+            var clusterConfig = config.useClusterServers()
+                    .setScanInterval(2000)
+                    .setIdleConnectionTimeout(10000)
+                    .setConnectTimeout(10000)
+                    .setTimeout(3000)
+                    .setRetryAttempts(3)
+                    .setRetryInterval(1500);
+
+            for (String node : clusterNodes) {
+                clusterConfig.addNodeAddress(RedisConstants.REDIS_PROTOCOL_PREFIX + node);
+            }
+        }
 
         return Redisson.create(config);
     }

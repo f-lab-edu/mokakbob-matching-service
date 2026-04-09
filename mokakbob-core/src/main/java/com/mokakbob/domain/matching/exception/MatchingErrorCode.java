@@ -1,6 +1,6 @@
 package com.mokakbob.domain.matching.exception;
 
-import com.mokakbob.common.exception.DomainErrorCode;
+import com.mokakbob.domain.exception.DomainErrorCode;
 
 public enum MatchingErrorCode implements DomainErrorCode {
 

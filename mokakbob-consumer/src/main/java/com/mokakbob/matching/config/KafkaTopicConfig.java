@@ -10,7 +10,7 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
 
     private static final int MATCHING_PARTITIONS = 1;
-    private static final short MATCHING_REPLICAS = 2;
+    private static final short MATCHING_REPLICAS = 1;
     private static final String MATCHING_RETENTION_MS = String.valueOf(600_000);
 
     @Bean

@@ -1,6 +1,6 @@
 package com.mokakbob.point.service;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.point.port.PaymentVerificationPort;
 import com.mokakbob.domain.point.port.dto.VerifiedPayment;
 import com.mokakbob.point.exception.PointErrorCode;

@@ -1,6 +1,6 @@
 package com.mokakbob.global.resolver;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.global.exception.GlobalErrorCode;
 import com.mokakbob.global.resolver.annotation.MemberId;
 import org.springframework.core.MethodParameter;

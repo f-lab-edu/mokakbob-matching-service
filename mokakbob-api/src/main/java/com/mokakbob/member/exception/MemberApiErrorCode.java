@@ -1,8 +1,8 @@
 package com.mokakbob.member.exception;
 
-import com.mokakbob.common.exception.exceptions.ApiErrorCode;
+import com.mokakbob.common.exception.BaseErrorCode;
 
-public enum MemberApiErrorCode implements ApiErrorCode {
+public enum MemberApiErrorCode implements BaseErrorCode {
     // image exception
     IMAGE_UPLOAD_FAILED(500, "I001", "이미지 업로드에 실패하였습니다."),
     IMAGE_FOLDER_CREATE_FAILED(500, "I002", "이미지 폴더 생성에 실패하였습니다."),

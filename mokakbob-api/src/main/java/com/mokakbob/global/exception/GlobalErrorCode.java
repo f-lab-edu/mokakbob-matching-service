@@ -1,8 +1,8 @@
 package com.mokakbob.global.exception;
 
-import com.mokakbob.common.exception.exceptions.ApiErrorCode;
+import com.mokakbob.common.exception.BaseErrorCode;
 
-public enum GlobalErrorCode implements ApiErrorCode {
+public enum GlobalErrorCode implements BaseErrorCode {
     INTERNAL_SERVER_ERROR(500, "G001", "내부 서버 문제가 발생하였습니다."),
     NOT_FOUND_TOKEN_MEMBER_ID(401, "G002", "토큰에서 사용자 ID를 추출할 수 없습니다."),
 

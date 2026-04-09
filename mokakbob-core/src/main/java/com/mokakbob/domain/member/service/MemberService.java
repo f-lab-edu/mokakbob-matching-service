@@ -1,6 +1,6 @@
 package com.mokakbob.domain.member.service;
 
-import com.mokakbob.common.exception.DomainException;
+import com.mokakbob.domain.exception.DomainException;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.domain.vo.MemberPreference;
 import com.mokakbob.domain.member.exception.MemberErrorCode;

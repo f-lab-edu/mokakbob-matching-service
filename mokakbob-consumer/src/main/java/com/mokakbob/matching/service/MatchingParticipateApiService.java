@@ -6,7 +6,7 @@ import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
-import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
+import com.mokakbob.matching.common.exception.ConsumerException;
 import com.mokakbob.matching.event.MatchFoundEventPublisher;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
 import java.time.Duration;

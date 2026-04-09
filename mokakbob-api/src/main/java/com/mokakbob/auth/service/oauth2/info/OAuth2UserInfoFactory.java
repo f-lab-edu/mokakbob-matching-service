@@ -1,8 +1,8 @@
 package com.mokakbob.auth.service.oauth2.info;
 
-import com.mokakbob.auth.exception.AuthApiErrorCode;
+import com.mokakbob.auth.exception.AuthErrorCode;
 import com.mokakbob.auth.service.oauth2.info.impl.GithubUserInfo;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import java.util.Map;
 
 /**
@@ -18,6 +18,6 @@ public class OAuth2UserInfoFactory {
         }
 
         // 지원하지 않는 제공자일 경우 에러 발생
-        throw new ApiException(AuthApiErrorCode.FORBIDDEN);
+        throw new ApiException(AuthErrorCode.FORBIDDEN);
     }
 }

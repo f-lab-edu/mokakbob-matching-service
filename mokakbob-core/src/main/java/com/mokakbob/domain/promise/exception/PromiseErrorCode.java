@@ -1,6 +1,6 @@
 package com.mokakbob.domain.promise.exception;
 
-import com.mokakbob.common.exception.DomainErrorCode;
+import com.mokakbob.domain.exception.DomainErrorCode;
 
 public enum PromiseErrorCode implements DomainErrorCode {
     ;

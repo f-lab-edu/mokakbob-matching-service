@@ -1,6 +1,6 @@
 package com.mokakbob.member.infrastructure;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.member.domain.ProfileImageUploader;
 import com.mokakbob.member.exception.MemberApiErrorCode;
 import java.io.File;
