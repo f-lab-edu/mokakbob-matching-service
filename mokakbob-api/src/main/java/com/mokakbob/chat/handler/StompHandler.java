@@ -60,7 +60,7 @@ public class StompHandler implements ChannelInterceptor {
             Long memberId = tokenProvider.extractMemberId(token);
             return tokenProvider.getAuthentication(memberId);
         } catch (Exception e) {
-            throw new ApiException(ChatErrorCode.STOMP_JWT_INVALID);
+            throw new ApiException(ChatErrorCode.STOMP_JWT_INVALID, e);
         }
     }
 }
