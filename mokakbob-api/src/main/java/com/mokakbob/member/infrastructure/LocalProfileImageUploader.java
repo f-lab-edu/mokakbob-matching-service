@@ -1,6 +1,6 @@
 package com.mokakbob.member.infrastructure;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.member.domain.ProfileImageUploader;
 import com.mokakbob.member.exception.MemberApiErrorCode;
 import java.io.File;
@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
-
 public class LocalProfileImageUploader implements ProfileImageUploader {
 
     private static final String PATH_SEPARATOR = "/";
@@ -27,7 +26,7 @@ public class LocalProfileImageUploader implements ProfileImageUploader {
             file.transferTo(new File(fullPath));
             return fileKey.replace("\\", PATH_SEPARATOR);
         } catch (IOException e) {
-            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED);
+            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED, e);
         }
     }
 

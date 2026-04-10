@@ -1,32 +1,28 @@
 spring:
-  jpa:
-    open-in-view: false
-
+  # 데이터베이스 공통 설정
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
+  # JPA 공통 설정 (dialect는 Spring Boot가 자동 감지)
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+  # Redis 단일 노드 설정
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      ssl:
-        enabled: false
 
-  mail:
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: ${OAUTH_GITHUB_CLIENT_ID}
-            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
-
+  # Kafka 공통 설정
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
@@ -38,25 +34,34 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        fetch.max.bytes: 1048576
-        max.partition.fetch.bytes: 1048576
         spring.json.trusted.packages: "com.mokakbob.domain.matching.event"
-    admin: {}
 
-jwt:
-  secret: ${JWT_SECRET}
+  # 메일 설정 (spring.mail 네임스페이스)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
+
+# 결제 API
+iamport:
+  api-key: ${IAMPORT_API_KEY}
+  api-secret: ${IAMPORT_API_SECRET}
+
+# AWS 설정
 cloud:
   aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
     s3:
-      bucket: mokakbob-bucket
+      bucket: ${AWS_S3_BUCKET}
     region:
-      static: ap-northeast-2
-
-profile:
-  default:
-    image:
-      url: https://mokakbob-bucket.s3.amazonaws.com/default/profile.png
-
-server:
-  port: 8080
+      static: ${AWS_REGION}

@@ -10,7 +10,7 @@ import com.mokakbob.domain.chat.cache.CachedChatMessage;
 import com.mokakbob.domain.chat.cursor.CursorToken;
 import com.mokakbob.chat.service.support.ParticipantContext;
 import com.mokakbob.chat.util.ChatRoomMapper;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.chat.domain.ChatMessage;
 import com.mokakbob.domain.chat.domain.ChatRoom;
 import com.mokakbob.domain.chat.pubsub.ChatPublisher;

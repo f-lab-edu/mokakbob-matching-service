@@ -63,6 +63,14 @@ public class AuthController {
         return ResponseEntity.ok(new SignUpResponse(member.getEmail(), member.getNickname()));
     }
 
+    @PostMapping(AuthPath.LOGOUT)
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        tokenService.logout(request);
+
+        return ResponseEntity.ok()
+                .build();
+    }
+
     @PostMapping(AuthPath.REISSUE)
     public ResponseEntity<TokenReissueResponse> reissue(
             HttpServletRequest request,

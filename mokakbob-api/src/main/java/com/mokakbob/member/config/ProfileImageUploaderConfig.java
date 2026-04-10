@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 public class ProfileImageUploaderConfig {
 
     @Bean
-    @Profile("local")
+    @Profile({"local", "dev", "test"})
     public LocalProfileImageUploader localProfileImageUploader() {
         return new LocalProfileImageUploader();
     }

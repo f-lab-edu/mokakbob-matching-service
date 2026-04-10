@@ -19,8 +19,8 @@ public record MemberExistResponse(
     public Map<String, Object> getAttributes() {
         return Map.of(
                 "email", email,
-                "login", nickName,
-                "avatar_url", profileImage
+                "name", nickName,
+                "picture", profileImage
         );
     }
 

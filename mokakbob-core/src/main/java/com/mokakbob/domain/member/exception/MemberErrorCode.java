@@ -1,36 +1,20 @@
 package com.mokakbob.domain.member.exception;
 
-import com.mokakbob.common.exception.DomainErrorCode;
+import com.mokakbob.domain.exception.DomainErrorCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum MemberErrorCode implements DomainErrorCode {
-    DUPLICATE_EMAIL(409, "M001", "중복되는 이메일입니다."),
-    DUPLICATE_NICKNAME(409, "M002", "중복되는 이메일입니다."),
-    NOT_FOUND_MEMBER_BY_EMAIL(404, "M003", "이메일에 해당하는 유저 정보가 없습니다."),
-    NOT_FOUND_MEMBER(404, "M004", "유저를 찾을 수 없습니다.")
+    ALREADY_EXIST_MEMBER(409, "DMEM001", "이미 존재하는 회원입니다."),
+    NOT_FOUND_MEMBER(404, "DMEM002", "회원을 찾을 수 없습니다."),
+    NOT_FOUND_MEMBER_BY_EMAIL(404, "DMEM003", "해당 이메일의 회원을 찾을 수 없습니다."),
+    DUPLICATE_EMAIL(409, "DMEM004", "이미 사용 중인 이메일입니다."),
+    DUPLICATE_NICKNAME(409, "DMEM005", "이미 사용 중인 닉네임입니다."),
     ;
 
     private final int httpStatus;
     private final String customCode;
     private final String message;
-
-    MemberErrorCode(int httpStatus, String customCode, String message) {
-        this.httpStatus = httpStatus;
-        this.customCode = customCode;
-        this.message = message;
-    }
-
-    @Override
-    public int httpStatus() {
-        return httpStatus;
-    }
-
-    @Override
-    public String customCode() {
-        return customCode;
-    }
-
-    @Override
-    public String message() {
-        return message;
-    }
 }

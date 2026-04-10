@@ -1,8 +1,8 @@
 package com.mokakbob.auth.service;
 
 import com.mokakbob.auth.domain.EmailSender;
-import com.mokakbob.auth.exception.AuthApiErrorCode;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.auth.exception.AuthErrorCode;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.auth.domain.EmailVerifyCodeStore;
 import com.mokakbob.auth.util.RandomNumberGenerator;
 import java.time.Duration;
@@ -34,10 +34,10 @@ public class EmailAuthService {
 
     public void checkEmailCode(String email, String code) {
         String redisMemberCode = codeStore.getCode(email)
-                .orElseThrow(() -> new ApiException(AuthApiErrorCode.NOT_EXIST_MAIL_CODE));
+                .orElseThrow(() -> new ApiException(AuthErrorCode.NOT_EXIST_MAIL_CODE));
 
         if (!Objects.equals(redisMemberCode, code)) {
-            throw new ApiException(AuthApiErrorCode.NOT_MATCH_MAIL_CODE);
+            throw new ApiException(AuthErrorCode.NOT_MATCH_MAIL_CODE);
         }
 
         codeStore.deleteCode(email);
@@ -45,7 +45,7 @@ public class EmailAuthService {
 
     private void checkCoolDown(String email) {
         if (codeStore.hasCode(email)) {
-            throw new ApiException(AuthApiErrorCode.TOO_MANY_REQUEST);
+            throw new ApiException(AuthErrorCode.TOO_MANY_REQUEST);
         }
     }
 }

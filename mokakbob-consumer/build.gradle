@@ -1,5 +1,13 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    id 'java'
+}
+
 dependencies {
     implementation project(':mokakbob-core')
+    implementation project(':mokakbob-redis')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // kafka
     implementation 'org.springframework.kafka:spring-kafka'
@@ -8,6 +16,19 @@ dependencies {
     // redisson
     implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
 
-    implementation 'com.fasterxml.jackson.core:jackson-core'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    // Jackson ObjectMapper 빈 자동설정 (spring-boot-starter-web 없이도 ObjectMapper 빈 등록)
+    implementation 'org.springframework.boot:spring-boot-starter-json'
+}
+
+springBoot {
+    mainClass = 'com.mokakbob.MokakbobConsumerApplication'
+}
+
+// 라이브러리로서 클래스 참조를 허용하기 위해 설정 추가
+bootJar {
+    enabled = true
+}
+
+jar {
+    enabled = true
 }

@@ -1,270 +1,69 @@
+x-app-common: &app-common
+  env_file:
+    - .env
+  environment:
+    - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+    - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+    - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    - REDIS_HOST=${REDIS_HOST}
+    - REDIS_PORT=${REDIS_PORT}
+    - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+    - MAIL_USERNAME=${MAIL_USERNAME}
+    - MAIL_PASSWORD=${MAIL_PASSWORD}
+    - JWT_SECRET=${JWT_SECRET}
+    - OAUTH_GITHUB_CLIENT_ID=${OAUTH_GITHUB_CLIENT_ID}
+    - OAUTH_GITHUB_CLIENT_SECRET=${OAUTH_GITHUB_CLIENT_SECRET}
+    - IAMPORT_API_KEY=${IAMPORT_API_KEY}
+    - IAMPORT_API_SECRET=${IAMPORT_API_SECRET}
+    - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+    - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+    - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+    - AWS_REGION=${AWS_REGION}
+    - JAVA_OPTS=-Xmx384m -Xms384m
+  deploy:
+    resources:
+      limits:
+        memory: 512M
+  networks:
+    - mokakbob-network
+  restart: always
+
 services:
-  redis:
-    image: redis:7.2
-    container_name: redis
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--bind", "0.0.0.0", "--appendonly", "yes", "--protected-mode", "no"]
-    restart: always
-    healthcheck:
-      test: [ "CMD", "bash", "-c", "redis-cli -h 127.0.0.1 ping | grep PONG" ]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-      start_period: 5s
-    networks:
-      - monitoring-network
-
-  redis-cluster-1:
-    image: redis:7.2
-    container_name: redis-cluster-1
-    ports:
-      - "17000:17000"
-    command: ["redis-server", "--port", "17000", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17000.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - monitoring-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17000", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-2:
-    image: redis:7.2
-    container_name: redis-cluster-2
-    ports:
-      - "17001:17001"
-    command: ["redis-server", "--port", "17001", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17001.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - monitoring-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17001", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-3:
-    image: redis:7.2
-    container_name: redis-cluster-3
-    ports:
-      - "17002:17002"
-    command: ["redis-server", "--port", "17002", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17002.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - monitoring-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17002", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-4:
-    image: redis:7.2
-    container_name: redis-cluster-4
-    ports:
-      - "17003:17003"
-    command: ["redis-server", "--port", "17003", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17003.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - monitoring-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17003", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-5:
-    image: redis:7.2
-    container_name: redis-cluster-5
-    ports:
-      - "17004:17004"
-    command: ["redis-server", "--port", "17004", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17004.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - monitoring-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17004", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-6:
-    image: redis:7.2
-    container_name: redis-cluster-6
-    ports:
-      - "17005:17005"
-    command: ["redis-server", "--port", "17005", "--cluster-enabled", "yes",
-              "--cluster-config-file", "nodes-17005.conf", "--cluster-node-timeout", "5000"]
-    networks:
-      - monitoring-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "17005", "ping"]
-      interval: 3s
-      timeout: 3s
-      retries: 10
-
-  redis-cluster-init:
-    image: redis:7.2
-    container_name: redis-cluster-init
-    depends_on:
-      redis-cluster-1:
-        condition: service_healthy
-      redis-cluster-2:
-        condition: service_healthy
-      redis-cluster-3:
-        condition: service_healthy
-      redis-cluster-4:
-        condition: service_healthy
-      redis-cluster-5:
-        condition: service_healthy
-      redis-cluster-6:
-        condition: service_healthy
-    networks:
-      - monitoring-network
-    entrypoint: /bin/sh
-    command: -c "
-      echo '⏳ Redis cluster nodes ready. Sleeping 10s for handshake...';
-      sleep 10;
-      echo 'yes' | redis-cli --cluster create \
-      redis-cluster-1:17000 \
-      redis-cluster-2:17001 \
-      redis-cluster-3:17002 \
-      redis-cluster-4:17003 \
-      redis-cluster-5:17004 \
-      redis-cluster-6:17005 \
-      --cluster-replicas 1;
-      echo 'Redis Cluster created successfully!';
-      "
-    restart: "no"
-
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: redis-exporter
-    ports:
-      - "9121:9121"
-    environment:
-      - REDIS_ADDR=redis://redis-cluster-1:17000
-      - REDIS_EXPORTER_CHECK_SINGLE_TARGET=false
-      - REDIS_EXPORTER_DEBUG=true
-    depends_on:
-      redis-cluster-init:
-        condition: service_completed_successfully
-    restart: always
-    networks:
-      - monitoring-network
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    restart: always
-    networks:
-      - monitoring-network
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    depends_on:
-      - zookeeper
-    restart: always
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/kafka/9092"]
-      interval: 3s
-      timeout: 2s
-      retries: 10
-    networks:
-      - monitoring-network
-
-  app1:
-    image: eclipse-temurin:17-jdk
-    container_name: app-8080
-    volumes:
-      - ./mokakbob-api/build/libs:/app
-    working_dir: /app
-    command: ["java", "-jar", "mokakbob-api-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=local"]
+  mokakbob-api:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: mokakbob-api
+    container_name: mokakbob-api
     ports:
       - "8080:8080"
     environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SERVER_PORT=8080
-    depends_on:
-      redis-cluster-init:
-        condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
-    restart: always
-    networks:
-      - monitoring-network
+      - SPRING_PROFILES_ACTIVE=api,local
 
-  app2:
-    image: eclipse-temurin:17-jdk
-    container_name: app-8081
-    volumes:
-      - ./mokakbob-api/build/libs:/app
-    working_dir: /app
-    command: ["java", "-jar", "mokakbob-api-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=local", "--server.port=8081"]
-    ports:
-      - "8081:8081"
+  mokakbob-consumer:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: mokakbob-consumer
+    container_name: mokakbob-consumer
     environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SERVER_PORT=8081
-    depends_on:
-      redis-cluster-init:
-        condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
-    restart: always
-    networks:
-      - monitoring-network
+      - SPRING_PROFILES_ACTIVE=consumer,local
 
-  app3:
-    image: eclipse-temurin:17-jdk
-    container_name: app-8082
-    volumes:
-      - ./mokakbob-api/build/libs:/app
-    working_dir: /app
-    command: ["java", "-jar", "mokakbob-api-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=local", "--server.port=8082"]
-    ports:
-      - "8082:8082"
+  mokakbob-batch:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE_NAME: mokakbob-batch
+    container_name: mokakbob-batch
     environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SERVER_PORT=8082
-    depends_on:
-      redis-cluster-init:
-        condition: service_completed_successfully
-      kafka:
-        condition: service_healthy
-    restart: always
-    networks:
-      - monitoring-network
-
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: mokakbob
-    ports:
-      - "3306:3306"
-    networks:
-      - monitoring-network
+      - SPRING_PROFILES_ACTIVE=batch,local
 
 networks:
-  monitoring-network:
+  mokakbob-network:
     external: true

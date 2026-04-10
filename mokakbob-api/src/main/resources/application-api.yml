@@ -1,0 +1,57 @@
+spring:
+  config:
+    import: optional:classpath:application-common.yml
+
+  jpa:
+    hibernate:
+      ddl-auto: update # API 모듈에서만 스키마 자동 생성을 허용합니다.
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${OAUTH_GITHUB_CLIENT_ID}
+            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: read:user,user:email
+            client-name: GitHub
+        provider:
+          github:
+            user-name-attribute: id
+
+jwt:
+  secret: ${JWT_SECRET}
+  access:
+    expiration-period: 3600000     # 1시간
+  refresh:
+    expiration-period: 604800000   # 7일
+
+local:
+  upload:
+    profile:
+      directory: /tmp/mokakbob/profiles
+
+profile:
+  default:
+    image:
+      url: https://${AWS_S3_BUCKET}.s3.amazonaws.com/default/profile.png
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  endpoint:
+    prometheus:
+      access: unrestricted
+  metrics:
+    tags:
+      application: mokakbob
+  prometheus:
+    metrics:
+      export:
+        enabled: true

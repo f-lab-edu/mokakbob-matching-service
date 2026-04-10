@@ -1,6 +1,6 @@
 package com.mokakbob.member.service;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.service.MemberService;
 import com.mokakbob.member.domain.ProfileImageUploader;

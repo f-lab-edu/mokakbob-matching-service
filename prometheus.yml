@@ -6,9 +6,19 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets:
-          - 'app-8080:8080'
-          - 'app-8081:8081'
-          - 'app-8082:8082'
+          - 'mokakbob-api:8080'
+
+  - job_name: 'mokakbob-consumer'
+    metrics_path: '/actuator/metrics'
+    static_configs:
+      - targets:
+          - 'mokakbob-consumer:8080'
+
+  - job_name: 'mokakbob-batch'
+    metrics_path: '/actuator/metrics'
+    static_configs:
+      - targets:
+          - 'mokakbob-batch:8080'
 
   - job_name: 'redis'
     static_configs:

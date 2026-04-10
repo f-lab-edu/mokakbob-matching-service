@@ -1,6 +1,6 @@
 package com.mokakbob.domain.point.service;
 
-import com.mokakbob.common.exception.DomainException;
+import com.mokakbob.domain.exception.DomainException;
 import com.mokakbob.domain.point.domain.Payment;
 import com.mokakbob.domain.point.domain.vo.PayType;
 import com.mokakbob.domain.point.exception.PointErrorCode;
@@ -24,7 +24,7 @@ public class PaymentService {
         try {
             return paymentRepository.save(payment);
         } catch (DataIntegrityViolationException e) {
-            throw new DomainException(PointErrorCode.DUPLICATE_PAYMENT);
+            throw new DomainException(PointErrorCode.DUPLICATE_PAYMENT, e);
         }
     }
 

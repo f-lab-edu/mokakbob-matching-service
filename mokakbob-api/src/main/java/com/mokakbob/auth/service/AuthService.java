@@ -1,7 +1,7 @@
 package com.mokakbob.auth.service;
 
-import com.mokakbob.auth.exception.AuthApiErrorCode;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.auth.exception.AuthErrorCode;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.member.domain.Member;
 import com.mokakbob.domain.member.domain.vo.MemberPreference;
 import com.mokakbob.domain.member.service.MemberService;
@@ -24,7 +24,7 @@ public class AuthService {
         Member member = memberService.findMemberByEmail(email);
 
         if (!passwordEncoder.matches(password, member.getPasswordEnc())) {
-            throw new ApiException(AuthApiErrorCode.NOT_MATCH_PASSWORD);
+            throw new ApiException(AuthErrorCode.INVALID_CREDENTIALS);
         }
 
         return member;

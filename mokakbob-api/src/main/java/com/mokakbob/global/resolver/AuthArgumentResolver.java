@@ -1,12 +1,11 @@
 package com.mokakbob.global.resolver;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.global.exception.GlobalErrorCode;
 import com.mokakbob.global.resolver.annotation.MemberId;
-import com.mokakbob.global.support.AuthConstants;
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.Objects;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -25,13 +24,12 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        Object memberId = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class))
-                .getAttribute(AuthConstants.TOKEN_ATTRIBUTE);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (memberId == null) {
+        if (authentication == null) {
             throw new ApiException(GlobalErrorCode.NOT_FOUND_TOKEN_MEMBER_ID);
         }
 
-        return memberId;
+        return Long.valueOf(authentication.getName());
     }
 }

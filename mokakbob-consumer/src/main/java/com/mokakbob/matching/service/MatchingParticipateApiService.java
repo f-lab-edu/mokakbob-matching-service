@@ -6,7 +6,7 @@ import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.event.MatchingFoundEvent;
 import com.mokakbob.domain.matching.event.MatchingParticipateEvent;
-import com.mokakbob.matching.common.exception.exceptions.ConsumerException;
+import com.mokakbob.matching.common.exception.ConsumerException;
 import com.mokakbob.matching.event.MatchFoundEventPublisher;
 import com.mokakbob.matching.exception.MatchingConsumerErrorCode;
 import java.time.Duration;
@@ -41,6 +41,7 @@ public class MatchingParticipateApiService {
     private static final double RADIUS_METERS = 1500.0;
     private static final int LIMIT_LOCK_CATCH_TIME = 3;
     private static final int LOCK_DURATION_TIME = 10;
+    private static final String LOCK_KEY_PREFIX = "lock:matching:";
 
     private final ParticipantGeoStore geoStore;
     private final ParticipantStore participantStore;
@@ -51,7 +52,7 @@ public class MatchingParticipateApiService {
      * category + participantCount 단위로 락을 잡고 participateMatching 실행
      */
     public void lockParticipateMatching(MatchingParticipateEvent event) {
-        String lockKey = "lock:matching:" + event.category().name() + ":" + event.participantCount();
+        String lockKey = LOCK_KEY_PREFIX + event.category().name() + ":" + event.participantCount();
         RLock lock = redissonClient.getLock(lockKey);
 
         try {
@@ -62,7 +63,7 @@ public class MatchingParticipateApiService {
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_LOCK_INTERRUPTED);
+            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_LOCK_INTERRUPTED, e);
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -112,7 +113,7 @@ public class MatchingParticipateApiService {
 
         } catch (Exception e) {
             rollback(idempotencyKey, event);
-            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_PARTICIPATE_CONSUMER_EXCEPTION);
+            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_PARTICIPATE_CONSUMER_EXCEPTION, e);
         }
     }
 

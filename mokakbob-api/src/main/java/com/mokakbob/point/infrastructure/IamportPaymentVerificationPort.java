@@ -1,6 +1,6 @@
 package com.mokakbob.point.infrastructure;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.point.port.PaymentVerificationPort;
 import com.mokakbob.domain.point.port.dto.VerifiedPayment;
 import com.mokakbob.point.exception.PointErrorCode;
@@ -42,7 +42,7 @@ public class IamportPaymentVerificationPort implements PaymentVerificationPort {
 
         } catch (Exception e) {
             log.error("[Iamport] 결제 검증 중 오류 impUid={}, merchantUid={}", impUid, merchantUid, e);
-            throw new ApiException(PointErrorCode.PAYMENT_GATEWAY_ERROR);
+            throw new ApiException(PointErrorCode.PAYMENT_GATEWAY_ERROR, e);
         }
     }
 }

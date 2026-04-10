@@ -10,7 +10,7 @@ services:
       - INFLUXDB_DB=k6
       - INFLUXDB_HTTP_AUTH_ENABLED=false
     networks:
-      - monitoring-network
+      - mokakbob-network
     restart: always
 
   prometheus:
@@ -24,7 +24,7 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
     networks:
-      - monitoring-network
+      - mokakbob-network
     restart: always
 
   grafana:
@@ -39,7 +39,7 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     networks:
-      - monitoring-network
+      - mokakbob-network
     restart: always
 
 volumes:
@@ -48,5 +48,5 @@ volumes:
   influxdb-data:
 
 networks:
-  monitoring-network:
+  mokakbob-network:
     external: true

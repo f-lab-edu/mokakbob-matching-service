@@ -37,3 +37,9 @@ mokakbob-api/src/main/resources/application-local.yml
 
 ### VS Code ###
 .vscode/
+
+# Secrets
+.env
+*-secrets.yml
+*-secrets.properties
+

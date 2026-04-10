@@ -1,6 +1,6 @@
 package com.mokakbob.member.infrastructure;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.member.domain.ProfileImageUploader;
 import com.mokakbob.member.exception.MemberApiErrorCode;
 import java.io.IOException;
@@ -11,7 +11,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
 @RequiredArgsConstructor
 public class S3ProfileImageUploader implements ProfileImageUploader {
 
@@ -32,7 +31,7 @@ public class S3ProfileImageUploader implements ProfileImageUploader {
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
             return fileKey;
         } catch (IOException e) {
-            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED);
+            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED, e);
         }
     }
 

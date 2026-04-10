@@ -1,10 +1,8 @@
 package com.mokakbob.config;
 
+import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.cluster.RedisClusterClient;
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,32 +10,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedisConfig {
 
-    private static final int DEFAULT_REDIS_PORT = 6379;
     private static final int REDIS_TIMEOUT_SECONDS = 10;
 
     @Bean
-    public RedisClusterClient redisClusterClient(
-            @Value("${spring.data.redis.cluster.nodes}") List<String> clusterNodes
+    public RedisClient redisClient(
+            @Value("${spring.data.redis.host}") String host,
+            @Value("${spring.data.redis.port}") int port
     ) {
-
-        List<RedisURI> uris = clusterNodes.stream()
-                .map(RedisConfig::toRedisURI)
-                .collect(Collectors.toList());
-
-        return RedisClusterClient.create(uris);
-    }
-
-    private static RedisURI toRedisURI(String node) {
-        String[] parts = node.split(":");
-        String host = parts[0];
-        int port = (parts.length > 1)
-                ? Integer.parseInt(parts[1])
-                : DEFAULT_REDIS_PORT;
-
-        return RedisURI.builder()
+        RedisURI uri = RedisURI.builder()
                 .withHost(host)
                 .withPort(port)
                 .withTimeout(Duration.ofSeconds(REDIS_TIMEOUT_SECONDS))
                 .build();
+
+        return RedisClient.create(uri);
     }
 }

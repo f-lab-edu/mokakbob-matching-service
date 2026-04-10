@@ -1,6 +1,6 @@
 package com.mokakbob.domain.matching.service;
 
-import com.mokakbob.common.exception.DomainException;
+import com.mokakbob.domain.exception.DomainException;
 import com.mokakbob.domain.matching.domain.MatchingParticipant;
 import com.mokakbob.domain.matching.exception.MatchingErrorCode;
 import com.mokakbob.domain.matching.repository.MatchingParticipantRepository;

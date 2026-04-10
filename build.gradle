@@ -31,6 +31,12 @@ subprojects {
 	}
 
 	dependencies {
+		constraints {
+			implementation('com.fasterxml.jackson.core:jackson-core:2.19.1')
+			implementation('com.fasterxml.jackson.core:jackson-databind:2.19.1')
+			implementation('com.fasterxml.jackson.core:jackson-annotations:2.19.1')
+		}
+
 		implementation 'org.springframework.boot:spring-boot-starter'
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -56,9 +62,16 @@ subprojects {
 		useJUnitPlatform()
 	}
 
-	// core(도메인) 모듈 + kafka 모듈 + redis 모듈 + consumer 모듈 bootJar 비활성화
-	if (project.name in ["mokakbob-core", "mokakbob-kafka", "mokakbob-redis", "mokakbob-consumer"]) {
-		bootJar { enabled = false }
+	// 모든 모듈에서 일반 jar(plain) 생성을 비활성화 (실행 오류 방지)
+	jar { enabled = false }
+
+	// core(도메인) 모듈 등은 라이브러리로서의 jar가 필요하므로 예외 처리
+	if (project.name in ["mokakbob-core", "mokakbob-kafka", "mokakbob-redis"]) {
 		jar { enabled = true }
+	}
+
+	// 실행 모듈 bootJar 활성화 확인
+	if (project.name in ["mokakbob-api", "mokakbob-consumer", "mokakbob-batch"]) {
+		bootJar { enabled = true }
 	}
 }

@@ -1,7 +1,7 @@
 package com.mokakbob.matching.service;
 
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.matching.domain.vo.Location;
 import com.mokakbob.domain.matching.domain.vo.MatchingCategory;
 import com.mokakbob.domain.matching.service.MatchingService;

@@ -1,8 +1,8 @@
 package com.mokakbob.auth.infrastructure;
 
 import com.mokakbob.auth.domain.TokenProvider;
-import com.mokakbob.auth.exception.AuthApiErrorCode;
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.auth.exception.AuthErrorCode;
+import com.mokakbob.common.exception.ApiException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -95,6 +95,13 @@ public class JwtTokenProvider implements TokenProvider {
         );
     }
 
+    @Override
+    public long getRemainingExpirationMillis(String token) {
+        Date expiration = parseToken(token).getExpiration();
+        Date now = new Date();
+        return Math.max(0, expiration.getTime() - now.getTime());
+    }
+
     private Claims parseToken(String token) {
         try {
             return Jwts.parserBuilder()
@@ -104,11 +111,11 @@ public class JwtTokenProvider implements TokenProvider {
                     .getBody();
 
         } catch (ExpiredJwtException e) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_EXPIRED);
+            throw new ApiException(AuthErrorCode.TOKEN_EXPIRED, e);
         } catch (SignatureException e) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_INVALID_SIGNATURE);
+            throw new ApiException(AuthErrorCode.TOKEN_INVALID_SIGNATURE, e);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiException(AuthApiErrorCode.TOKEN_INVALID);
+            throw new ApiException(AuthErrorCode.TOKEN_INVALID, e);
         }
     }
 }

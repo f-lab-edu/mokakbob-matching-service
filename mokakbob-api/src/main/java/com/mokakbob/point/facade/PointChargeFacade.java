@@ -1,6 +1,6 @@
 package com.mokakbob.point.facade;
 
-import com.mokakbob.common.exception.exceptions.ApiException;
+import com.mokakbob.common.exception.ApiException;
 import com.mokakbob.domain.point.domain.Payment;
 import com.mokakbob.domain.point.domain.vo.PayType;
 import com.mokakbob.domain.point.port.dto.VerifiedPayment;
@@ -19,6 +19,8 @@ public class PointChargeFacade {
 
     private static final int LIMIT_LOCK_CATCH_TIME = 5;
     private static final int LOCK_DURATION_TIME = 10;
+    private static final String LOCK_KEY_PREFIX = "lock:member:";
+    private static final String LOCK_KEY_SUFFIX = ":point";
 
     private final IamportVerificationService verificationService;
     private final PointChargeService pointChargeService;
@@ -31,7 +33,7 @@ public class PointChargeFacade {
             throw new ApiException(PointErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
-        String lockKey = "lock:member:" + memberId + ":point";
+        String lockKey = LOCK_KEY_PREFIX + memberId + LOCK_KEY_SUFFIX;
         RLock lock = redissonClient.getLock(lockKey);
 
         try {
@@ -44,7 +46,7 @@ public class PointChargeFacade {
             return pointChargeService.charge(memberId, amount, impUid, merchantUid, payType);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new ApiException(PointErrorCode.POINT_OPERATION_INTERRUPTED);
+            throw new ApiException(PointErrorCode.POINT_OPERATION_INTERRUPTED, e);
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();

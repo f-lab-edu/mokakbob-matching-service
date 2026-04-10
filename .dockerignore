@@ -1,0 +1,14 @@
+.gradle
+.idea
+build
+out
+bin
+*.jar
+*.war
+*.log
+.DS_Store
+.git
+Dockerfile
+docker-compose*.yml
+README.md
+HELP.md

@@ -1,6 +1,5 @@
 package com.mokakbob.config;
 
-
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -18,10 +17,9 @@ public class RedissonConfig {
 
         Config config = new Config();
         config.useSingleServer()
-                .setAddress("redis://" + host + ":" + port)
-                .setConnectionMinimumIdleSize(10)
-                .setConnectionPoolSize(64)
+                .setAddress(RedisConstants.REDIS_PROTOCOL_PREFIX + host + ":" + port)
                 .setIdleConnectionTimeout(10000)
+                .setConnectTimeout(10000)
                 .setTimeout(3000)
                 .setRetryAttempts(3)
                 .setRetryInterval(1500);
