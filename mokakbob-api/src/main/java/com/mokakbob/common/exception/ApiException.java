@@ -6,6 +6,10 @@ public class ApiException extends BaseException {
         super(errorCode);
     }
 
+    public ApiException(ApiErrorCode errorCode, Throwable cause) {
+        super(errorCode, cause);
+    }
+
     @Override
     public ApiErrorCode getErrorCode() {
         return (ApiErrorCode) super.getErrorCode();

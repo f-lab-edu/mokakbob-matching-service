@@ -45,7 +45,7 @@ public class RedisChatSubscriber {
         });
 
         for (int roomId = 0; roomId < ROOM_COUNT_FOR_TEST; roomId++) {
-            doSubscribe(RedisConstants.CHAT_CHANNEL_PREFIX + roomId);
+            subscribeRoom((long) roomId);
         }
     }
 
@@ -81,7 +81,7 @@ public class RedisChatSubscriber {
             chatSubscriber.handleMessage(channel, payload);
         } catch (Exception e) {
             chatMetrics.countError(METRICS_EVENT);
-            throw new RedisException(RedisPubSubErrorCode.REDIS_SUBSCRIBE_ERROR);
+            throw new RedisException(RedisPubSubErrorCode.REDIS_SUBSCRIBE_ERROR, e);
         } finally {
             chatMetrics.recordLatency(METRICS_EVENT, System.currentTimeMillis() - start);
         }

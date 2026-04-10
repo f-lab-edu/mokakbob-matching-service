@@ -48,7 +48,7 @@ public class NotificationRedisStore implements NotificationStore {
 
             basicRedisTemplate.expire(roomKey, Duration.ofSeconds(ttlSeconds));
         } catch (IOException e) {
-            throw new RedisException(RedisStoreErrorCode.REDIS_STORE_ERROR);
+            throw new RedisException(RedisStoreErrorCode.REDIS_STORE_ERROR, e);
         }
     }
 
@@ -73,7 +73,7 @@ public class NotificationRedisStore implements NotificationStore {
             String value = (String) valueObj;
             return Optional.ofNullable(objectMapper.readValue(value, Notification.class));
         } catch (IOException e) {
-            throw new RedisException(RedisStoreErrorCode.REDIS_STORE_ERROR);
+            throw new RedisException(RedisStoreErrorCode.REDIS_STORE_ERROR, e);
         }
     }
 }

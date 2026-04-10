@@ -8,6 +8,10 @@ public class ConsumerException extends BaseException {
         super(errorCode);
     }
 
+    public ConsumerException(ConsumerErrorCode errorCode, Throwable cause) {
+        super(errorCode, cause);
+    }
+
     @Override
     public ConsumerErrorCode getErrorCode() {
         return (ConsumerErrorCode) super.getErrorCode();

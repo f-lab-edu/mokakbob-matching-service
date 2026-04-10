@@ -6,6 +6,10 @@ public class RedisException extends BaseException {
         super(errorCode);
     }
 
+    public RedisException(RedisErrorCode errorCode, Throwable cause) {
+        super(errorCode, cause);
+    }
+
     @Override
     public RedisErrorCode getErrorCode() {
         return (RedisErrorCode) super.getErrorCode();

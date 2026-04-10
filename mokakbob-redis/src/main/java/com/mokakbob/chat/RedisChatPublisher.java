@@ -44,7 +44,7 @@ public class RedisChatPublisher implements ChatPublisher {
             String channel = RedisConstants.CHAT_CHANNEL_PREFIX + roomId;
             asyncCommands.publish(channel, payload);
         } catch (Exception e) {
-            throw new RedisException(RedisPubSubErrorCode.REDIS_PUBLISH_ERROR);
+            throw new RedisException(RedisPubSubErrorCode.REDIS_PUBLISH_ERROR, e);
         }
     }
 }

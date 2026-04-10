@@ -8,6 +8,10 @@ public class DomainException extends BaseException {
         super(errorCode);
     }
 
+    public DomainException(DomainErrorCode errorCode, Throwable cause) {
+        super(errorCode, cause);
+    }
+
     @Override
     public DomainErrorCode getErrorCode() {
         return (DomainErrorCode) super.getErrorCode();

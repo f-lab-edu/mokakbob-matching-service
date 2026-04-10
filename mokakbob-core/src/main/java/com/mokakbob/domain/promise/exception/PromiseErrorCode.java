@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum PromiseErrorCode implements DomainErrorCode {
     ;
 
+    private final int httpStatus;
     private final String customCode;
     private final String message;
 }

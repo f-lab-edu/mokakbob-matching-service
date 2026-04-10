@@ -11,7 +11,6 @@ public enum AuthErrorCode implements ApiErrorCode {
     TOKEN_NOT_FOUND(404, "A001", "토큰을 찾을 수 없습니다."),
     TOKEN_EXPIRED(401, "A002", "토큰이 만료되었습니다."),
     TOKEN_INVALID(401, "A003", "유효하지 않은 토큰입니다."),
-    TOKEN_SIGNATURE_INVALID(401, "A004", "토큰의 서명이 유효하지 않습니다."),
     TOKEN_MALFORMED(401, "A005", "토큰의 형식이 잘못되었습니다."),
     TOKEN_UNSUPPORTED(401, "A006", "지원하지 않는 토큰입니다."),
     TOKEN_CLAIM_INVALID(401, "A007", "토큰의 클레임이 유효하지 않습니다."),
