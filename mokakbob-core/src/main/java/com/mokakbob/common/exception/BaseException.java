@@ -5,7 +5,7 @@ public abstract class BaseException extends RuntimeException {
     private final BaseErrorCode errorCode;
 
     protected BaseException(BaseErrorCode errorCode) {
-        super(errorCode.customCode() + ": " + errorCode.message());
+        super(errorCode.getCustomCode() + ": " + errorCode.getMessage());
         this.errorCode = errorCode;
     }
 

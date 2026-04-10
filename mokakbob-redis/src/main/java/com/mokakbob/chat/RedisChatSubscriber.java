@@ -7,9 +7,7 @@ import com.mokakbob.domain.chat.pubsub.ChatSubscriber;
 import com.mokakbob.domain.chat.pubsub.response.ChatMessageResponse;
 import com.mokakbob.common.exception.RedisPubSubErrorCode;
 import com.mokakbob.metrix.ChatMetrics;
-import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.RedisClient;
-import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
@@ -26,7 +24,7 @@ public class RedisChatSubscriber {
     private static final int ROOM_COUNT_FOR_TEST = 10;
     private static final String METRICS_EVENT = "chat_receive_message";
 
-    private final AbstractRedisClient redisClient;
+    private final RedisClient redisClient;
     private final ObjectMapper objectMapper;
     private final ChatSubscriber chatSubscriber;
     private final ChatMetrics chatMetrics;
@@ -34,25 +32,12 @@ public class RedisChatSubscriber {
 
     private StatefulRedisPubSubConnection<String, String> pubSubConnection;
     private RedisPubSubAsyncCommands<String, String> asyncCommands;
-    private boolean isClusterMode;
 
     @PostConstruct
     public void init() {
-        this.isClusterMode = redisClient instanceof RedisClusterClient;
-
-        if (isClusterMode) {
-            this.pubSubConnection = ((RedisClusterClient) redisClient).connectPubSub();
-        } else {
-            this.pubSubConnection = ((RedisClient) redisClient).connectPubSub();
-        }
-
+        this.pubSubConnection = redisClient.connectPubSub();
         this.asyncCommands = pubSubConnection.async();
         this.pubSubConnection.addListener(new RedisPubSubAdapter<>() {
-            @Override
-            public void smessage(String channel, String message) {
-                handleIncomingMessage(channel, message);
-            }
-
             @Override
             public void message(String channel, String message) {
                 handleIncomingMessage(channel, message);
@@ -79,11 +64,7 @@ public class RedisChatSubscriber {
     }
 
     private void doSubscribe(String channel) {
-        if (isClusterMode) {
-            asyncCommands.ssubscribe(channel);
-        } else {
-            asyncCommands.subscribe(channel);
-        }
+        asyncCommands.subscribe(channel);
     }
 
     private void handleIncomingMessage(String channel, String rawBody) {

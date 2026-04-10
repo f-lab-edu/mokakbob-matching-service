@@ -1,5 +1,6 @@
 package com.mokakbob.common.exception.handler;
 
+import com.mokakbob.common.exception.ApiErrorCode;
 import com.mokakbob.common.exception.BaseErrorCode;
 import com.mokakbob.common.exception.BaseException;
 import com.mokakbob.common.exception.handler.response.CustomErrorResponse;
@@ -24,10 +25,15 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<CustomErrorResponse> handleExceptionInternal(BaseErrorCode errorCode) {
-        log.warn("Exception Occurred: [{} - {}]", errorCode.customCode(), errorCode.message());
+        log.warn("Exception Occurred: [{} - {}]", errorCode.getCustomCode(), errorCode.getMessage());
 
-        return ResponseEntity.status(errorCode.httpStatus())
-                .body(new CustomErrorResponse(errorCode.customCode(), errorCode.message()));
+        int status = org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR.value();
+        if (errorCode instanceof ApiErrorCode) {
+            status = ((ApiErrorCode) errorCode).getHttpStatus();
+        }
+
+        return ResponseEntity.status(status)
+                .body(new CustomErrorResponse(errorCode.getCustomCode(), errorCode.getMessage()));
     }
 
     /**

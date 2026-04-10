@@ -40,7 +40,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=api
+      - SPRING_PROFILES_ACTIVE=api,local
 
   mokakbob-consumer:
     <<: *app-common
@@ -51,7 +51,7 @@ services:
         MODULE_NAME: mokakbob-consumer
     container_name: mokakbob-consumer
     environment:
-      - SPRING_PROFILES_ACTIVE=consumer
+      - SPRING_PROFILES_ACTIVE=consumer,local
 
   mokakbob-batch:
     <<: *app-common
@@ -62,7 +62,7 @@ services:
         MODULE_NAME: mokakbob-batch
     container_name: mokakbob-batch
     environment:
-      - SPRING_PROFILES_ACTIVE=batch
+      - SPRING_PROFILES_ACTIVE=batch,local
 
 networks:
   mokakbob-network:

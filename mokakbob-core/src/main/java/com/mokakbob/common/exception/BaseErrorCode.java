@@ -2,9 +2,7 @@ package com.mokakbob.common.exception;
 
 public interface BaseErrorCode {
 
-    int httpStatus();
+    String getCustomCode();
 
-    String customCode();
-
-    String message();
+    String getMessage();
 }

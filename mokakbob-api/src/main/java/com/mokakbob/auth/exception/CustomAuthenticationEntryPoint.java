@@ -21,13 +21,13 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          AuthenticationException authException) throws IOException, ServletException {
         AuthErrorCode errorCode = AuthErrorCode.TOKEN_INVALID;
 
-        response.setStatus(errorCode.httpStatus());
+        response.setStatus(errorCode.getHttpStatus());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
         CustomErrorResponse errorResponse = new CustomErrorResponse(
-                errorCode.customCode(),
-                errorCode.message()
+                errorCode.getCustomCode(),
+                errorCode.getMessage()
         );
 
         response.getWriter()

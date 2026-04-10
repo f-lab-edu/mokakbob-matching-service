@@ -6,27 +6,21 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
-  # JPA 및 하이버네이트 공통 설정 (Spring Boot 3 표준 경로)
+  # JPA 공통 설정 (dialect는 Spring Boot가 자동 감지)
   jpa:
     open-in-view: false
-    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        hbm2ddl:
-          auto: update
-        dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
         format_sql: true
 
-  # Redis 공통 설정
+  # Redis 단일 노드 설정
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      ssl:
-        enabled: false
 
   # Kafka 공통 설정
   kafka:
@@ -42,26 +36,26 @@ spring:
       properties:
         spring.json.trusted.packages: "com.mokakbob.domain.matching.event"
 
-# 기타 공통 보안 및 서비스 설정
+  # 메일 설정 (spring.mail 네임스페이스)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+# 결제 API
 iamport:
   api-key: ${IAMPORT_API_KEY}
   api-secret: ${IAMPORT_API_SECRET}
 
-jwt:
-  secret: ${JWT_SECRET}
-
-mail:
-  host: smtp.gmail.com
-  port: 587
-  username: ${MAIL_USERNAME}
-  password: ${MAIL_PASSWORD}
-  properties:
-    mail:
-      smtp:
-        auth: true
-        starttls:
-          enable: true
-
+# AWS 설정
 cloud:
   aws:
     credentials:

@@ -5,7 +5,7 @@ import com.mokakbob.chat.RedisChatSubscriber;
 import com.mokakbob.chat.handler.StompHandler;
 import com.mokakbob.domain.chat.pubsub.ChatSubscriber;
 import com.mokakbob.metrix.ChatMetrics;
-import io.lettuce.core.cluster.RedisClusterClient;
+import io.lettuce.core.RedisClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,38 +25,34 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry registry) {
-        // 구독
         registry.enableSimpleBroker("/sub");
-        // 발행
         registry.setApplicationDestinationPrefixes("/pub");
     }
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-connect")
-                .setAllowedOriginPatterns("*") // CORS 허용
-                .withSockJS(); // SockJS fallback 지원
+                .setAllowedOriginPatterns("*")
+                .withSockJS();
 
-        // test
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*");
     }
 
     @Override
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
-        // ChannelInterceptor로 StompHandler 등록
         registration.interceptors(stompHandler);
     }
 
     @Bean
     public RedisChatSubscriber redisChatSubscriber(
-            RedisClusterClient redisClusterClient,
+            RedisClient redisClient,
             ObjectMapper objectMapper,
             ChatSubscriber chatSubscriber,
             ChatMetrics chatMetrics
     ) {
         return new RedisChatSubscriber(
-                redisClusterClient,
+                redisClient,
                 objectMapper,
                 chatSubscriber,
                 chatMetrics
