@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.mokakbob.auth.domain.EmailSender;
 import com.mokakbob.auth.domain.EmailVerifyCodeStore;
-import com.mokakbob.auth.exception.AuthApiErrorCode;
+import com.mokakbob.auth.exception.AuthErrorCode;
 import com.mokakbob.auth.service.EmailAuthService;
 import com.mokakbob.common.exception.ApiException;
 import java.time.Duration;
@@ -54,6 +54,6 @@ class EmailAuthServiceTest {
         // when & then
         assertThatThrownBy(() -> emailAuthService.sendEmail(email))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining(AuthApiErrorCode.TOO_MANY_REQUEST.message());
+                .hasMessageContaining(AuthErrorCode.TOO_MANY_REQUEST.getMessage());
     }
 }

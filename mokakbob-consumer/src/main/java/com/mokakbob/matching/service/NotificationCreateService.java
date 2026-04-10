@@ -40,7 +40,7 @@ public class NotificationCreateService {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {
-            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_NOTIFICATION_SERIALIZE_FAILED);
+            throw new ConsumerException(MatchingConsumerErrorCode.MATCHING_NOTIFICATION_SERIALIZE_FAILED, e);
         }
     }
 }

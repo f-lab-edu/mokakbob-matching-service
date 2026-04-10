@@ -24,7 +24,7 @@ public class PaymentService {
         try {
             return paymentRepository.save(payment);
         } catch (DataIntegrityViolationException e) {
-            throw new DomainException(PointErrorCode.DUPLICATE_PAYMENT);
+            throw new DomainException(PointErrorCode.DUPLICATE_PAYMENT, e);
         }
     }
 

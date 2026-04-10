@@ -111,11 +111,11 @@ public class JwtTokenProvider implements TokenProvider {
                     .getBody();
 
         } catch (ExpiredJwtException e) {
-            throw new ApiException(AuthErrorCode.TOKEN_EXPIRED);
+            throw new ApiException(AuthErrorCode.TOKEN_EXPIRED, e);
         } catch (SignatureException e) {
-            throw new ApiException(AuthErrorCode.TOKEN_INVALID_SIGNATURE);
+            throw new ApiException(AuthErrorCode.TOKEN_INVALID_SIGNATURE, e);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new ApiException(AuthErrorCode.TOKEN_INVALID);
+            throw new ApiException(AuthErrorCode.TOKEN_INVALID, e);
         }
     }
 }

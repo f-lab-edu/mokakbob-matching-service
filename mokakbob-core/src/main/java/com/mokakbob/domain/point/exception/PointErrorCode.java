@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum PointErrorCode implements DomainErrorCode {
-    INVALID_PAYMENT(400, "P002", "유효하지 않은 결제입니다."),
-    DUPLICATE_PAYMENT(409, "P004", "이미 승인된 결제입니다."),
+    INVALID_PAYMENT(400, "DP002", "유효하지 않은 결제입니다."),
+    DUPLICATE_PAYMENT(409, "DP004", "이미 승인된 결제입니다."),
     ;
 
     private final int httpStatus;

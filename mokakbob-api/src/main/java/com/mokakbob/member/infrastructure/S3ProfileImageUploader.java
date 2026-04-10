@@ -31,7 +31,7 @@ public class S3ProfileImageUploader implements ProfileImageUploader {
             s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
             return fileKey;
         } catch (IOException e) {
-            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED);
+            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED, e);
         }
     }
 

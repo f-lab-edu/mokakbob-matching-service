@@ -26,7 +26,7 @@ public class LocalProfileImageUploader implements ProfileImageUploader {
             file.transferTo(new File(fullPath));
             return fileKey.replace("\\", PATH_SEPARATOR);
         } catch (IOException e) {
-            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED);
+            throw new ApiException(MemberApiErrorCode.IMAGE_UPLOAD_FAILED, e);
         }
     }
 
